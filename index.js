@@ -174,12 +174,12 @@ export class GlobalState {
         if (component.__proto__.componentWillUnmount) {
             const unMount = component.componentWillUnmount
             component.componentWillUnmount = function () {
-                GlobalState.UnsafeGlobalInstance._deregister(component)
+                GlobalState.UnsafeGlobalInstance._deregister(GlobalState.UnsafeGlobalInstance, component)
                 unMount()
             }
         } else {
             component.componentWillUnmount = function () {
-                GlobalState.UnsafeGlobalInstance._deregister(component)
+                GlobalState.UnsafeGlobalInstance._deregister(GlobalState.UnsafeGlobalInstance, component)
             }
         }
 
@@ -328,21 +328,18 @@ export class GlobalState {
      * @param {string} component The name of the action to add t the global state object.
      * 
      */
-    _deregister = (component: string) => {
-        Object.keys(GlobalState.UnsafeGlobalInstance.value).forEach((key) => {
-            let property = GlobalState.UnsafeGlobalInstance.value[key]
-            while (isObject(property)) {
-                if (property.listeners) {
-                    property.listeners.forEach((listener) => {
-                        if (listener.globalStateId === component.globalStateId) {
-                            property.listeners.delete(listener)
-                        }
-                    })
+    _deregister = (base: any, component: string) => {
+        if (base.hasOwnProperty("listeners")) {
+            base.listeners.forEach((listener) => {
+                if (listener.globalStateId === component.globalStateId) {
+                    base.listeners.delete(listener)
                 }
-
-                property = property.value
-            }
-        })
+            })
+        } else {
+            Object.keys(base.value).forEach((key) => {
+                GlobalState.UnsafeGlobalInstance._deregister(base.value[key], component)
+            })
+        }
     }
 }
 
