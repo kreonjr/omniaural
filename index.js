@@ -341,6 +341,18 @@ export class GlobalState {
             })
         }
     }
+
+    /**
+     * getCurrentState
+     * 
+     * It returns a copy of the global state object at a given time.
+     * 
+     * @returns {object} The current global state object.
+     * 
+     */
+    getCurrentState = () => {
+        return flatten(this)
+    }
 }
 
 /**
