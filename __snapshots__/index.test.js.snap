@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Component Testing should register and contain the account name on initialization 1`] = `
+<div
+  onClick={[Function]}
+>
+  Josh
+</div>
+`;
+
+exports[`Component Testing should update the account name global property and also be listening to global updates 1`] = `
+<div
+  onClick={[Function]}
+>
+  Josh
+</div>
+`;
+
+exports[`Component Testing should update the account name global property and also be listening to global updates 2`] = `
+<div
+  onClick={[Function]}
+>
+  Victor
+</div>
+`;
+
+exports[`Component Testing should update the account name global property from within the component 1`] = `
+<div
+  onClick={[Function]}
+>
+  Victor
+</div>
+`;
+
+exports[`Component Testing should update the account name global property from within the component 2`] = `
+<div
+  onClick={[Function]}
+>
+  Jack
+</div>
+`;
