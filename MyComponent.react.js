@@ -5,8 +5,9 @@ export default class MyComponent extends React.Component {
     constructor() {
         super()
         this.state = {
-            ...GlobalState.register(this, ["account.name"])
         }
+
+        GlobalState.register(this, ["account.name as person.name"])
     }
 
     _updateName = (name) => {
@@ -14,6 +15,6 @@ export default class MyComponent extends React.Component {
     }
 
     render() {
-        return <div onClick={this._updateName}>{this.state.account.name}</div>
+        return <div onClick={this._updateName}>{this.state.person.name}</div>
     }
 }

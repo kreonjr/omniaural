@@ -26,14 +26,14 @@ const isObject = (val) => {
     return typeof val == 'object' && !Array.isArray(val)
 }
 
-const flatten = (obj) => {
+const sanitize = (obj) => {
     let newObj = {}
 
     if (!isObject(obj.value)) {
         return obj.value
     } else {
         Object.keys(obj.value).forEach((key) => {
-            newObj[key] = flatten(obj.value[key])
+            newObj[key] = sanitize(obj.value[key])
         })
     }
     return newObj
@@ -75,8 +75,10 @@ const assign = (obj, keyPath, value) => {
  * // the global state object. Properties will be available on local state:
  *
  * state = {
- *      ...Global.register(this, ["account.username"])
+ *      user: {}
  * }
+ * 
+ * Global.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
 export class GlobalState {
@@ -101,13 +103,14 @@ export class GlobalState {
         return GlobalState.UnsafeGlobalInstance
     }
 
-    registerProperty = (component, propertyObject) => {
+    registerProperty = (aliasPath, component, propertyObject) => {
         let state = {}
         if (!isObject(propertyObject.value)) {
-            propertyObject.listeners.add(component)
+            propertyObject.listeners.add({ aliasPath, component })
         } else {
             Object.keys(propertyObject.value).forEach((key) => {
                 GlobalState.UnsafeGlobalInstance.registerProperty(
+                    aliasPath,
                     component,
                     propertyObject.value[key]
                 )
@@ -127,6 +130,8 @@ export class GlobalState {
      * @param {array}  properties      An array of strings with the names of the global properties you
      *                                 want the component to listen to. Can be a top level object
      *                                 (i.e. account) or a nested object (i.e acount.address.street).
+     *                                 Registered properties can be given aliases to be used on the component state
+     *                                 (i.e acount.address.street as user.street).
      *                                 Passing nothing or an empty array will register the whole global object
      *
      *
@@ -135,34 +140,54 @@ export class GlobalState {
      * @example
      *
      * this.state = {
-     *     ...GlobalState.register(this, ["account.username", "appHasLaunched"])
+     *     person: {
+     *        email: "john@mail.com"
+     *    }
      * }
+     * 
+     * GlobalState.register(this, ["account.username as person", "account.address.street", "appHasLaunched"])
      *
      * //Local State will contain:
      *
      * {
-     *    account: {
-     *       username: "John"
+     *    
+     *    person: {
+     *      name: "John",
+     *      email: "john@mail.com"
      *    },
+     *    account: {
+     *      address: {
+     *        street: "Main St"
+     *      }
+     *    }
      *    appHasLaunched: true
      * }
      *
      */
     static register = (component: object, properties?: [string]) => {
         component.globalStateId = GlobalState.globalStateCounter++
-        let state = {}
+        let state = component.state || {}
 
         if (!properties || !properties.length) {
             GlobalState.UnsafeGlobalInstance.registerProperty(
+                null,
                 component,
                 GlobalState.UnsafeGlobalInstance
             )
-            state = flatten(GlobalState.UnsafeGlobalInstance)
+            state = { ...state, global: sanitize(GlobalState.UnsafeGlobalInstance) }
         } else {
             properties.forEach((prop) => {
                 let propertyObject = GlobalState.UnsafeGlobalInstance
+                let aliasPath = null
+
+                let aliasArr = prop.split(" as ")
+
+                if (aliasArr.length > 1) {
+                    prop = aliasArr[0]
+                    aliasPath = aliasArr[1]
+                }
+
                 let path = prop.split('.')
-                const stateObj = {}
                 if (path.length > 0) {
                     path.forEach((step, index) => {
                         if (!propertyObject.value.hasOwnProperty(step)) {
@@ -173,10 +198,12 @@ export class GlobalState {
                         }
                     })
 
-                    assign(state, path, flatten(propertyObject))
+                    const propPath = aliasPath ? aliasPath.split(".") : path
+                    assign(state, propPath, sanitize(propertyObject))
                 }
 
                 GlobalState.UnsafeGlobalInstance.registerProperty(
+                    aliasPath,
                     component,
                     propertyObject
                 )
@@ -201,7 +228,7 @@ export class GlobalState {
             }
         }
 
-        return state
+        component.state = state
     }
 
     /**
@@ -210,19 +237,25 @@ export class GlobalState {
      * It adds specific actions to the global object class to be able to
      * encapsulate global state manipulation.
      *
-     * @param {string}    actionName   The name of the action to add t the global state object.
-     * @param {function}  actionFunc   A function which is passed the current global state object.
-     *                                 Must return the function that wil be attached to the actionName
-     *
+     * @param {string}      actionName   The name of the action to add to the global state object.
+     * @param {function}  actionFunc   A function that will be set on the GlobalState object. Has a `props`
+     *                                   parameter which contains the parameters passed in when the callback 
+     *                                   is invoked and some more properties like the `getGlobalState` function
+     *                                   to get the a snapshot of the global state object
+     * 
      * @example
      *
-     * GlobalState.addAction("updateAccount", (globalState) => {
-     *    return ({phone, name}) => {
-     *        GlobalSetters.account.phone.set(phone)
-     *        GlobalSetters.account.name.set(name)
-     *        //or
-     *        GlobalSetters.account.set({phone, name})
-     *    }
+     * GlobalState.addAction("updateAccount", (props) => {
+     *   const {phone, name, getGlobalState} = props
+     * 
+     *   const globalState = getGlobalState()
+     * 
+     * 
+     *   GlobalSetters.account.phone.set(phone)
+     *   GlobalSetters.account.name.set(name)
+     *    //or
+     *   GlobalSetters.account.set({phone, name})
+     *    
      * })
      *
      * //Call action
@@ -230,26 +263,16 @@ export class GlobalState {
      * GlobalState.updateAccount({phone: "111-22-3222", name: "Jason"})
      *
      */
-    static addAction = (actionName: string, actionFunc: mixed) => {
-        let action = null
-
-        if (typeof actionFunc === 'function') {
-            actionFunc = actionFunc.bind(this)
-        } else {
-            throw `${actionName} is missing a daclaration or is not a function`
+    static addGlobalAction = (actionName: string, actionFunc: mixed) => {
+        const action = () => {
+            return (params) => {
+                params.getGlobalState = GlobalState.UnsafeGlobalInstance.getCurrentState
+                console.log("IT WORKED!")
+                actionFunc(params)
+            }
         }
 
-        if (actionFunc.length) {
-            action = actionFunc(GlobalState.UnsafeGlobalInstance.getCurrentState())
-        } else {
-            action = actionFunc()
-        }
-
-        if (typeof action !== 'function') {
-            throw `${actionName} is not a function. Please return a function during action declaration`
-        }
-
-        GlobalState[actionName] = action
+        GlobalState[actionName] = action()
     }
 
     constructor(initialState) {
@@ -327,8 +350,9 @@ export class GlobalState {
                     set: function (path, newVal) {
                         this.value = newVal
                         this.listeners.forEach((listener) => {
-                            listener.setState((prevState) => {
-                                assign(prevState, path.split('.'), newVal)
+                            listener.component.setState((prevState) => {
+                                const statePath = listener.aliasPath || path
+                                assign(prevState, statePath.split('.'), newVal)
                                 return prevState
                             })
                         })
@@ -374,7 +398,7 @@ export class GlobalState {
     _deregister = (base: any, component: string) => {
         if (base.hasOwnProperty('listeners')) {
             base.listeners.forEach((listener) => {
-                if (listener.globalStateId === component.globalStateId) {
+                if (listener.component.globalStateId === component.globalStateId) {
                     base.listeners.delete(listener)
                 }
             })
@@ -394,7 +418,7 @@ export class GlobalState {
      *
      */
     getCurrentState = () => {
-        return flatten(this)
+        return sanitize(this)
     }
 }
 
