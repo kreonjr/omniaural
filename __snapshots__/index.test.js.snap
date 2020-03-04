@@ -4,38 +4,102 @@ exports[`Component Testing should register and contain the account name on initi
 <div
   onClick={[Function]}
 >
-  Josh
+  <div>
+    Josh
+  </div>
+  <div>
+    Clark
+  </div>
 </div>
 `;
 
-exports[`Component Testing should update the account name global property and also be listening to global updates 1`] = `
+exports[`Component Testing should register and contain the address street on initialization using an alias 1`] = `
 <div
   onClick={[Function]}
 >
-  Josh
+  <div>
+    Josh
+  </div>
+  <div>
+    Clark
+  </div>
 </div>
 `;
 
-exports[`Component Testing should update the account name global property and also be listening to global updates 2`] = `
+exports[`Component Testing should update correctly the account name global property and also be listening to global updates 1`] = `
 <div
   onClick={[Function]}
 >
-  Victor
+  <div>
+    Josh
+  </div>
+  <div>
+    Clark
+  </div>
 </div>
 `;
 
-exports[`Component Testing should update the account name global property from within the component 1`] = `
+exports[`Component Testing should update correctly the account name global property and also be listening to global updates 2`] = `
 <div
   onClick={[Function]}
 >
-  Victor
+  <div>
+    Victor
+  </div>
+  <div>
+    Clark
+  </div>
 </div>
 `;
 
-exports[`Component Testing should update the account name global property from within the component 2`] = `
+exports[`Component Testing should update correctly the account name global property from within the component 1`] = `
 <div
   onClick={[Function]}
 >
-  Jack
+  <div>
+    Victor
+  </div>
+  <div>
+    State
+  </div>
+</div>
+`;
+
+exports[`Component Testing should update correctly the account name global property from within the component 2`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Jack
+  </div>
+  <div>
+    State
+  </div>
+</div>
+`;
+
+exports[`Component Testing should update correctly the address street name global property and also be listening to global updates through the alias 1`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Victor
+  </div>
+  <div>
+    Clark
+  </div>
+</div>
+`;
+
+exports[`Component Testing should update correctly the address street name global property and also be listening to global updates through the alias 2`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Victor
+  </div>
+  <div>
+    State
+  </div>
 </div>
 `;

@@ -265,9 +265,8 @@ export class GlobalState {
      */
     static addGlobalAction = (actionName: string, actionFunc: mixed) => {
         const action = () => {
-            return (params) => {
+            return (params = {}) => {
                 params.getGlobalState = GlobalState.UnsafeGlobalInstance.getCurrentState
-                console.log("IT WORKED!")
                 actionFunc(params)
             }
         }

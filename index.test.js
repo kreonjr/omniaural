@@ -51,41 +51,90 @@ describe('Global Setters', () => {
 
 })
 
+describe("Action Creator", () => {
+    test('should create an action on the Global State Object', () => {
+        GlobalState.addGlobalAction('action1', () => {
+
+        })
+
+        expect(GlobalState.action1).toBeTruthy()
+        expect(typeof GlobalState.action1 === "function").toBeTruthy()
+    })
+
+    test('should contain the global state snapshot getter in the callback', () => {
+        GlobalState.addGlobalAction('action2', (props) => {
+            expect(props.getGlobalState).toBeTruthy()
+            expect(typeof props.getGlobalState === "function").toBeTruthy()
+            const currentSnapshot = props.getGlobalState()
+            expect(JSON.stringify(currentSnapshot) === JSON.stringify(GlobalState.UnsafeGlobalInstance.getCurrentState()))
+        })
+
+        expect(GlobalState.action2).toBeTruthy()
+        expect(typeof GlobalState.action2 === "function").toBeTruthy()
+        GlobalState.action2()
+    })
+
+})
+
 describe("Component Testing", () => {
     test('should register and contain the account name on initialization', () => {
         const component = renderer.create(<MyComponent />)
         let tree = component.toJSON()
         expect(tree).toMatchSnapshot()
 
-        expect(tree.children.includes("Josh")).toBeTruthy()
+        expect(tree.children[0].children.includes("Josh")).toBeTruthy()
     })
 
-    test('should update the account name global property and also be listening to global updates', () => {
+    test('should register and contain the address street on initialization using an alias', () => {
         const component = renderer.create(<MyComponent />)
         let tree = component.toJSON()
         expect(tree).toMatchSnapshot()
 
-        expect(tree.children.includes("Josh")).toBeTruthy()
+        expect(tree.children[1].children.includes("Clark")).toBeTruthy()
+    })
+
+    test('should update correctly the account name global property and also be listening to global updates', () => {
+        const component = renderer.create(<MyComponent />)
+        let tree = component.toJSON()
+        expect(tree).toMatchSnapshot()
+
+        expect(tree.children[0].children.includes("Josh")).toBeTruthy()
+
         GlobalSetters.account.name.set("Victor")
         expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Victor").toBeTruthy()
 
         tree = component.toJSON();
         expect(tree).toMatchSnapshot();
-        expect(tree.children.includes("Victor")).toBeTruthy()
+        expect(tree.children[0].children.includes("Victor")).toBeTruthy()
     })
 
-    test('should update the account name global property from within the component', () => {
+    test('should update correctly the address street name global property and also be listening to global updates through the alias', () => {
         const component = renderer.create(<MyComponent />)
         let tree = component.toJSON()
         expect(tree).toMatchSnapshot()
 
-        expect(tree.children.includes("Victor")).toBeTruthy()
+        expect(tree.children[1].children.includes("Clark")).toBeTruthy()
+
+        GlobalSetters.account.address.street.set("State")
+        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "State").toBeTruthy()
+
+        tree = component.toJSON();
+        expect(tree).toMatchSnapshot();
+        expect(tree.children[1].children.includes("State")).toBeTruthy()
+    })
+
+    test('should update correctly the account name global property from within the component', () => {
+        const component = renderer.create(<MyComponent />)
+        let tree = component.toJSON()
+        expect(tree).toMatchSnapshot()
+
+        expect(tree.children[0].children.includes("Victor")).toBeTruthy()
         tree.props.onClick("Jack")
         expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Jack").toBeTruthy()
 
         tree = component.toJSON();
         expect(tree).toMatchSnapshot();
-        expect(tree.children.includes("Jack")).toBeTruthy()
+        expect(tree.children[0].children.includes("Jack")).toBeTruthy()
     })
 })
 
