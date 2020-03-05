@@ -116,12 +116,19 @@ export class GlobalState {
         })
     }
 
-    static addProperty = (obj) => {
+    static addProperty = (path, property) => {
+        if (isObject(property)) {
 
-        // Object.keys(obj).forEach((key) => {
-        //     GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, obj[key], key)
-        //     GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, obj[key])
-        // })
+            const newObj = {}
+            const pathArr = path.split(".")
+            assign(newObj, pathArr, property)
+
+
+            Object.keys(newObj).forEach((key) => {
+                GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, newObj[key], key)
+                GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, newObj[key])
+            })
+        }
     }
 
     /**
@@ -136,7 +143,6 @@ export class GlobalState {
     * 
     */
     _registerProperty = (aliasPath, component, propertyObject) => {
-        console.log("Property: ", propertyObject)
         propertyObject.listeners.add({ aliasPath, component })
 
         if (isObject(propertyObject.value)) {
@@ -327,17 +333,19 @@ export class GlobalState {
                 }
             }
         } else {
-            base[key] = {
-                set: (params) => {
-                    if (!isObject(params)) {
-                        throw `You are trying to set an object. Please pass an object arguement`
-                    }
-                    let obj = GlobalState.UnsafeGlobalInstance
-                    path.split('.').forEach((pathStep) => {
-                        obj = obj.value[pathStep]
-                    })
+            if (!base[key]) {
+                base[key] = {
+                    set: (params) => {
+                        if (!isObject(params)) {
+                            throw `You are trying to set an object. Please pass an object arguement`
+                        }
+                        let obj = GlobalState.UnsafeGlobalInstance
+                        path.split('.').forEach((pathStep) => {
+                            obj = obj.value[pathStep]
+                        })
 
-                    obj.set(path, params)
+                        obj.set(path, params)
+                    }
                 }
             }
 
@@ -363,34 +371,35 @@ export class GlobalState {
      * the property key/value pair on the global object instance and also creates a setter
      * for each global property. Should not be called outside this file.
      */
-    _addKeyValue = (base, key, initialVal = null) => {
-        if (!base[key] || !base[key].value) {
-            if (!isObject(initialVal)) {
+    _addKeyValue = (base, key, initialVal = null, initialListeners = new Set()) => {
+        if (!isObject(initialVal)) {
+            if (!base[key] || !base[key].value) {
                 base[key] = {
                     value: initialVal,
-                    listeners: new Set(),
+                    listeners: new Set([...initialListeners]),
                     set: function (path, newVal) {
                         this.value = newVal
                         this.listeners.forEach((listener) => {
                             listener.component.setState((prevState) => {
                                 const statePath = listener.aliasPath || path
-
-                                // console.log("State Path: ", statePath)
-                                // console.log("New Value: ", newVal)
-                                // console.log("Prev State: ", JSON.stringify(prevState))
-
                                 assign(prevState, statePath.split('.'), newVal)
-                                //console.log("New State: ", JSON.stringify(prevState))
-
                                 return prevState
                             })
                         })
                     }
                 }
             } else {
+                console.error(`${key} already exists in global state`)
+            }
+        } else {
+            let baseValue = initialVal
+            if (base[key] && base[key].value) {
+                base[key].listeners = new Set([...base[key].listeners], [...initialListeners])
+                baseValue = base[key].value
+            } else {
                 base[key] = {
                     value: initialVal,
-                    listeners: new Set(),
+                    listeners: new Set([...initialListeners]),
                     set: function (path, params) {
                         Object.keys(params).forEach(function (key) {
                             let obj = GlobalState.UnsafeGlobalInstance
@@ -403,20 +412,17 @@ export class GlobalState {
                                 throw `Property '${key}' not present in object '${path}'`
                             }
 
-                            console.log("Path: ", path)
-                            console.log("Key: ", key)
                             obj.value[key].set(path + '.' + key, params[key])
                         })
                     }
                 }
-
-                Object.keys(initialVal).forEach((innerKey) => {
-                    this._addKeyValue(initialVal, innerKey, initialVal[innerKey])
-                })
             }
-        } else {
-            console.error(`${key} already exists in global state`)
+
+            Object.keys(initialVal).forEach((innerKey) => {
+                this._addKeyValue(baseValue, innerKey, initialVal[innerKey], base[key].listeners)
+            })
         }
+
     }
 
     /**
