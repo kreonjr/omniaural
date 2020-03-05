@@ -103,10 +103,25 @@ export class GlobalState {
     static initializeInstance(initialState = {}) {
         if (!GlobalState.UnsafeGlobalInstance) {
             GlobalState.UnsafeGlobalInstance = new GlobalState(initialState)
-            GlobalState.UnsafeGlobalInstance = GlobalState.UnsafeGlobalInstance
         }
 
         return GlobalState.UnsafeGlobalInstance
+    }
+
+    constructor(initialState) {
+        this.value = {}
+        Object.keys(initialState).forEach((key) => {
+            this._addSetter(GlobalSetters, key, initialState[key], key)
+            this._addKeyValue(this.value, key, initialState[key])
+        })
+    }
+
+    static addProperty = (obj) => {
+
+        // Object.keys(obj).forEach((key) => {
+        //     GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, obj[key], key)
+        //     GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, obj[key])
+        // })
     }
 
     /**
@@ -121,12 +136,13 @@ export class GlobalState {
     * 
     */
     _registerProperty = (aliasPath, component, propertyObject) => {
-        if (!isObject(propertyObject.value)) {
-            propertyObject.listeners.add({ aliasPath, component })
-        } else {
+        console.log("Property: ", propertyObject)
+        propertyObject.listeners.add({ aliasPath, component })
+
+        if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
                 GlobalState.UnsafeGlobalInstance._registerProperty(
-                    aliasPath,
+                    aliasPath + "." + key,
                     component,
                     propertyObject.value[key]
                 )
@@ -288,14 +304,6 @@ export class GlobalState {
         GlobalState[actionName] = action()
     }
 
-    constructor(initialState) {
-        this.value = {}
-        Object.keys(initialState).forEach((key) => {
-            this._addSetter(GlobalSetters, key, initialState[key], key)
-            this._addKeyValue(this.value, key, initialState[key])
-        })
-    }
-
     /**
      * @private addSetter
      *
@@ -366,7 +374,14 @@ export class GlobalState {
                         this.listeners.forEach((listener) => {
                             listener.component.setState((prevState) => {
                                 const statePath = listener.aliasPath || path
+
+                                // console.log("State Path: ", statePath)
+                                // console.log("New Value: ", newVal)
+                                // console.log("Prev State: ", JSON.stringify(prevState))
+
                                 assign(prevState, statePath.split('.'), newVal)
+                                //console.log("New State: ", JSON.stringify(prevState))
+
                                 return prevState
                             })
                         })
@@ -375,6 +390,7 @@ export class GlobalState {
             } else {
                 base[key] = {
                     value: initialVal,
+                    listeners: new Set(),
                     set: function (path, params) {
                         Object.keys(params).forEach(function (key) {
                             let obj = GlobalState.UnsafeGlobalInstance
@@ -387,6 +403,8 @@ export class GlobalState {
                                 throw `Property '${key}' not present in object '${path}'`
                             }
 
+                            console.log("Path: ", path)
+                            console.log("Key: ", key)
                             obj.value[key].set(path + '.' + key, params[key])
                         })
                     }
