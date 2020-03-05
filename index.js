@@ -1,3 +1,4 @@
+import React from "react"
 /**
  * @constant
  * GlobalSetters Object
@@ -174,7 +175,7 @@ export class GlobalState {
                 component,
                 GlobalState.UnsafeGlobalInstance
             )
-            state = { ...state, global: sanitize(GlobalState.UnsafeGlobalInstance) }
+            state = { ...state, ...sanitize(GlobalState.UnsafeGlobalInstance) }
         } else {
             properties.forEach((prop) => {
                 let propertyObject = GlobalState.UnsafeGlobalInstance
@@ -445,3 +446,42 @@ export class GlobalState {
  *
  */
 export const initGlobalState = GlobalState.initializeInstance
+
+/**
+ * withGlobal
+ *
+ * Adds the a global state object as a prop to a component
+ *
+ * This high order function receives a component and passed the global state object (or a part of it)
+ * as props. Returns a new component that listens to global state updates
+ *
+ * @param {object} Component  The component to turn into a higher order component
+ * @param {array}  paths      The array of paths that the user want to observe from 
+ *                            the global state. Works similarly as registering a component as a listener.
+ * 
+ * @return {object} The Higher order component with the registered state passed in to its props
+ * 
+ * @example
+ *
+ * const MyAddress = (props) => {
+ *    return <div>
+ *      <div>{props.streetName}</div>
+ *    </div>
+ * }
+ * 
+ * export default withGlobal(MyAddress, ["account.address.street as streetName"])
+ *
+ */
+export const withGlobal = (Component: {}, paths?: [] = []) => {
+    return class Component extends React.Component {
+        constructor() {
+            super()
+            this.state = {}
+            GlobalState.register(this, paths)
+        }
+
+        render() {
+            return <Component {...this.state} />
+        }
+    }
+}
