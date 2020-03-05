@@ -472,7 +472,7 @@ export const initGlobalState = GlobalState.initializeInstance
  * export default withGlobal(MyAddress, ["account.address.street as streetName"])
  *
  */
-export const withGlobal = (Component: {}, paths?: [] = []) => {
+export const withGlobal = (RegisteredComponent: {}, paths?: [] = []) => {
     return class Component extends React.Component {
         constructor() {
             super()
@@ -481,7 +481,7 @@ export const withGlobal = (Component: {}, paths?: [] = []) => {
         }
 
         render() {
-            return <Component {...this.state} />
+            return <RegisteredComponent {...this.state} />
         }
     }
 }

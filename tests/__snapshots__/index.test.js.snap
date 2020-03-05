@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Component Testing The Class Component should register and contain the account name on initialization 1`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Josh
+  </div>
+  <div>
+    Clark
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should register and contain the address street on initialization using an alias 1`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Josh
+  </div>
+  <div>
+    Clark
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should update correctly the account name global property and also be listening to global updates 1`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Josh
+  </div>
+  <div>
+    Clark
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should update correctly the account name global property and also be listening to global updates 2`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Victor
+  </div>
+  <div>
+    Clark
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should update correctly the account name global property from within the component 1`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Victor
+  </div>
+  <div>
+    State
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should update correctly the account name global property from within the component 2`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Jack
+  </div>
+  <div>
+    State
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should update correctly the address street name global property and also be listening to global updates through the alias 1`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Victor
+  </div>
+  <div>
+    Clark
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Class Component should update correctly the address street name global property and also be listening to global updates through the alias 2`] = `
+<div
+  onClick={[Function]}
+>
+  <div>
+    Victor
+  </div>
+  <div>
+    State
+  </div>
+</div>
+`;
+
+exports[`Component Testing The Functional Component should be registered through the high order function 1`] = `
+<div>
+  Dev mode: true
+</div>
+`;
+
+exports[`Component Testing The Functional Component should update correctly when global state changes 1`] = `
+<div>
+  Dev mode: true
+</div>
+`;
+
+exports[`Component Testing The Functional Component should update correctly when global state changes 2`] = `
+<div>
+  Dev mode: false
+</div>
+`;

@@ -1,5 +1,5 @@
 import React from "react";
-import { GlobalState, GlobalSetters } from "./index";
+import { GlobalState, GlobalSetters } from "../index";
 
 export default class MyComponent extends React.Component {
     constructor() {
