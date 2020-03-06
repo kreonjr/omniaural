@@ -116,19 +116,43 @@ export class GlobalState {
         })
     }
 
+    /**
+     * addProperty
+     *
+     * Adds a property to the global state
+     *
+     * This function can be used to add a property on the global state object after initialization.
+     * It will through an error if the path to the property already exists. It will also update all the
+     * top level listeners state to include this property
+     *
+     * @param {string}       path       The path to which to add the new property
+     * @param {any}          property   The property value to add to the new path
+     *
+     *
+     * @example
+     *
+     * GlobalState.addProperty("account.id", 1234123412341234)
+     *
+     */
     static addProperty = (path, property) => {
-        if (isObject(property)) {
+        const newObj = {}
+        const pathArr = path.split(".")
+        assign(newObj, pathArr, property)
 
-            const newObj = {}
-            const pathArr = path.split(".")
-            assign(newObj, pathArr, property)
+        Object.keys(newObj).forEach((key) => {
+            GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, newObj[key], key)
+            GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, newObj[key])
+        })
 
+        GlobalState.UnsafeGlobalInstance.value[pathArr[0]].listeners.forEach((listener) => {
+            listener.component.setState((prevState) => {
+                const newPath = listener.aliasPath ? listener.aliasPath.split(".") : pathArr
 
-            Object.keys(newObj).forEach((key) => {
-                GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, newObj[key], key)
-                GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, newObj[key])
+                assign(prevState, newPath, property)
+
+                return prevState
             })
-        }
+        })
     }
 
     /**
@@ -143,12 +167,13 @@ export class GlobalState {
     * 
     */
     _registerProperty = (aliasPath, component, propertyObject) => {
-        propertyObject.listeners.add({ aliasPath, component })
+        propertyObject.listeners.set(component.globalStateId, { aliasPath, component })
 
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
+                const newPath = aliasPath ? aliasPath + "." + key : key
                 GlobalState.UnsafeGlobalInstance._registerProperty(
-                    aliasPath + "." + key,
+                    newPath,
                     component,
                     propertyObject.value[key]
                 )
@@ -217,7 +242,6 @@ export class GlobalState {
                 let aliasPath = null
 
                 let aliasArr = prop.split(" as ")
-
                 if (aliasArr.length > 1) {
                     prop = aliasArr[0]
                     aliasPath = aliasArr[1]
@@ -371,12 +395,19 @@ export class GlobalState {
      * the property key/value pair on the global object instance and also creates a setter
      * for each global property. Should not be called outside this file.
      */
-    _addKeyValue = (base, key, initialVal = null, initialListeners = new Set()) => {
+    _addKeyValue = (base, key, initialVal = null, initialListeners = new Map()) => {
         if (!isObject(initialVal)) {
             if (!base[key] || !base[key].value) {
+                if (initialListeners.size) {
+                    initialListeners.forEach((listener) => {
+                        if (listener.aliasPath) {
+                            listener.aliasPath = listener.aliasPath + "." + key
+                        }
+                    })
+                }
                 base[key] = {
                     value: initialVal,
-                    listeners: new Set([...initialListeners]),
+                    listeners: new Map([...initialListeners]),
                     set: function (path, newVal) {
                         this.value = newVal
                         this.listeners.forEach((listener) => {
@@ -394,12 +425,12 @@ export class GlobalState {
         } else {
             let baseValue = initialVal
             if (base[key] && base[key].value) {
-                base[key].listeners = new Set([...base[key].listeners], [...initialListeners])
+                base[key].listeners = new Map([...base[key].listeners], [...initialListeners])
                 baseValue = base[key].value
             } else {
                 base[key] = {
                     value: initialVal,
-                    listeners: new Set([...initialListeners]),
+                    listeners: new Map([...initialListeners]),
                     set: function (path, params) {
                         Object.keys(params).forEach(function (key) {
                             let obj = GlobalState.UnsafeGlobalInstance
@@ -436,9 +467,9 @@ export class GlobalState {
      */
     _deregister = (base, component) => {
         if (base.hasOwnProperty('listeners')) {
-            base.listeners.forEach((listener) => {
-                if (listener.component.globalStateId === component.globalStateId) {
-                    base.listeners.delete(listener)
+            base.listeners.forEach((listener, listenerId) => {
+                if (listenerId === component.globalStateId) {
+                    base.listeners.delete(listenerId)
                 }
             })
         } else {
@@ -493,11 +524,13 @@ export const initGlobalState = GlobalState.initializeInstance
  * This high order function receives a component and passed the global state object (or a part of it)
  * as props. Returns a new component that listens to global state updates
  *
- * @param {React.FunctionComponent} Component  The component to turn into a higher order component
- * @param {array}                   paths      The array of paths that the user want to observe from 
- *                                  the global state. Works similarly as registering a component as a listener.
+ * @param {React.FunctionComponent} RegisteredComponent  The component to turn into a higher order component
+ * @param {array}                   paths                The array of paths that the user want to observe from 
+ *                                                       the global state. Works similarly as registering a component 
+ *                                                       as a listener.
  * 
- * @return {React.Component}  The Higher order component with the registered state passed in to its props
+ * @return {React.Component}  The Higher order component with the registered state passed in to its props. Will contain the name 
+ *                            the passed in component on its object under this.name
  * 
  * @example
  *
@@ -508,13 +541,16 @@ export const initGlobalState = GlobalState.initializeInstance
  * }
  * 
  * export default withGlobal(MyAddress, ["account.address.street as streetName"])
+ * 
  *
  */
 export const withGlobal = (RegisteredComponent, paths = []) => {
+
     return class GlobalComponent extends React.Component {
         constructor(props) {
             super(props)
             this.state = {}
+            this.name = RegisteredComponent.name
             GlobalState.register(this, paths)
         }
 
