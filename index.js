@@ -58,6 +58,19 @@ const assign = (obj, keyPath, value) => {
     obj[keyPath[lastKeyIndex]] = value
 }
 
+const flatten = (obj, prefix = '') =>
+    Object.keys(obj).reduce((acc, k) => {
+        const pre = prefix.length ? prefix + '.' : '';
+        if (isObject(obj[k])) {
+            Object.assign(acc, flatten(obj[k], pre + k))
+        }
+        else {
+            acc[pre + k] = obj[k]
+        }
+
+        return acc;
+    }, {});
+
 /**
  * @class
  * GlobalState Class
@@ -138,21 +151,30 @@ export class GlobalState {
         const newObj = {}
         const pathArr = path.split(".")
         assign(newObj, pathArr, property)
+        const flatObject = flatten(newObj)
 
         Object.keys(newObj).forEach((key) => {
             GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, newObj[key], key)
             GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, newObj[key])
         })
 
-        GlobalState.UnsafeGlobalInstance.value[pathArr[0]].listeners.forEach((listener) => {
-            listener.component.setState((prevState) => {
-                const newPath = listener.aliasPath ? listener.aliasPath.split(".") : pathArr
-
-                assign(prevState, newPath, property)
-
-                return prevState
+        if (!isObject(property)) {
+            let setter = GlobalSetters
+            pathArr.forEach((step) => {
+                setter = setter[step]
             })
-        })
+
+            setter.set(property)
+        } else {
+            Object.keys(flatObject).forEach((innerPath) => {
+                let setter = GlobalSetters
+                innerPath.split(".").forEach((step) => {
+                    setter = setter[step]
+                })
+
+                setter.set(flatObject[innerPath])
+            })
+        }
     }
 
     /**
@@ -171,7 +193,7 @@ export class GlobalState {
 
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
-                const newPath = aliasPath ? aliasPath + "." + key : key
+                const newPath = aliasPath ? aliasPath + "." + key : null
                 GlobalState.UnsafeGlobalInstance._registerProperty(
                     newPath,
                     component,
@@ -249,7 +271,7 @@ export class GlobalState {
 
                 let path = prop.split('.')
                 if (path.length > 0) {
-                    path.forEach((step, index) => {
+                    path.forEach((step) => {
                         if (!propertyObject.value.hasOwnProperty(step)) {
                             // error
                             throw `Invalid object path: ${prop}. Make sure the path to the property matches your global state structure.`
@@ -398,29 +420,36 @@ export class GlobalState {
     _addKeyValue = (base, key, initialVal = null, initialListeners = new Map()) => {
         if (!isObject(initialVal)) {
             if (!base[key] || !base[key].value) {
+                const newListeners = new Map()
                 if (initialListeners.size) {
-                    initialListeners.forEach((listener) => {
-                        if (listener.aliasPath) {
-                            listener.aliasPath = listener.aliasPath + "." + key
+                    initialListeners.forEach((listener, mapKey) => {
+                        const newListener = {
+                            component: listener.component,
+                            aliasPath: null
                         }
+
+                        if (listener.aliasPath) {
+                            newListener.aliasPath = listener.aliasPath + "." + key
+                        }
+                        newListeners.set(mapKey, newListener)
                     })
                 }
                 base[key] = {
                     value: initialVal,
-                    listeners: new Map([...initialListeners]),
+                    listeners: newListeners,
                     set: function (path, newVal) {
                         this.value = newVal
                         this.listeners.forEach((listener) => {
                             listener.component.setState((prevState) => {
-                                const statePath = listener.aliasPath || path
-                                assign(prevState, statePath.split('.'), newVal)
+                                const newPath = listener.aliasPath ? listener.aliasPath.split(".") : path.split(".")
+                                assign(prevState, newPath, newVal)
                                 return prevState
                             })
                         })
                     }
                 }
             } else {
-                console.error(`${key} already exists in global state`)
+                throw `${key} already exists at this global state path`
             }
         } else {
             let baseValue = initialVal
