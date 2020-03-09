@@ -1,7 +1,7 @@
 import React from "react"
 
 /*
-* @typedef {value: any, listeners: Set<any>} GlobalProperty
+* @typedef {value: any, listeners: Map<{}>} GlobalProperty
 */
 
 /**
@@ -29,7 +29,7 @@ import React from "react"
 export const GlobalSetters = {}
 
 const isObject = (val) => {
-    return typeof val == 'object' && !Array.isArray(val)
+    return !Array.isArray(val) && typeof val == 'object'
 }
 
 const sanitize = (obj) => {
@@ -58,18 +58,19 @@ const assign = (obj, keyPath, value) => {
     obj[keyPath[lastKeyIndex]] = value
 }
 
-const flatten = (obj, prefix = '') =>
-    Object.keys(obj).reduce((acc, k) => {
+const flatten = (obj, prefix = '') => {
+    return Object.keys(obj).reduce((acc, key) => {
         const pre = prefix.length ? prefix + '.' : '';
-        if (isObject(obj[k])) {
-            Object.assign(acc, flatten(obj[k], pre + k))
+        if (isObject(obj[key])) {
+            Object.assign(acc, flatten(obj[key], pre + key))
         }
         else {
-            acc[pre + k] = obj[k]
+            acc[pre + key] = obj[key]
         }
 
         return acc;
     }, {});
+}
 
 /**
  * @class
@@ -158,8 +159,8 @@ export class GlobalState {
             GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, newObj[key])
         })
 
+        let setter = GlobalSetters
         if (!isObject(property)) {
-            let setter = GlobalSetters
             pathArr.forEach((step) => {
                 setter = setter[step]
             })
@@ -167,7 +168,6 @@ export class GlobalState {
             setter.set(property)
         } else {
             Object.keys(flatObject).forEach((innerPath) => {
-                let setter = GlobalSetters
                 innerPath.split(".").forEach((step) => {
                     setter = setter[step]
                 })
@@ -495,8 +495,8 @@ export class GlobalState {
      *
      */
     _deregister = (base, component) => {
-        if (base.hasOwnProperty('listeners')) {
-            base.listeners.forEach((listener, listenerId) => {
+        if (!isObject(base.value)) {
+            base.listeners.forEach((_, listenerId) => {
                 if (listenerId === component.globalStateId) {
                     base.listeners.delete(listenerId)
                 }
