@@ -4,10 +4,12 @@ Omniaural is a minimal global state manager for React/React-Native applications.
 
 ## Getting started
 
-TBD npm repo. For now, download from repo and reference folder directly in `package.json`
+TBD npm repo.
+
+For now, install it from github directly.
 
 ```bash
-(eventually) yarn install @isobar/omniaural
+yarn add ccreonopoulos/omniaural
 ```
 
 ## Usage
