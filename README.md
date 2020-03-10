@@ -52,6 +52,13 @@ export class IntroScreen extends React.Component<*, *> {
     }
 
     GlobalState.register(this, ['account as person', 'account.address as address'])
+    GlobalState.addGlobalAction('updateAddress', ({ address, getGlobalState, globalSetters }) => {
+        globalSetters.account.address.set(address)
+    })
+  }
+
+  _updateAddress = () => {
+      GlobalState.updateAddress({street: "Main st"})
   }
 
   render() {
@@ -60,7 +67,7 @@ export class IntroScreen extends React.Component<*, *> {
         <Text style={styles.instructions}>
           Account information
         </Text>
-        <Text style={styles.instructions}>
+        <Text style={styles.instructions} onPress={this._updateAddress}>
           {'\n'}
           {`Name: ${this.state.person.name}`}
           {'\n'}
@@ -84,34 +91,10 @@ const styles = StyleSheet.create({
 
 ```
 
+### Functional components
 
-### Add Actions
+You can register a functional component by wrapping it in the [withGlobal](#withGlobal) HOC function
 
-```javascript
-import { GlobalState, GlobalSetters } from 'omniaural'
-
-GlobalState.addGlobalAction('updateAddress', ({ address, getGlobalState }) => {
-    GlobalSetters.account.address.set(address)
-})
-
-
-_onClick = () => {
-    GlobalState.updateAddress({street: "Main st"})
-}
-```
-
-
-### Add Properties
-
-```javascript
-import { GlobalState } from 'omniaural'
-
-GlobalState.addProperty("account.id", 4568585)
-//or
-GlobalState.addProperty("account", {id: 4568585})
-```
-
-### Use with functional components
 ```javascript
 import React from 'react'
 import { View, Text } from 'react-native'
@@ -127,6 +110,8 @@ const PersonScreen = (props) => {
 
 export default withGlobal(PersonScreen, ["account as person"])
 ```
+
+---
 
 ## __API__
 
@@ -255,6 +240,8 @@ import { GlobalState } from 'omniaural'
 GlobalState.UnsafeGlobalInstance.getCurrentState()
 ```
 
+---
+
 ### GlobalSetters
 
 This is a dynamicaly created class that is called when you initialize your [GlobalState](#globalstate).
@@ -281,6 +268,8 @@ GlobalSetters.account.address.street.set("1st st")
 
 GlobalSetters.account.address.set({street: "1st st"})
 ```
+
+---
 
 ### Functions
 
@@ -312,9 +301,6 @@ const PersonScreen = (props) => {
 
 export default withGlobal(PersonScreen, ["account as person"])
 ```
-
-
-## Contributing
 
 
 ## License
