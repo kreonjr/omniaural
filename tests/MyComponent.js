@@ -7,7 +7,7 @@ export default class MyComponent extends React.Component {
         this.state = {
         }
 
-        GlobalState.register(this, ["account.name as person.name", "account.address"])
+        GlobalState.register(this, ["account.name as person.name", "account.address", "account.address.street as street", "account as info.account"])
     }
 
     _updateName = (name) => {
@@ -23,6 +23,8 @@ export default class MyComponent extends React.Component {
             <div>{this.state.person.name}</div>
             <div>{this.state.account.address.street}</div>
             <div onClick={this._addZipCode}>{this.state.account.address.zip}</div>
+            <div>{this.state.street}</div>
+            <div>{this.state.info.account.name}</div>
         </div>
     }
 }

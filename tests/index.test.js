@@ -5,12 +5,13 @@ import MyComponent from "./MyComponent";
 import MyBadComponent from "./MyBadComponent";
 import MyFunctional from "./MyFunctional";
 
-beforeEach(() => {
+beforeAll(() => {
     initGlobalState({
         account: {
             name: "Josh",
             address: {
-                street: "Randolph"
+                street: "Randolph",
+                city: "Chicago"
             }
         },
         dev_mode: false
@@ -37,10 +38,12 @@ describe('Basic Global State Manager', () => {
             expect(typeof GlobalState.action1 === "function").toBeTruthy()
         })
 
-        test('should contain the global state snapshot getter in the callback', () => {
+        test('should contain the global state snapshot getter and setter in the callback', () => {
             GlobalState.addGlobalAction('action2', (props) => {
                 expect(props.getGlobalState).toBeTruthy()
                 expect(typeof props.getGlobalState === "function").toBeTruthy()
+                expect(props.globalSetters).toBeTruthy()
+                expect(typeof props.globalSetters === "object").toBeTruthy()
                 const currentSnapshot = props.getGlobalState()
                 expect(JSON.stringify(currentSnapshot) === JSON.stringify(GlobalState.UnsafeGlobalInstance.getCurrentState()))
             })
@@ -50,6 +53,21 @@ describe('Basic Global State Manager', () => {
             GlobalState.action2()
         })
 
+        //Add test to make sure action performs given funciton body
+        test('should execute the given action to update global state', () => {
+            GlobalState.addGlobalAction('action3', (props) => {
+                const { globalSetters, account } = props
+                globalSetters.account.set(account)
+
+                expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
+                expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
+                expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+            })
+
+            expect(GlobalState.action3).toBeTruthy()
+            expect(typeof GlobalState.action3 === "function").toBeTruthy()
+            GlobalState.action3({ account: { address: { city: "New York" } } })
+        })
     })
 
     describe("Adding a property", () => {
@@ -66,6 +84,16 @@ describe('Basic Global State Manager', () => {
             expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
         })
 
+        test('should contain the new nested object property on the global object and have kept the structure intact', () => {
+            GlobalState.addProperty("account", { nextOfKin: { name: "James" } })
+
+            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["nextOfKin"].value["name"].value === "James").toBeTruthy()
+            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+
+            GlobalState.addProperty("account.grandParent.name", "Sue")
+            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["grandParent"].value["name"].value === "Sue").toBeTruthy()
+        })
+
         test('should error if an existing property is attempted to be added', () => {
             expect(() => GlobalState.addProperty("account.name", "Victor")).toThrow("name already exists at this global state path")
         })
@@ -80,23 +108,18 @@ describe('Global Setters', () => {
         expect(GlobalState.UnsafeGlobalInstance.value["dev_mode"].value).toBeTruthy()
     })
 
-    test('should update top level object property', () => {
+    test('should update top level object property without changing account or address structures', () => {
         GlobalSetters.account.set({ address: { street: "Clark" } })
 
         expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Clark").toBeTruthy()
+        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
+        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
     })
 
     test('should update nested object property', () => {
         GlobalSetters.account.address.street.set("State")
 
         expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "State").toBeTruthy()
-    })
-
-    test('should update object property by merging into existing object', () => {
-        GlobalSetters.account.set({ address: { street: "Clark" } })
-
-        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Clark").toBeTruthy()
-        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
     })
 
     test('should error if a property does not exist at provided path', () => {
@@ -106,13 +129,11 @@ describe('Global Setters', () => {
 
 
 describe("Component Testing", () => {
-    //const component = renderer.create(<MyComponent />)
-
-
     describe("The Class Component", () => {
         test('should register and contain the account name on initialization', () => {
             const component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
+
             expect(tree).toMatchSnapshot()
 
             expect(tree.children[0].children.includes("Josh")).toBeTruthy()
@@ -121,9 +142,9 @@ describe("Component Testing", () => {
         test('should register and contain the address street on initialization using an alias', () => {
             const component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
-
             expect(tree).toMatchSnapshot()
-            expect(tree.children[1].children.includes("Clark")).toBeTruthy()
+
+            expect(tree.children[1].children.includes("State")).toBeTruthy()
         })
 
         test('should update correctly the account name global property and also be listening to global updates', () => {
@@ -142,13 +163,13 @@ describe("Component Testing", () => {
             const component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
-            expect(tree.children[1].children.includes("Clark")).toBeTruthy()
+            expect(tree.children[1].children.includes("State")).toBeTruthy()
 
-            GlobalSetters.account.address.street.set("State")
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "State").toBeTruthy()
+            GlobalSetters.account.address.street.set("Randolph")
+            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
 
             tree = component.toJSON();
-            expect(tree.children[1].children.includes("State")).toBeTruthy()
+            expect(tree.children[1].children.includes("Randolph")).toBeTruthy()
         })
 
         test('should update correctly the account name global property from within the component', () => {
@@ -188,7 +209,6 @@ describe("Component Testing", () => {
             expect(tree).toMatchSnapshot()
 
             expect(tree.children.includes("Dev mode: true")).toBeTruthy()
-
         })
 
         test('should update correctly when global state changes', () => {

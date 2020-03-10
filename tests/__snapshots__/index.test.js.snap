@@ -8,11 +8,17 @@ exports[`Component Testing The Class Component should register and contain the a
     Josh
   </div>
   <div>
-    Clark
+    State
   </div>
   <div
     onClick={[Function]}
   />
+  <div>
+    State
+  </div>
+  <div>
+    Josh
+  </div>
 </div>
 `;
 
@@ -24,11 +30,17 @@ exports[`Component Testing The Class Component should register and contain the a
     Josh
   </div>
   <div>
-    Clark
+    State
   </div>
   <div
     onClick={[Function]}
   />
+  <div>
+    State
+  </div>
+  <div>
+    Josh
+  </div>
 </div>
 `;
 

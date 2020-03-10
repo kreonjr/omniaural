@@ -189,7 +189,7 @@ export class GlobalState {
     * 
     */
     _registerProperty = (aliasPath, component, propertyObject) => {
-        propertyObject.listeners.set(component.globalStateId, { aliasPath, component })
+        propertyObject.listeners.set(component.globalStateId + aliasPath, { aliasPath, component })
 
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
@@ -320,7 +320,7 @@ export class GlobalState {
      * encapsulate global state manipulation.
      *
      * @param {string}      actionName   The name of the action to add to the global state object.
-     * @param {function}  actionFunc   A function that will be set on the GlobalState object. Has a `props`
+     * @param {function}  actionFunc     A function that will be set on the GlobalState object. Has a `props`
      *                                   parameter which contains the parameters passed in when the callback 
      *                                   is invoked and some more properties like the `getGlobalState` function
      *                                   to get the a snapshot of the global state object
@@ -328,28 +328,28 @@ export class GlobalState {
      * @example
      *
      * GlobalState.addAction("updateAccount", (props) => {
-     *   const {phone, name, getGlobalState} = props
+     *   const {account, getGlobalState, globalSetters} = props
      * 
      *   const globalState = getGlobalState()
      * 
-     * 
-     *   GlobalSetters.account.phone.set(phone)
-     *   GlobalSetters.account.name.set(name)
+     *   globalSetters.account.phone.set(account.phone)
+     *   globalSetters.account.name.set(account.name)
      *    //or
-     *   GlobalSetters.account.set({phone, name})
+     *   globalSetters.account.set(account)
      *    
      * })
      *
      * //Call action
      *
-     * GlobalState.updateAccount({phone: "111-22-3222", name: "Jason"})
+     * GlobalState.updateAccount({account: {phone: "111-22-3222", name: "Jason"}})
      *
      */
     static addGlobalAction = (actionName, actionFunc) => {
         const action = () => {
-            return (params = {}) => {
-                params.getGlobalState = GlobalState.UnsafeGlobalInstance.getCurrentState
-                actionFunc(params)
+            return (props = {}) => {
+                props.getGlobalState = GlobalState.UnsafeGlobalInstance.getCurrentState
+                props.globalSetters = GlobalSetters
+                actionFunc(props)
             }
         }
 
@@ -431,7 +431,7 @@ export class GlobalState {
                         if (listener.aliasPath) {
                             newListener.aliasPath = listener.aliasPath + "." + key
                         }
-                        newListeners.set(mapKey, newListener)
+                        newListeners.set(mapKey + "." + key, newListener)
                     })
                 }
                 base[key] = {

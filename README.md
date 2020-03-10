@@ -197,21 +197,26 @@ Actions can be added to the Global State to be used as batch updates or async ca
 | Parameter     | Type                    | Description  |
 | ------------- |:----------------------: | :----------- |
 | actionName    | String                                 | The name of the action to be added to the global state object
-| action        | (opts: {params, getGlobalState}) => {} | The body of this function will be added as a global action. This function can be called from anywhere. Opts is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state.
+| action        | (opts: {params, getGlobalState, globalSetters}) => {} | The body of this function will be added as a global action. The action should then be called with an object parameter that contains the properties you'd like to update. __Note:__ The argument passed into the action must be an object.
+
+`opts` is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state as well as a reference to the [GlobalSetters](#globalsetters) object.
 
 ##### Example: 
 ```javascript
-import { GlobalState, GlobalSetters } from 'omniaural'
+import { GlobalState } from 'omniaural'
 
-GlobalState.addGlobalAction('updateAddress', ({ address, getGlobalState }) => {
+GlobalState.addGlobalAction('updateAddress', (opts) => {
+    const { address, getGlobalState, globalSetters } = opts
+    
+    //The currentGlobalState will contain a global state snapshot
     const currentGlobalState = getGlobalState()
 
-    GlobalSetters.account.address.set(address)
+    globalSetters.account.address.set(address)
 })
 
 
 _onClick = () => {
-    GlobalState.updateAddress({street: "Main st"})
+    GlobalState.updateAddress({address: {street: "Main st"}})
 }
 ```
 
