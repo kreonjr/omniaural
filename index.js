@@ -189,7 +189,8 @@ export class GlobalState {
     * 
     */
     _registerProperty = (aliasPath, component, propertyObject) => {
-        propertyObject.listeners.set(component.globalStateId + aliasPath, { aliasPath, component })
+        const mapKey = aliasPath ? component.globalStateId + "." + aliasPath : component.globalStateId
+        propertyObject.listeners.set(mapKey, { aliasPath, component })
 
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
@@ -496,8 +497,8 @@ export class GlobalState {
      */
     _deregister = (base, component) => {
         if (!isObject(base.value)) {
-            base.listeners.forEach((_, listenerId) => {
-                if (listenerId === component.globalStateId) {
+            base.listeners.forEach((listener, listenerId) => {
+                if (listener.component.globalStateId === component.globalStateId) {
                     base.listeners.delete(listenerId)
                 }
             })
