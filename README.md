@@ -129,21 +129,19 @@ export default withGlobal(PersonScreen, ["account as person"])
 ## __API__
 
 ### GlobalState
-[globalstateclass]:[globalstate]
 
 The main global state manager class. It should be initialized at your top most component (usually App.js). This class will contain your global state. Components can register to specific properties or the whole global state object and update when it changes.
 
 #### Methods:
-   - [initGlobalState()][1]
-   - [register()][2]
-   - [addGlobalAction()][3]
-   - [addProperty()][4]
-   - [getCurrentState()][5]
+   - [initGlobalState()](#initialglobalstate)
+   - [register()](#register)
+   - [addGlobalAction()](#addGlobalAction)
+   - [addProperty()](#addProperty)
+   - [getCurrentState()](#getCurrentState)
 
 #### initialGlobalState() 
-[1]:initGlobalState
 
-Initialize the global state with an initial object to which the different components will listen to its changes. This will create the GlobalState structure as well as the [GlobalSetters][setterclass] structure to update the state with.
+Initialize the global state with an initial object to which the different components will listen to its changes. This will create the GlobalState structure as well as the [GlobalSetters](#globalsetters) structure to update the state with.
 
 | Parameter        | Type | Description  |
 | ------------- |:-------------:| :-----|
@@ -167,7 +165,6 @@ initGlobalState({
 
 
 #### register()
-[2]:register
 
 Register a component to listen to changes on the global state. This method will add the component as a listener to the passed in properties that you want to listen to and call `setState` on that component whenever a change happens. 
 An alias can be used for each property using the keyword `as` and will be added to the local state using that alias.
@@ -193,7 +190,6 @@ constructor() {
 ```
 
 #### addGlobalAction()
-[3]:addGlobalAction
 
 Actions can be added to the Global State to be used as batch updates or async calls that need to update the global state after they are completed. 
 
@@ -201,7 +197,7 @@ Actions can be added to the Global State to be used as batch updates or async ca
 | Parameter        | Type | Description  |
 | ------------- |:-------------:| :-----|
 | actionName  | String        | The name of the action to be added to the global state object
-| action | (opts: {params, getGlobalState}) => {} | The body of the function to be added as a global action. This function can be called from anywhere. Opts is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state.
+| action | (opts: {params, getGlobalState}) => {} | The body of this function will be added as a global action. This function can be called from anywhere. Opts is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state.
 
 ##### Example: 
 ```javascript
@@ -220,7 +216,6 @@ _onClick = () => {
 ```
 
 #### addProperty()
-[4]:addProperty
 
 This function add new properties to the global state object structure. If you add properties to nested objects, any listener to the parent object will also start listenting to the newly added property.
 
@@ -242,7 +237,6 @@ GlobalState.addProperty("account", {id: 4568585})
 ```
 
 #### getCurrentState()
-[5]:getCurrentState
 
 This function gets the current global state object at any given point in time. (Not recommended to access outside a global action).
 You have to reference the GlobalState Instance to call this function.
@@ -256,9 +250,8 @@ GlobalState.UnsafeGlobalInstance.getCurrentState()
 ```
 
 ### GlobalSetters
-[setterclass]:[globalsetters]
 
-This is a dynamicaly created class that is called when you initialize your [GlobalState][globalstateclass].
+This is a dynamicaly created class that is called when you initialize your [GlobalState](#globalstate).
 This class mimics your global state structure and it is what should be used to update you global state object. you can set properties on the global object structure directly. 
 
 ##### Example:
