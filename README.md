@@ -143,8 +143,8 @@ The main global state manager class. It should be initialized at your top most c
 
 Initialize the global state with an initial object to which the different components will listen to its changes. This will create the GlobalState structure as well as the [GlobalSetters](#globalsetters) structure to update the state with.
 
-| Parameter        | Type | Description  |
-| ------------- |:-------------:| :-----|
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
 | initialState  | Object        | The object with which to initialize your global object.
 
 ##### Example: 
@@ -172,10 +172,10 @@ An alias can be used for each property using the keyword `as` and will be added 
 __Note:__ This function must should be called after you have initialized your initial local state.
 
 
-| Parameter        | Type | Description  |
-| ------------- |:-------------:| :-----|
-| component  | React.Component        | The component to be registered as a listener to the global state properties
-| paths | [String] | The global state paths to subscribe to. If an empty array is passed in, the whole global state will be observed (not recommended).
+| Parameter     | Type             | Description  |
+| ------------- |:---------------: | :----------- |
+| component     | React.Component  | The component to be registered as a listener to the global state properties.
+| paths         | Array<string>    | The global state paths to subscribe to. If an empty array is passed in, the whole global state will be observed (not recommended).
 
 ##### Example: 
 ```javascript
@@ -194,10 +194,10 @@ constructor() {
 Actions can be added to the Global State to be used as batch updates or async calls that need to update the global state after they are completed. 
 
 
-| Parameter        | Type | Description  |
-| ------------- |:-------------:| :-----|
-| actionName  | String        | The name of the action to be added to the global state object
-| action | (opts: {params, getGlobalState}) => {} | The body of this function will be added as a global action. This function can be called from anywhere. Opts is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state.
+| Parameter     | Type                    | Description  |
+| ------------- |:----------------------: | :----------- |
+| actionName    | String                                 | The name of the action to be added to the global state object
+| action        | (opts: {params, getGlobalState}) => {} | The body of this function will be added as a global action. This function can be called from anywhere. Opts is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state.
 
 ##### Example: 
 ```javascript
@@ -219,11 +219,10 @@ _onClick = () => {
 
 This function add new properties to the global state object structure. If you add properties to nested objects, any listener to the parent object will also start listenting to the newly added property.
 
-
-| Parameter        | Type | Description  |
-| ------------- |:-------------:| :-----|
-| path  | String        | The path in the global state to which to add a property
-| value | any | The value to initialize the newly added property as
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | The path in the global state to which to add a property.
+| value         | any           | The value to initialize the newly added property as.
 
 
 
@@ -274,6 +273,37 @@ GlobalSetters.account.address.street.set("1st st")
 //or
 
 GlobalSetters.account.address.set({street: "1st st"})
+```
+
+### Functions
+
+#### withGlobal
+
+This function can be used to register a functional component with a collection of properties from the global state using a higher order component.
+The registered properties will be passed in as props to the functional component.
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| component     | Function      | The functional component to start listening to the global state.
+| paths         | Array<string> | An array of strings that represent the paths to the global properties to listen to. Each path can receive an alias similar to the [register](#register) function to be passed into the props.
+
+
+
+##### Example: 
+```javascript
+import React from 'react'
+import { View, Text } from 'react-native'
+import { withGlobal } from 'omniaural'
+
+const PersonScreen = (props) => {
+  return (
+    <View>
+      <Text>User Id: {props.person.id}</Text>
+    </View>
+  )
+}
+
+export default withGlobal(PersonScreen, ["account as person"])
 ```
 
 
