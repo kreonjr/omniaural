@@ -1,12 +1,17 @@
 {
   "name": "omniaural",
   "version": "1.0.0",
-  "description": "A global state manager for react-native",
+  "description": "A lightweight global state manager",
   "main": "index.js",
   "scripts": {
     "test": "jest"
   },
-  "author": "",
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test"
+    }
+  },
+  "author": "Creon Creonopoulos",
   "license": "MIT",
   "private": true,
   "devDependencies": {
@@ -16,6 +21,7 @@
     "@babel/preset-env": "^7.8.6",
     "@babel/preset-react": "^7.8.3",
     "babel-jest": "^25.1.0",
+    "husky": "^4.2.3",
     "jest": "^25.1.0",
     "react": "^16.13.0",
     "react-test-renderer": "^16.13.0"
