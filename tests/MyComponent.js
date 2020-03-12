@@ -1,5 +1,5 @@
 import React from "react";
-import { GlobalState, GlobalSetters } from "../index";
+import { OmniAural } from "../index";
 
 export default class MyComponent extends React.Component {
     constructor() {
@@ -7,15 +7,15 @@ export default class MyComponent extends React.Component {
         this.state = {
         }
 
-        GlobalState.register(this, ["account.name as person.name", "account.address", "account.address.street as street", "account as info.account"])
+        OmniAural.register(this, ["account.name as person.name", "account.address", "account.address.street as street", "account as info.account"])
     }
 
     _updateName = (name) => {
-        GlobalSetters.account.name.set(name)
+        OmniAural.state.account.name.set(name)
     }
 
     _addZipCode = () => {
-        GlobalState.addProperty("account.address", { zip: 12345 })
+        OmniAural.addProperty("account.address", { zip: 12345 })
     }
 
     render() {

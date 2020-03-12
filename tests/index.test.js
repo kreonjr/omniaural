@@ -1,129 +1,166 @@
-import { GlobalState, initGlobalState, GlobalSetters } from "../index";
+import { OmniAural, initGlobalState } from "../index";
 import React from 'react';
 import renderer from "react-test-renderer"
 import MyComponent from "./MyComponent";
 import MyBadComponent from "./MyBadComponent";
 import MyFunctional from "./MyFunctional";
 
+const initialState = {
+    account: {
+        name: "Josh",
+        address: {
+            street: "Randolph",
+            city: "Chicago"
+        }
+    },
+    dev_mode: false
+}
+
 beforeAll(() => {
-    initGlobalState({
-        account: {
-            name: "Josh",
-            address: {
-                street: "Randolph",
-                city: "Chicago"
-            }
-        },
-        dev_mode: false
-    })
+    initGlobalState(initialState)
 });
 
-describe('Basic Global State Manager', () => {
+describe('Global State Manager', () => {
 
     test('should validate global state has been initialized correctly', () => {
-        const globalObject = GlobalState.UnsafeGlobalInstance.value
+        const globalObject = OmniAural.UnsafeGlobalInstance.value
 
         expect(globalObject["dev_mode"].value).toBeFalsy()
         expect(globalObject["account"].value["name"].value === "Josh").toBeTruthy()
         expect(globalObject["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
     })
 
+    test('should validate global state was declared correctly in the state object', () => {
+        const currentSnapshot = OmniAural.state.value()
+        expect(JSON.stringify(currentSnapshot) === JSON.stringify(initialState))
+    })
+
+    test('should get properties value from the state object', () => {
+        expect(OmniAural.state.dev_mode.value()).toBeFalsy()
+        expect(OmniAural.state.account.address.city.value() === "Chicago").toBeTruthy()
+    })
+
     describe("Action Creator", () => {
         test('should create an action on the Global State Object', () => {
-            GlobalState.addGlobalAction('action1', () => {
+            OmniAural.addGlobalAction('action1', () => { })
 
-            })
-
-            expect(GlobalState.action1).toBeTruthy()
-            expect(typeof GlobalState.action1 === "function").toBeTruthy()
+            expect(OmniAural.action1).toBeTruthy()
+            expect(typeof OmniAural.action1 === "function").toBeTruthy()
         })
 
-        test('should contain the global state snapshot getter and setter in the callback', () => {
-            GlobalState.addGlobalAction('action2', (props) => {
-                expect(props.getGlobalState).toBeTruthy()
-                expect(typeof props.getGlobalState === "function").toBeTruthy()
-                expect(props.globalSetters).toBeTruthy()
-                expect(typeof props.globalSetters === "object").toBeTruthy()
-                const currentSnapshot = props.getGlobalState()
-                expect(JSON.stringify(currentSnapshot) === JSON.stringify(GlobalState.UnsafeGlobalInstance.getCurrentState()))
-            })
+        test('should create multiple actions on the Global State Object', () => {
+            const action2 = () => { }
+            const action3 = () => { }
+            const action4 = function () {
 
-            expect(GlobalState.action2).toBeTruthy()
-            expect(typeof GlobalState.action2 === "function").toBeTruthy()
-            GlobalState.action2()
+            }
+            OmniAural.addGlobalActions(action2, action3, action4)
+
+            expect(OmniAural.action2).toBeTruthy()
+            expect(typeof OmniAural.action2 === "function").toBeTruthy()
+            expect(OmniAural.action3).toBeTruthy()
+            expect(typeof OmniAural.action3 === "function").toBeTruthy()
+            expect(OmniAural.action4).toBeTruthy()
+            expect(typeof OmniAural.action4 === "function").toBeTruthy()
         })
 
         //Add test to make sure action performs given funciton body
-        test('should execute the given action to update global state', () => {
-            GlobalState.addGlobalAction('action3', (props) => {
-                const { globalSetters, account } = props
-                globalSetters.account.set(account)
+        test('should execute the given action and update global state', () => {
+            const action5 = (account) => {
+                OmniAural.state.account.set(account)
 
-                expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
-                expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
-                expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
-            })
+                expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
+                expect(OmniAural.state.account.address.street.value() === "Randolph").toBeTruthy()
 
-            expect(GlobalState.action3).toBeTruthy()
-            expect(typeof GlobalState.action3 === "function").toBeTruthy()
-            GlobalState.action3({ account: { address: { city: "New York" } } })
+                expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
+                expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+            }
+            OmniAural.addGlobalAction(action5)
+
+            expect(OmniAural.action5).toBeTruthy()
+            expect(typeof OmniAural.action5 === "function").toBeTruthy()
+            OmniAural.action5({ address: { city: "New York" } })
+        })
+
+        test('should not allow addGlobalAction to accept more than 2 arguments', () => {
+            expect(() => OmniAural.addGlobalAction("", () => { }, () => { })).toThrow("addGlobalAction must have exactly 1 or 2 arguments")
+            expect(() => OmniAural.addGlobalActions(() => { })).toThrow("All actions must be named functions")
+        })
+
+        test('should not allow nameless actions to be added', () => {
+            expect(() => OmniAural.addGlobalAction(() => { })).toThrow("Actions must be named functions")
+            expect(() => OmniAural.addGlobalActions(() => { })).toThrow("All actions must be named functions")
         })
     })
 
     describe("Adding a property", () => {
         test('should contain the new property on the global object', () => {
-            GlobalState.addProperty("app_theme", "light")
+            OmniAural.addProperty("app_theme", "light")
 
-            expect(GlobalState.UnsafeGlobalInstance.value["app_theme"].value === "light").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["app_theme"].value === "light").toBeTruthy()
         })
 
-        test('should contain the new property on the global object and have kept the structure intact', () => {
-            GlobalState.addProperty("account.billing", { cc: 1234123412341234 })
+        test('should contain the new property on the global object and have kept the state structure intact', () => {
+            OmniAural.addProperty("account.billing", { cc: 1234123412341234 })
 
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["billing"].value["cc"].value === 1234123412341234).toBeTruthy()
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["billing"].value["cc"].value === 1234123412341234).toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+
+            expect(OmniAural.state.account.billing.cc.value() === 1234123412341234).toBeTruthy()
+            expect(OmniAural.state.account.name.value() === "Josh").toBeTruthy()
         })
 
         test('should contain the new nested object property on the global object and have kept the structure intact', () => {
-            GlobalState.addProperty("account", { nextOfKin: { name: "James" } })
+            OmniAural.addProperty("account", { nextOfKin: { name: "James" } })
 
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["nextOfKin"].value["name"].value === "James").toBeTruthy()
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["nextOfKin"].value["name"].value === "James").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
 
-            GlobalState.addProperty("account.grandParent.name", "Sue")
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["grandParent"].value["name"].value === "Sue").toBeTruthy()
+            expect(OmniAural.state.account.nextOfKin.name.value() === "James").toBeTruthy()
+            expect(OmniAural.state.account.name.value() === "Josh").toBeTruthy()
+
+            OmniAural.addProperty("account.grandParent.name", "Sue")
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["grandParent"].value["name"].value === "Sue").toBeTruthy()
+
+            expect(OmniAural.state.account.grandParent.name.value() === "Sue").toBeTruthy()
         })
 
         test('should error if an existing property is attempted to be added', () => {
-            expect(() => GlobalState.addProperty("account.name", "Victor")).toThrow("name already exists at this global state path")
+            expect(() => OmniAural.addProperty("account.name", "Victor")).toThrow("name already exists at this global state path")
         })
     })
 
 })
 
-describe('Global Setters', () => {
+describe('Global State Updater', () => {
     test('should update top level non-object property', () => {
-        GlobalSetters.dev_mode.set(true)
+        OmniAural.state.dev_mode.set(true)
 
-        expect(GlobalState.UnsafeGlobalInstance.value["dev_mode"].value).toBeTruthy()
+        expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].value).toBeTruthy()
     })
 
     test('should update top level object property without changing account or address structures', () => {
-        GlobalSetters.account.set({ address: { street: "Clark" } })
+        OmniAural.state.account.set({ address: { street: "Clark" } })
 
-        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Clark").toBeTruthy()
-        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
-        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
+        expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Clark").toBeTruthy()
+        expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
+        expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
     })
 
     test('should update nested object property', () => {
-        GlobalSetters.account.address.street.set("State")
+        OmniAural.state.account.address.street.set("State")
 
-        expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "State").toBeTruthy()
+        expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "State").toBeTruthy()
+    })
+
+    test('should update the global state object correctly', () => {
+        OmniAural.state.account.nextOfKin.name.set("Mike")
+
+        expect(OmniAural.state.account.nextOfKin.name.value() === "Mike").toBeTruthy()
     })
 
     test('should error if a property does not exist at provided path', () => {
-        expect(() => GlobalSetters.account.set({ contact: { tel: 1234345544 } })).toThrow("Property 'contact' not present in object 'account'")
+        expect(() => OmniAural.state.account.set({ contact: { tel: 1234345544 } })).toThrow("Property 'contact' not present in object 'account'")
     })
 })
 
@@ -152,8 +189,8 @@ describe("Component Testing", () => {
             let tree = component.toJSON()
             expect(tree.children[0].children.includes("Josh")).toBeTruthy()
 
-            GlobalSetters.account.name.set("Victor")
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Victor").toBeTruthy()
+            OmniAural.state.account.name.set("Victor")
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Victor").toBeTruthy()
 
             tree = component.toJSON();
             expect(tree.children[0].children.includes("Victor")).toBeTruthy()
@@ -165,8 +202,8 @@ describe("Component Testing", () => {
 
             expect(tree.children[1].children.includes("State")).toBeTruthy()
 
-            GlobalSetters.account.address.street.set("Randolph")
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
+            OmniAural.state.account.address.street.set("Randolph")
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
 
             tree = component.toJSON();
             expect(tree.children[1].children.includes("Randolph")).toBeTruthy()
@@ -178,7 +215,7 @@ describe("Component Testing", () => {
 
             expect(tree.children[0].children.includes("Victor")).toBeTruthy()
             tree.props.onClick("Jack")
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["name"].value === "Jack").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Jack").toBeTruthy()
 
             tree = component.toJSON();
             expect(tree.children[0].children.includes("Jack")).toBeTruthy()
@@ -190,7 +227,7 @@ describe("Component Testing", () => {
 
             expect(tree.children[2].children).toBeNull()
             tree.children[2].props.onClick()
-            expect(GlobalState.UnsafeGlobalInstance.value["account"].value["address"].value["zip"].value === 12345).toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["zip"].value === 12345).toBeTruthy()
 
             tree = component.toJSON()
             expect(tree.children[2].children.includes("12345")).toBeTruthy()
@@ -211,13 +248,20 @@ describe("Component Testing", () => {
             expect(tree.children.includes("Dev mode: true")).toBeTruthy()
         })
 
+        test('Listeners contain the correct name of the functional component', () => {
+            const component = renderer.create(<MyFunctional />)
+            const instance = component.getInstance()
+
+            expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].listeners.get(instance.globalStateId).component.name === instance.name).toBeTruthy()
+        })
+
         test('should update correctly when global state changes', () => {
             const component = renderer.create(<MyFunctional />)
             let tree = component.toJSON()
             expect(tree.children.includes("Dev mode: true")).toBeTruthy()
 
-            GlobalSetters.dev_mode.set(false)
-            expect(GlobalState.UnsafeGlobalInstance.value["dev_mode"].value).toBeFalsy()
+            OmniAural.state.dev_mode.set(false)
+            expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].value).toBeFalsy()
 
             tree = component.toJSON();
             expect(tree.children.includes("Dev mode: false")).toBeTruthy()
@@ -225,4 +269,11 @@ describe("Component Testing", () => {
     })
 
 })
+
+let addGlobalAction = (action) => {
+    OmniAural.addGlobalAction(action.name, action)
+}
+
+let myAction = (props) => { }
+addGlobalAction(myAction)
 

@@ -1,33 +1,5 @@
 import React from "react"
 
-/*
-* @typedef {value: any, listeners: Map<{}>} GlobalProperty
-*/
-
-/**
- * @constant
- * GlobalSetters Object
- *
- * Should be used to update GlobalState properties instead of accessing GlobalState directly. This object will contain a structure similar to the initial GlobalState
- * structure but will be accessible from anywhere where a GlobalState property needs to be updated
- *
- * @example
- *
- *  global = {
- *      account: {
- *          name: "John"
- *      }
- *  }
- *
- * import {GlobalSetters} from "omniaural"
- *
- * GlobalSetters.account.name.set("John47")
- *             or
- * GlobalSetters.account.set({name: "John47"})
- *
- */
-export const GlobalSetters = {}
-
 const isObject = (val) => {
     return !Array.isArray(val) && typeof val == 'object'
 }
@@ -74,7 +46,7 @@ const flatten = (obj, prefix = '') => {
 
 /**
  * @class
- * GlobalState Class
+ * OmniAural Class
  *
  * Used to create and maintain a global state used throught an app execution.
  * This Object is a singelton and it should be initialized at the top most component
@@ -91,7 +63,7 @@ const flatten = (obj, prefix = '') => {
  *      appHasLaunchedBefore: false
  * })
  *
- * // Inside your Class Components import GlobalState and register by your component to listen to
+ * // Inside your Class Components import OmniAural and register by your component to listen to
  * // the global state object. Properties will be available on local state:
  *
  * state = {
@@ -101,7 +73,12 @@ const flatten = (obj, prefix = '') => {
  * Global.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
-export class GlobalState {
+export class OmniAural {
+    static state = {
+        value: () => {
+            return sanitize(OmniAural.UnsafeGlobalInstance.value)
+        }
+    }
     /**
      * Each component passed in is given a specific id that auto-increments,
      * used to keep a reference to the component listeners and remove them as necessary
@@ -115,17 +92,17 @@ export class GlobalState {
     static UnsafeGlobalInstance = null
 
     static initializeInstance(initialState = {}) {
-        if (!GlobalState.UnsafeGlobalInstance) {
-            GlobalState.UnsafeGlobalInstance = new GlobalState(initialState)
+        if (!OmniAural.UnsafeGlobalInstance) {
+            OmniAural.UnsafeGlobalInstance = new OmniAural(initialState)
         }
 
-        return GlobalState.UnsafeGlobalInstance
+        return OmniAural.UnsafeGlobalInstance
     }
 
     constructor(initialState) {
         this.value = {}
         Object.keys(initialState).forEach((key) => {
-            this._addSetter(GlobalSetters, key, initialState[key], key)
+            this._addSetter(OmniAural.state, key, initialState[key], key)
             this._addKeyValue(this.value, key, initialState[key])
         })
     }
@@ -145,7 +122,7 @@ export class GlobalState {
      *
      * @example
      *
-     * GlobalState.addProperty("account.id", 1234123412341234)
+     * OmniAural.addProperty("account.id", 1234123412341234)
      *
      */
     static addProperty = (path, property) => {
@@ -155,11 +132,11 @@ export class GlobalState {
         const flatObject = flatten(newObj)
 
         Object.keys(newObj).forEach((key) => {
-            GlobalState.UnsafeGlobalInstance._addSetter(GlobalSetters, key, newObj[key], key)
-            GlobalState.UnsafeGlobalInstance._addKeyValue(GlobalState.UnsafeGlobalInstance.value, key, newObj[key])
+            OmniAural.UnsafeGlobalInstance._addSetter(OmniAural.state, key, newObj[key], key)
+            OmniAural.UnsafeGlobalInstance._addKeyValue(OmniAural.UnsafeGlobalInstance.value, key, newObj[key])
         })
 
-        let setter = GlobalSetters
+        let setter = OmniAural.state
         if (!isObject(property)) {
             pathArr.forEach((step) => {
                 setter = setter[step]
@@ -195,7 +172,7 @@ export class GlobalState {
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
                 const newPath = aliasPath ? aliasPath + "." + key : null
-                GlobalState.UnsafeGlobalInstance._registerProperty(
+                OmniAural.UnsafeGlobalInstance._registerProperty(
                     newPath,
                     component,
                     propertyObject.value[key]
@@ -229,7 +206,7 @@ export class GlobalState {
      *    }
      * }
      * 
-     * GlobalState.register(this, ["account.username as person", "account.address.street", "appHasLaunched"])
+     * OmniAural.register(this, ["account.username as person", "account.address.street", "appHasLaunched"])
      *
      * //Local State will contain:
      *
@@ -249,19 +226,19 @@ export class GlobalState {
      *
      */
     static register = (component, properties) => {
-        component.globalStateId = GlobalState.globalStateCounter++
+        component.globalStateId = OmniAural.globalStateCounter++
         let state = component.state || {}
 
         if (!properties || !properties.length) {
-            GlobalState.UnsafeGlobalInstance._registerProperty(
+            OmniAural.UnsafeGlobalInstance._registerProperty(
                 null,
                 component,
-                GlobalState.UnsafeGlobalInstance
+                OmniAural.UnsafeGlobalInstance
             )
-            state = { ...state, ...sanitize(GlobalState.UnsafeGlobalInstance) }
+            state = { ...state, ...sanitize(OmniAural.UnsafeGlobalInstance) }
         } else {
             properties.forEach((prop) => {
-                let propertyObject = GlobalState.UnsafeGlobalInstance
+                let propertyObject = OmniAural.UnsafeGlobalInstance
                 let aliasPath = null
 
                 let aliasArr = prop.split(" as ")
@@ -285,7 +262,7 @@ export class GlobalState {
                     assign(state, propPath, sanitize(propertyObject))
                 }
 
-                GlobalState.UnsafeGlobalInstance._registerProperty(
+                OmniAural.UnsafeGlobalInstance._registerProperty(
                     aliasPath,
                     component,
                     propertyObject
@@ -296,16 +273,16 @@ export class GlobalState {
         if (component.__proto__.componentWillUnmount) {
             const unMount = component.componentWillUnmount
             component.componentWillUnmount = function () {
-                GlobalState.UnsafeGlobalInstance._deregister(
-                    GlobalState.UnsafeGlobalInstance,
+                OmniAural.UnsafeGlobalInstance._deregister(
+                    OmniAural.UnsafeGlobalInstance,
                     component
                 )
                 unMount()
             }
         } else {
             component.componentWillUnmount = function () {
-                GlobalState.UnsafeGlobalInstance._deregister(
-                    GlobalState.UnsafeGlobalInstance,
+                OmniAural.UnsafeGlobalInstance._deregister(
+                    OmniAural.UnsafeGlobalInstance,
                     component
                 )
             }
@@ -321,14 +298,14 @@ export class GlobalState {
      * encapsulate global state manipulation.
      *
      * @param {string}      actionName   The name of the action to add to the global state object.
-     * @param {function}  actionFunc     A function that will be set on the GlobalState object. Has a `props`
+     * @param {function}  actionFunc     A function that will be set on the OmniAural object. Has a `props`
      *                                   parameter which contains the parameters passed in when the callback 
      *                                   is invoked and some more properties like the `getGlobalState` function
      *                                   to get the a snapshot of the global state object
      * 
      * @example
      *
-     * GlobalState.addAction("updateAccount", (props) => {
+     * OmniAural.addAction("updateAccount", (props) => {
      *   const {account, getGlobalState, globalSetters} = props
      * 
      *   const globalState = getGlobalState()
@@ -342,19 +319,41 @@ export class GlobalState {
      *
      * //Call action
      *
-     * GlobalState.updateAccount({account: {phone: "111-22-3222", name: "Jason"}})
+     * OmniAural.updateAccount({account: {phone: "111-22-3222", name: "Jason"}})
      *
      */
-    static addGlobalAction = (actionName, actionFunc) => {
-        const action = () => {
-            return (props = {}) => {
-                props.getGlobalState = GlobalState.UnsafeGlobalInstance.getCurrentState
-                props.globalSetters = GlobalSetters
-                actionFunc(props)
+    static addGlobalAction = (...args) => {
+        let name = ""
+        let func = ""
+
+        if (args.length === 1) {
+            func = args[0]
+            name = args[0].name
+        } else if (args.length === 2) {
+            name = args[0]
+            func = args[1]
+            if(typeof func !== "function" || !name) {
+                throw `Single argument must be a named function`
             }
+        } else {
+            throw `addGlobalAction must have exactly 1 or 2 arguments`
         }
 
-        GlobalState[actionName] = action()
+        if(typeof func !== "function" || !name) {
+            throw `Actions must be named functions`
+        }
+
+        OmniAural[name] = func
+    }
+
+    static addGlobalActions = (...args) => {
+        args.forEach((func) => {
+            if(typeof func === "function" && func.name) {
+                OmniAural.addGlobalAction(func)
+            } else {
+                throw `All actions must be named functions`
+            }
+        })
     }
 
     /**
@@ -372,11 +371,18 @@ export class GlobalState {
         if (!isObject(value)) {
             base[key] = {
                 set: (newValue) => {
-                    let obj = GlobalState.UnsafeGlobalInstance
+                    let obj = OmniAural.UnsafeGlobalInstance
                     path.split('.').forEach((pathStep) => {
                         obj = obj.value[pathStep]
                     })
                     obj.set(path, newValue)
+                },
+                value: () => {
+                    let obj = OmniAural.UnsafeGlobalInstance
+                    path.split('.').forEach((pathStep) => {
+                        obj = obj.value[pathStep]
+                    })
+                    return obj.value
                 }
             }
         } else {
@@ -386,12 +392,19 @@ export class GlobalState {
                         if (!isObject(params)) {
                             throw `You are trying to set an object. Please pass an object arguement`
                         }
-                        let obj = GlobalState.UnsafeGlobalInstance
+                        let obj = OmniAural.UnsafeGlobalInstance
                         path.split('.').forEach((pathStep) => {
                             obj = obj.value[pathStep]
                         })
 
                         obj.set(path, params)
+                    },
+                    value: () => {
+                        let obj = OmniAural.UnsafeGlobalInstance
+                        path.split('.').forEach((pathStep) => {
+                            obj = obj.value[pathStep]
+                        })
+                        return sanitize(obj.value)
                     }
                 }
             }
@@ -463,7 +476,7 @@ export class GlobalState {
                     listeners: new Map([...initialListeners]),
                     set: function (path, params) {
                         Object.keys(params).forEach(function (key) {
-                            let obj = GlobalState.UnsafeGlobalInstance
+                            let obj = OmniAural.UnsafeGlobalInstance
                             const pathArr = path.split('.')
                             pathArr.forEach((step) => {
                                 obj = obj.value[step]
@@ -504,21 +517,9 @@ export class GlobalState {
             })
         } else {
             Object.keys(base.value).forEach((key) => {
-                GlobalState.UnsafeGlobalInstance._deregister(base.value[key], component)
+                OmniAural.UnsafeGlobalInstance._deregister(base.value[key], component)
             })
         }
-    }
-
-    /**
-     * getCurrentState
-     *
-     * It returns a copy of the global state object at a given time.
-     *
-     * @returns {object} The current global state object.
-     *
-     */
-    getCurrentState = () => {
-        return sanitize(this)
     }
 }
 
@@ -536,7 +537,7 @@ export class GlobalState {
  *
  * @example
  *
- * GlobalState.initGlobalState({
+ * OmniAural.initGlobalState({
  *    account: {
  *      name: "John",
  *      phone: "332-56-3322"
@@ -545,7 +546,7 @@ export class GlobalState {
  * })
  *
  */
-export const initGlobalState = GlobalState.initializeInstance
+export const initGlobalState = OmniAural.initializeInstance
 /**
  * withGlobal
  *
@@ -581,7 +582,7 @@ export const withGlobal = (RegisteredComponent, paths = []) => {
             super(props)
             this.state = {}
             this.name = RegisteredComponent.name
-            GlobalState.register(this, paths)
+            OmniAural.register(this, paths)
         }
 
         render() {

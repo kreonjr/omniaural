@@ -35,12 +35,13 @@ initGlobalState({
 
 ### Register a component
 
-You can register to listen to a particular property or a whole object on the global state. You can also use aliases to keep a local naming that makes more sense for your component:
+You can register to listen to a particular property or a whole object on the global state. 
+You can also use aliases to keep a local naming that makes more sense for your component:
 
 ```javascript
 import React from 'react'
 import { StyleSheet, SafeAreaView, Text } from 'react-native'
-import { GlobalState } from 'omniaural'
+import { OmniAural } from 'omniaural'
 
 export class IntroScreen extends React.Component<*, *> {
   constructor() {
@@ -51,14 +52,14 @@ export class IntroScreen extends React.Component<*, *> {
       }
     }
 
-    GlobalState.register(this, ['account as person', 'account.address as address'])
-    GlobalState.addGlobalAction('updateAddress', ({ address, getGlobalState, globalSetters }) => {
-        globalSetters.account.address.set(address)
+    OmniAural.register(this, ['account as person', 'account.address as address'])
+    OmniAural.addGlobalAction('updateAddress', (address) => {
+        OmniAural.state.account.address.set(address)
     })
   }
 
   _updateAddress = () => {
-      GlobalState.updateAddress({street: "Main st"})
+      OmniAural.updateAddress({street: "Main st"})
   }
 
   render() {
@@ -115,20 +116,20 @@ export default withGlobal(PersonScreen, ["account as person"])
 
 ## __API__
 
-### GlobalState
+### OmniAural
 
 The main global state manager class. It should be initialized at your top most component (usually App.js). This class will contain your global state. Components can register to specific properties or the whole global state object and update when it changes.
 
 #### Methods:
-   - [initGlobalState()](#initialglobalstate)
+   - [initGlobalState()](#initGlobalState)
    - [register()](#register)
    - [addGlobalAction()](#addGlobalAction)
+   - [addGlobalActions()](#addGlobalActions)
    - [addProperty()](#addProperty)
-   - [getCurrentState()](#getCurrentState)
 
-#### initialGlobalState() 
+#### initGlobalState() 
 
-Initialize the global state with an initial object to which the different components will listen to its changes. This will create the GlobalState structure as well as the [GlobalSetters](#globalsetters) structure to update the state with.
+Initialize the global state with an initial object to which components will register and listen to its changes. You can access and update properties directly from the creates state object
 
 | Parameter     | Type          | Description  |
 | ------------- |:------------: | :----------- |
@@ -148,6 +149,11 @@ initGlobalState({
     },
     movies: []
 })
+
+console.log(OmniAural.state.account.phone.value()) //Prints 3129058787
+OmniAural.state.account.phone.set('2125548844')
+console.log(OmniAural.state.account.phone.value()) //Prints 2125548844
+
 ```
 
 
@@ -166,44 +172,87 @@ __Note:__ This function must should be called after you have initialized your in
 
 ##### Example: 
 ```javascript
-import { GlobalState } from 'omniaural'
+import { OmniAural } from 'omniaural'
 
 constructor() {
     super()
     this.state = {}
 
-    GlobalState.register(this, ['account as person', 'account.address as address'])
+    OmniAural.register(this, ['account as person', 'account.address as address'])
 }
 ```
 
 #### addGlobalAction()
 
-Actions can be added to the Global State to be used as batch updates or async calls that need to update the global state after they are completed. 
+Actions can be added to OmniAural to be used as batch updates or async calls that need to update the global state after they are completed. 
+You can add an action as a predeclared named function or by passing an anonymous function with a name.
 
 
 | Parameter     | Type                    | Description  |
 | ------------- |:----------------------: | :----------- |
-| actionName    | String                                 | The name of the action to be added to the global state object
-| action        | (opts: {params, getGlobalState, globalSetters}) => {} | The body of this function will be added as a global action. The action should then be called with an object parameter that contains the properties you'd like to update. __Note:__ The argument passed into the action must be an object.
+| action        | Function                | The body of this function will be added as a global action. Must be a named function
 
-`opts` is an object that contains the object parameter passed in to your action when its called and also contains a function to get the current global state as well as a reference to the [GlobalSetters](#globalsetters) object.
 
 ##### Example: 
 ```javascript
-import { GlobalState } from 'omniaural'
+import { OmniAural } from 'omniaural'
 
-GlobalState.addGlobalAction('updateAddress', (opts) => {
-    const { address, getGlobalState, globalSetters } = opts
-    
-    //The currentGlobalState will contain a global state snapshot
-    const currentGlobalState = getGlobalState()
+const updateAddress = (address) => {
+    OmniAural.state.account.address.set(address)
+}
 
-    globalSetters.account.address.set(address)
-})
-
+OmniAural.addGlobalAction(updateAddress)
 
 _onClick = () => {
-    GlobalState.updateAddress({address: {street: "Main st"}})
+    OmniAural.updateAddress({street: "Main st"})
+}
+```
+
+
+__* If you don't want to use a named function, you can also pass a string as the first argument that will represent the name of the function on OmniAural and an anonymous funtion as a second argument__
+
+##### Example: 
+```javascript
+import { OmniAural } from 'omniaural'
+
+OmniAural.addGlobalAction('updateAddress', (opts) => {
+    OmniAural.state.account.address.set(address)
+})
+
+_onClick = () => {
+    OmniAural.updateAddress({street: "Main st"})
+}
+```
+
+#### addGlobalActions()
+
+Actions can be added to OmniAural in bulk by passing named functions as arguments to this function
+
+
+| Parameter     | Type                    | Description  |
+| ------------- |:----------------------: | :----------- |
+| action        | ...Function             | One or more named functions to be added to OmniAural. __Note:__ All actions must be named functions
+
+##### Example: 
+```javascript
+import { OmniAural } from 'omniaural'
+
+const updateAddress = (address) => {
+    OmniAural.state.account.address.set(address)
+}
+
+const updateAccount = (account) => {
+    OmniAural.state.account.set(account)
+}
+
+OmniAural.addGlobalActions(updateAccount, updateAddress)
+
+_onClick = () => {
+    OmniAural.updateAddress({street: "Main st"})
+}
+
+_onAnotherClick = () => {
+    OmniAural.updateAccount({address: street: "Main st"}})
 }
 ```
 
@@ -217,56 +266,13 @@ This function add new properties to the global state object structure. If you ad
 | value         | any           | The value to initialize the newly added property as.
 
 
-
 ##### Example: 
 ```javascript
-import { GlobalState } from 'omniaural'
+import { OmniAural } from 'omniaural'
 
-GlobalState.addProperty("account.id", 4568585)
+OmniAural.addProperty("account.id", 4568585)
 //or
-GlobalState.addProperty("account", {id: 4568585})
-```
-
-#### getCurrentState()
-
-This function gets the current global state object at any given point in time. (Not recommended to access outside a global action).
-You have to reference the GlobalState Instance to call this function.
-
-
-##### Example: 
-```javascript
-import { GlobalState } from 'omniaural'
-
-GlobalState.UnsafeGlobalInstance.getCurrentState()
-```
-
----
-
-### GlobalSetters
-
-This is a dynamicaly created class that is called when you initialize your [GlobalState](#globalstate).
-This class mimics your global state structure and it is what should be used to update you global state object. you can set properties on the global object structure directly. 
-
-##### Example:
-```javascript
-//If your global state is setup to look like the following:
-
-globalState = {
-    account: {
-        name: "John",
-        address: {
-            street: "Main st"
-        }
-    }
-}
-
-//You can update your global state as such:
-
-GlobalSetters.account.address.street.set("1st st")
-
-//or
-
-GlobalSetters.account.address.set({street: "1st st"})
+OmniAural.addProperty("account", {id: 4568585})
 ```
 
 ---

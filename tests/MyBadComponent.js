@@ -1,5 +1,5 @@
 import React from "react";
-import { GlobalState } from "../index";
+import { OmniAural } from "../index";
 
 export default class MyBadComponent extends React.Component {
     constructor() {
@@ -7,7 +7,7 @@ export default class MyBadComponent extends React.Component {
         this.state = {
         }
 
-        GlobalState.register(this, ["account.bad"])
+        OmniAural.register(this, ["account.bad"])
     }
 
     render() {
