@@ -53,7 +53,7 @@ export class IntroScreen extends React.Component<*, *> {
     }
 
     OmniAural.register(this, ['account as person', 'account.address as address'])
-    OmniAural.addGlobalAction('updateAddress', (address) => {
+    OmniAural.addAction('updateAddress', (address) => {
         OmniAural.state.account.address.set(address)
     })
   }
@@ -123,8 +123,8 @@ The main global state manager class. It should be initialized at your top most c
 #### Methods:
    - [initGlobalState()](#initGlobalState)
    - [register()](#register)
-   - [addGlobalAction()](#addGlobalAction)
-   - [addGlobalActions()](#addGlobalActions)
+   - [addAction()](#addAction)
+   - [addActions()](#addActions)
    - [addProperty()](#addProperty)
 
 #### initGlobalState() 
@@ -182,7 +182,7 @@ constructor() {
 }
 ```
 
-#### addGlobalAction()
+#### addAction()
 
 Actions can be added to OmniAural to be used as batch updates or async calls that need to update the global state after they are completed. 
 You can add an action as a predeclared named function or by passing an anonymous function with a name.
@@ -201,7 +201,7 @@ const updateAddress = (address) => {
     OmniAural.state.account.address.set(address)
 }
 
-OmniAural.addGlobalAction(updateAddress)
+OmniAural.addAction(updateAddress)
 
 _onClick = () => {
     OmniAural.updateAddress({street: "Main st"})
@@ -215,7 +215,7 @@ __* If you don't want to use a named function, you can also pass a string as the
 ```javascript
 import { OmniAural } from 'omniaural'
 
-OmniAural.addGlobalAction('updateAddress', (opts) => {
+OmniAural.addAction('updateAddress', (opts) => {
     OmniAural.state.account.address.set(address)
 })
 

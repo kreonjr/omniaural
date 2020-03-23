@@ -226,6 +226,10 @@ export class OmniAural {
      *
      */
     static register = (component, properties) => {
+        if (component.globalStateId) {
+            return
+        }
+
         component.globalStateId = OmniAural.globalStateCounter++
         let state = component.state || {}
 
@@ -322,7 +326,7 @@ export class OmniAural {
      * OmniAural.updateAccount({account: {phone: "111-22-3222", name: "Jason"}})
      *
      */
-    static addGlobalAction = (...args) => {
+    static addAction = (...args) => {
         let name = ""
         let func = ""
 
@@ -332,24 +336,24 @@ export class OmniAural {
         } else if (args.length === 2) {
             name = args[0]
             func = args[1]
-            if(typeof func !== "function" || !name) {
+            if (typeof func !== "function" || !name) {
                 throw `Single argument must be a named function`
             }
         } else {
-            throw `addGlobalAction must have exactly 1 or 2 arguments`
+            throw `addAction must have exactly 1 or 2 arguments`
         }
 
-        if(typeof func !== "function" || !name) {
+        if (typeof func !== "function" || !name) {
             throw `Actions must be named functions`
         }
 
         OmniAural[name] = func
     }
 
-    static addGlobalActions = (...args) => {
+    static addActions = (...args) => {
         args.forEach((func) => {
-            if(typeof func === "function" && func.name) {
-                OmniAural.addGlobalAction(func)
+            if (typeof func === "function" && func.name) {
+                OmniAural.addAction(func)
             } else {
                 throw `All actions must be named functions`
             }
@@ -556,13 +560,13 @@ export const initGlobalState = OmniAural.initializeInstance
  * as props. Returns a new component that listens to global state updates
  *
  * @param {React.FunctionComponent} RegisteredComponent  The component to turn into a higher order component
- * @param {array}                   paths                The array of paths that the user want to observe from 
- *                                                       the global state. Works similarly as registering a component 
+ * @param {array}                   paths                The array of paths that the user want to observe from
+ *                                                       the global state. Works similarly as registering a component
  *                                                       as a listener.
- * 
- * @return {React.Component}  The Higher order component with the registered state passed in to its props. Will contain the name 
+ *
+ * @return {React.Component}  The Higher order component with the registered state passed in to its props. Will contain the name
  *                            the passed in component on its object under this.name
- * 
+ *
  * @example
  *
  * const MyAddress = (props) => {
@@ -570,9 +574,9 @@ export const initGlobalState = OmniAural.initializeInstance
  *      <div>{props.streetName}</div>
  *    </div>
  * }
- * 
+ *
  * export default withGlobal(MyAddress, ["account.address.street as streetName"])
- * 
+ *
  *
  */
 export const withGlobal = (RegisteredComponent, paths = []) => {

@@ -4,20 +4,11 @@ import renderer from "react-test-renderer"
 import MyComponent from "./MyComponent";
 import MyBadComponent from "./MyBadComponent";
 import MyFunctional from "./MyFunctional";
-
-const initialState = {
-    account: {
-        name: "Josh",
-        address: {
-            street: "Randolph",
-            city: "Chicago"
-        }
-    },
-    dev_mode: false
-}
+import mockInitialState from "./mockInitialState";
+const fetch = require("node-fetch").default
 
 beforeAll(() => {
-    initGlobalState(initialState)
+    initGlobalState(mockInitialState)
 });
 
 describe('Global State Manager', () => {
@@ -26,13 +17,13 @@ describe('Global State Manager', () => {
         const globalObject = OmniAural.UnsafeGlobalInstance.value
 
         expect(globalObject["dev_mode"].value).toBeFalsy()
-        expect(globalObject["account"].value["name"].value === "Josh").toBeTruthy()
+        expect(globalObject["account"].value["name"].value === "Mike").toBeTruthy()
         expect(globalObject["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
     })
 
     test('should validate global state was declared correctly in the state object', () => {
         const currentSnapshot = OmniAural.state.value()
-        expect(JSON.stringify(currentSnapshot) === JSON.stringify(initialState))
+        expect(JSON.stringify(currentSnapshot) === JSON.stringify(mockInitialState))
     })
 
     test('should get properties value from the state object', () => {
@@ -42,7 +33,7 @@ describe('Global State Manager', () => {
 
     describe("Action Creator", () => {
         test('should create an action on the Global State Object', () => {
-            OmniAural.addGlobalAction('action1', () => { })
+            OmniAural.addAction('action1', () => { })
 
             expect(OmniAural.action1).toBeTruthy()
             expect(typeof OmniAural.action1 === "function").toBeTruthy()
@@ -54,7 +45,7 @@ describe('Global State Manager', () => {
             const action4 = function () {
 
             }
-            OmniAural.addGlobalActions(action2, action3, action4)
+            OmniAural.addActions(action2, action3, action4)
 
             expect(OmniAural.action2).toBeTruthy()
             expect(typeof OmniAural.action2 === "function").toBeTruthy()
@@ -64,7 +55,21 @@ describe('Global State Manager', () => {
             expect(typeof OmniAural.action4 === "function").toBeTruthy()
         })
 
-        //Add test to make sure action performs given funciton body
+        test('should allow for async actions to update global state', async () => {
+            OmniAural.addAction('asyncAction', () => {
+                return fetch('https://jsonplaceholder.typicode.com/todos/100')
+                    .then(response => {
+                        OmniAural.state.account.name.set("Josh")
+                    })
+            })
+
+            expect(OmniAural.asyncAction).toBeTruthy()
+            expect(typeof OmniAural.asyncAction === "function").toBeTruthy()
+            await OmniAural.asyncAction()
+            expect(OmniAural.state.account.name.value() === "Josh").toBeTruthy()
+        })
+
+
         test('should execute the given action and update global state', () => {
             const action5 = (account) => {
                 OmniAural.state.account.set(account)
@@ -75,21 +80,21 @@ describe('Global State Manager', () => {
                 expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["city"].value === "New York").toBeTruthy()
                 expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
             }
-            OmniAural.addGlobalAction(action5)
+            OmniAural.addAction(action5)
 
             expect(OmniAural.action5).toBeTruthy()
             expect(typeof OmniAural.action5 === "function").toBeTruthy()
             OmniAural.action5({ address: { city: "New York" } })
         })
 
-        test('should not allow addGlobalAction to accept more than 2 arguments', () => {
-            expect(() => OmniAural.addGlobalAction("", () => { }, () => { })).toThrow("addGlobalAction must have exactly 1 or 2 arguments")
-            expect(() => OmniAural.addGlobalActions(() => { })).toThrow("All actions must be named functions")
+        test('should not allow addAction to accept more than 2 arguments', () => {
+            expect(() => OmniAural.addAction("", () => { }, () => { })).toThrow("addAction must have exactly 1 or 2 arguments")
+            expect(() => OmniAural.addActions(() => { })).toThrow("All actions must be named functions")
         })
 
         test('should not allow nameless actions to be added', () => {
-            expect(() => OmniAural.addGlobalAction(() => { })).toThrow("Actions must be named functions")
-            expect(() => OmniAural.addGlobalActions(() => { })).toThrow("All actions must be named functions")
+            expect(() => OmniAural.addAction(() => { })).toThrow("Actions must be named functions")
+            expect(() => OmniAural.addActions(() => { })).toThrow("All actions must be named functions")
         })
     })
 
@@ -270,10 +275,10 @@ describe("Component Testing", () => {
 
 })
 
-let addGlobalAction = (action) => {
-    OmniAural.addGlobalAction(action.name, action)
+let addAction = (action) => {
+    OmniAural.addAction(action.name, action)
 }
 
 let myAction = (props) => { }
-addGlobalAction(myAction)
+addAction(myAction)
 
