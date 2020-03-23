@@ -70,7 +70,7 @@ const flatten = (obj, prefix = '') => {
  *      user: {}
  * }
  * 
- * Global.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
+ * OmniAural.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
 export class OmniAural {
@@ -309,21 +309,19 @@ export class OmniAural {
      * 
      * @example
      *
-     * OmniAural.addAction("updateAccount", (props) => {
-     *   const {account, getGlobalState, globalSetters} = props
+     * OmniAural.addAction("updateAccount", (account) => {
      * 
-     *   const globalState = getGlobalState()
      * 
-     *   globalSetters.account.phone.set(account.phone)
-     *   globalSetters.account.name.set(account.name)
+     *   OmniAural.state.account.phone.set(account.phone)
+     *   OmniAural.account.name.set(account.name)
      *    //or
-     *   globalSetters.account.set(account)
+     *   OmniAural.state.account.set(account)
      *    
      * })
      *
      * //Call action
      *
-     * OmniAural.updateAccount({account: {phone: "111-22-3222", name: "Jason"}})
+     * OmniAural.updateAccount({phone: "111-22-3222", name: "Jason"})
      *
      */
     static addAction = (...args) => {

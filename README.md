@@ -33,6 +33,12 @@ initGlobalState({
 })
 ```
 
+After initialization, global state properties can be accessed directly through the `.value()` function
+```javascript
+OmniAural.state.account.name.value()
+```
+
+
 ### Register a component
 
 You can register to listen to a particular property or a whole object on the global state. 
@@ -224,7 +230,7 @@ _onClick = () => {
 }
 ```
 
-#### addGlobalActions()
+#### addActions()
 
 Actions can be added to OmniAural in bulk by passing named functions as arguments to this function
 
@@ -245,7 +251,7 @@ const updateAccount = (account) => {
     OmniAural.state.account.set(account)
 }
 
-OmniAural.addGlobalActions(updateAccount, updateAddress)
+OmniAural.addActions(updateAccount, updateAddress)
 
 _onClick = () => {
     OmniAural.updateAddress({street: "Main st"})
