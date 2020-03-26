@@ -2,18 +2,15 @@
   "name": "omniaural",
   "version": "1.0.0",
   "description": "A lightweight global state manager",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "build": "rm -rf dist && mkdir dist && babel src -d dist --copy-files"
+    "build": "babel src -d . --copy-files"
   },
-  "files": [
-    "dist/**/*"
-  ],
   "husky": {
     "hooks": {
-      "pre-commit": "yarn test"
+      "pre-commit": "yarn test && yarn build"
     }
   },
   "author": "Creon Creonopoulos",
