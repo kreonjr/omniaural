@@ -1,5 +1,5 @@
-import { OmniAural } from "../index";
-import OmniObject from "../OmniObject";
+import { OmniAural } from "../src/index";
+import OmniObject from "../src/OmniObject";
 
 export default class MyOmniObject extends OmniObject {
     constructor() {

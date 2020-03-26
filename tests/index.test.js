@@ -1,4 +1,4 @@
-import { OmniAural, initGlobalState } from "../index";
+import { OmniAural, initGlobalState } from "../src/index";
 import React from 'react';
 import renderer from "react-test-renderer"
 import MyComponent from "./MyComponent";

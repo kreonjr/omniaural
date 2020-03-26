@@ -1,4 +1,4 @@
-import { OmniAural, initGlobalState } from "../index"
+import { OmniAural, initGlobalState } from "../src/index"
 import MyOmniObject from "./MyOmniObject";
 import mockInitialState from "./mockInitialState";
 initGlobalState(mockInitialState)

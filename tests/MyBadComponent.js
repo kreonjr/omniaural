@@ -1,5 +1,5 @@
 import React from "react";
-import { OmniAural } from "../index";
+import { OmniAural } from "../src/index";
 
 export default class MyBadComponent extends React.Component {
     constructor() {
