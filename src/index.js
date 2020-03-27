@@ -4,6 +4,10 @@ const isObject = (val) => {
     return !Array.isArray(val) && typeof val == 'object'
 }
 
+/**
+* Takes an OmniAural property (special object) and returns a 
+* regular key/value pair object version.
+*/
 const sanitize = (obj) => {
     let newObj = {}
 
@@ -17,6 +21,10 @@ const sanitize = (obj) => {
     return newObj
 }
 
+/**
+* Assigns or creates a key/value pair property to the passed in object
+* Does not return because it works by reference
+*/
 const assign = (obj, keyPath, value) => {
     let lastKeyIndex = keyPath.length - 1
     for (var i = 0; i < lastKeyIndex; ++i) {
@@ -30,6 +38,26 @@ const assign = (obj, keyPath, value) => {
     obj[keyPath[lastKeyIndex]] = value
 }
 
+/**
+* Flattens an nested object to a single layer object
+* with the key representing each path
+*
+* i.e.
+* const obj = {
+*   a: {
+*      b: {
+*          c: "foo"
+*      }
+*   },
+*   d: "bar"
+* }
+*
+* const flat = flatten(obj)
+*
+* flat will be:
+* { "a.b.c": "foo", d: "bar"}
+*
+*/
 const flatten = (obj, prefix = '') => {
     return Object.keys(obj).reduce((acc, key) => {
         const pre = prefix.length ? prefix + '.' : '';
@@ -54,9 +82,9 @@ const flatten = (obj, prefix = '') => {
  *
  * @example
  *
- * import {initGlobalState} from "omniaural"
+ * import {OmniAural} from "omniaural"
  *
- * initGlobalState({
+ * OmniAural.initGlobalState({
  *      account: {
  *          username: ""
  *      },
@@ -91,12 +119,10 @@ export class OmniAural {
      */
     static UnsafeGlobalInstance = null
 
-    static initializeInstance(initialState = {}) {
+    static initGlobalState(initialState = {}) {
         if (!OmniAural.UnsafeGlobalInstance) {
             OmniAural.UnsafeGlobalInstance = new OmniAural(initialState)
         }
-
-        return OmniAural.UnsafeGlobalInstance
     }
 
     constructor(initialState) {
@@ -535,11 +561,10 @@ export class OmniAural {
  *
  * @param {object} initialState Contains the properties to initialize the global state with.
  *
- * @return {object} The singleton instance of the Global State object.
  *
  * @example
  *
- * OmniAural.initGlobalState({
+ * initGlobalState({
  *    account: {
  *      name: "John",
  *      phone: "332-56-3322"
@@ -548,7 +573,8 @@ export class OmniAural {
  * })
  *
  */
-export const initGlobalState = OmniAural.initializeInstance
+export const initGlobalState = OmniAural.initGlobalState
+
 /**
  * withGlobal
  *

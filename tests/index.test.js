@@ -8,7 +8,7 @@ import mockInitialState from "./mockInitialState";
 const fetch = require("node-fetch").default
 
 beforeAll(() => {
-    initGlobalState(mockInitialState)
+    OmniAural.initGlobalState(mockInitialState)
 });
 
 describe('Global State Manager', () => {
