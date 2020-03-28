@@ -19,6 +19,16 @@ exports[`Component Testing The Class Component should register and contain the a
   <div>
     Josh
   </div>
+  <div
+    onClick={[Function]}
+  >
+    Josh
+  </div>
+  <div
+    onClick={[Function]}
+  >
+    Josh
+  </div>
 </div>
 `;
 
@@ -39,6 +49,16 @@ exports[`Component Testing The Class Component should register and contain the a
     State
   </div>
   <div>
+    Josh
+  </div>
+  <div
+    onClick={[Function]}
+  >
+    Josh
+  </div>
+  <div
+    onClick={[Function]}
+  >
     Josh
   </div>
 </div>

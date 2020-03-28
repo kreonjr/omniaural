@@ -318,6 +318,21 @@ export class OmniAural {
             }
         }
 
+        const defaultSetState = component.setState.bind(component)
+
+        component.setState = (stateUpdates, callback) => {
+            const flattenUpdates = flatten(stateUpdates)
+            const flattenedCurrentState = flatten(state)
+            Object.keys(flattenUpdates).forEach((key) => {
+                if (flattenedCurrentState[key] !== 'undefined') {
+                    throw `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
+                }
+            })
+
+            defaultSetState(stateUpdates, callback)
+        }
+
+
         component.state = state
     }
 

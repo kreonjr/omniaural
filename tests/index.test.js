@@ -239,6 +239,26 @@ describe("Component Testing", () => {
 
         })
 
+        test('should not allow to update local state of global property', () => {
+            const component = renderer.create(<MyComponent />)
+            let tree = component.toJSON()
+
+            expect(() => tree.children[5].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.name\". Please use the global property setter.')
+
+            tree = component.toJSON()
+            expect(tree.children[5].children.includes("Jack")).toBeTruthy()
+        })
+
+        test('should not allow to update local state of global property with alias', () => {
+            const component = renderer.create(<MyComponent />)
+            let tree = component.toJSON()
+
+            expect(() => tree.children[6].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.person.name\". Please use the global property setter.')
+
+            tree = component.toJSON()
+            expect(tree.children[6].children.includes("Jack")).toBeTruthy()
+        })
+
         test('should throw an error if trying to register for an nonexistent property', () => {
             expect(() => shallow(<MyBadComponent />)).toThrow();
         })
