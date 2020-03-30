@@ -5,6 +5,7 @@ export default class MyComponent extends React.Component {
     constructor() {
         super()
         this.state = {
+            description: "Small Description"
         }
 
         OmniAural.register(this, ["account.name as name", "account.name as person.name", "account.address", "account.address.street as street", "account as info.account"])
@@ -32,6 +33,22 @@ export default class MyComponent extends React.Component {
         })
     }
 
+    _updateNameLocallyAlt = () => {
+        this.setState((prevState) => {
+            return { ...prevState, person: { ...prevState.person, name: "Jane" } }
+        })
+    }
+
+    _updateDescription = () => {
+        this.setState({ description: "Long Description" })
+    }
+
+    _updateDescriptionAlt = () => {
+        this.setState((prev) => {
+            return { ...prev, description: "Long Description" }
+        })
+    }
+
     render() {
         return <div onClick={this._updateName}>
             <div>{this.state.person.name}</div>
@@ -41,6 +58,9 @@ export default class MyComponent extends React.Component {
             <div>{this.state.info.account.name}</div>
             <div onClick={this._updateNameLocally}>{this.state.name}</div>
             <div onClick={this._updateAliasNameLocally}>{this.state.person.name}</div>
+            <div onClick={this._updateNameLocallyAlt}>{this.state.person.name}</div>
+            <div onClick={this._updateDescription}>{this.state.description}</div>
+            <div onClick={this._updateDescriptionAlt}>{this.state.description}</div>
         </div>
     }
 }

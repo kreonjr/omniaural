@@ -5,10 +5,10 @@ const isObject = (val) => {
 }
 
 //Get the value of an object given a deep path
-export const getDeepValue = (path) => {
+export const getDeepValue = (obj, path) => {
     return path.split('.').reduce((acc, key) => {
         return acc ? acc[key] : undefined
-    }, OmniAural.state);
+    }, obj);
 }
 
 /**
@@ -264,6 +264,7 @@ export class OmniAural {
         }
 
         component.globalStateId = OmniAural.globalStateCounter++
+        component.omniAuralMap = {}
         let state = component.state || {}
 
         if (!properties || !properties.length) {
@@ -283,6 +284,8 @@ export class OmniAural {
                     prop = aliasArr[0]
                     aliasPath = aliasArr[1]
                 }
+
+                component.omniAuralMap[aliasPath || prop] = prop
 
                 let path = prop.split('.')
                 if (path.length > 0) {
@@ -327,13 +330,22 @@ export class OmniAural {
 
         const defaultSetState = component.setState.bind(component)
 
-        component.setState = (stateUpdates, callback) => {
-            const flattenUpdates = flatten(stateUpdates)
-            Object.keys(flattenUpdates).forEach((key) => {
-                if (getDeepValue(key) === undefined) {
-                    throw `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
+        component.setState = (stateUpdates, callback, fromOmni = false) => {
+            if (!fromOmni) {
+                if (typeof stateUpdates === "function") {
+                    stateUpdates = stateUpdates(component.state)
                 }
-            })
+
+                const flattenUpdates = flatten(stateUpdates)
+                Object.keys(component.omniAuralMap).forEach((key) => {
+                    const stateVal = flattenUpdates[key]
+                    const omniVal = getDeepValue(OmniAural.state, component.omniAuralMap[key])
+
+                    if (stateVal && stateVal !== omniVal.value()) {
+                        throw `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
+                    }
+                })
+            }
 
             defaultSetState(stateUpdates, callback)
         }
@@ -506,7 +518,7 @@ export class OmniAural {
                                 const newPath = listener.aliasPath ? listener.aliasPath.split(".") : path.split(".")
                                 assign(prevState, newPath, newVal)
                                 return prevState
-                            })
+                            }, null, true)
                         })
                     }
                 }
