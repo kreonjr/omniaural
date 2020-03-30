@@ -4,6 +4,13 @@ const isObject = (val) => {
     return !Array.isArray(val) && typeof val == 'object'
 }
 
+//Get the value of an object given a deep path
+export const getDeepValue = (path) => {
+    return path.split('.').reduce((acc, key) => {
+        return acc ? acc[key] : undefined
+    }, OmniAural.state);
+}
+
 /**
 * Takes an OmniAural property (special object) and returns a 
 * regular key/value pair object version.
@@ -322,16 +329,14 @@ export class OmniAural {
 
         component.setState = (stateUpdates, callback) => {
             const flattenUpdates = flatten(stateUpdates)
-            const flattenedCurrentState = flatten(state)
             Object.keys(flattenUpdates).forEach((key) => {
-                if (flattenedCurrentState[key] !== 'undefined') {
+                if (getDeepValue(key) === undefined) {
                     throw `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
                 }
             })
 
             defaultSetState(stateUpdates, callback)
         }
-
 
         component.state = state
     }

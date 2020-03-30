@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withGlobal = exports.initGlobalState = exports.OmniAural = void 0;
+exports.withGlobal = exports.initGlobalState = exports.OmniAural = exports.getDeepValue = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -13,12 +13,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 const isObject = val => {
   return !Array.isArray(val) && typeof val == 'object';
+}; //Get the value of an object given a deep path
+
+
+const getDeepValue = path => {
+  return path.split('.').reduce((acc, key) => {
+    return acc ? acc[key] : undefined;
+  }, OmniAural.state);
 };
 /**
 * Takes an OmniAural property (special object) and returns a 
 * regular key/value pair object version.
 */
 
+
+exports.getDeepValue = getDeepValue;
 
 const sanitize = obj => {
   let newObj = {};
@@ -439,9 +448,8 @@ _defineProperty(OmniAural, "register", (component, properties) => {
 
   component.setState = (stateUpdates, callback) => {
     const flattenUpdates = flatten(stateUpdates);
-    const flattenedCurrentState = flatten(state);
     Object.keys(flattenUpdates).forEach(key => {
-      if (flattenedCurrentState[key] !== 'undefined') {
+      if (getDeepValue(key) === undefined) {
         throw `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`;
       }
     });

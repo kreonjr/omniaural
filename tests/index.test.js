@@ -1,4 +1,4 @@
-import { OmniAural, initGlobalState } from "../src/index";
+import { OmniAural, getDeepValue } from "../src/index";
 import React from 'react';
 import renderer from "react-test-renderer"
 import MyComponent from "./MyComponent";
