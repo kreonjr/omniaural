@@ -307,7 +307,7 @@ describe("Component Testing", () => {
             const component = renderer.create(<MyFunctional />)
             const instance = component.getInstance()
 
-            expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].listeners.get(instance.globalStateId).component.name === instance.name).toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].listeners.get(instance.omniId).component.name === instance.name).toBeTruthy()
         })
 
         test('should update correctly when global state changes', () => {

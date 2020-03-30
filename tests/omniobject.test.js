@@ -18,7 +18,7 @@ describe("Omni object singleton", () => {
     beforeEach(() => (console.log = mockedLog))
 
     test('should have one global object instance for all declared instances', () => {
-        expect(controller1.globalStateId === controller2.globalStateId).toBeTruthy()
+        expect(controller1.omniId === controller2.omniId).toBeTruthy()
     })
 
     test('should update state on all instances from one global state update call', () => {

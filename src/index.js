@@ -118,7 +118,7 @@ export class OmniAural {
      * Each component passed in is given a specific id that auto-increments,
      * used to keep a reference to the component listeners and remove them as necessary
      */
-    static globalStateCounter = 1
+    static listenerCounter = 1
 
     /**
      * Named "unsafe" to inform developers that they should not access properties directly
@@ -199,7 +199,7 @@ export class OmniAural {
     * 
     */
     _registerProperty = (aliasPath, component, propertyObject) => {
-        const mapKey = aliasPath ? component.globalStateId + "." + aliasPath : component.globalStateId
+        const mapKey = aliasPath ? component.omniId + "." + aliasPath : component.omniId
         propertyObject.listeners.set(mapKey, { aliasPath, component })
 
         if (isObject(propertyObject.value)) {
@@ -259,11 +259,11 @@ export class OmniAural {
      *
      */
     static register = (component, properties) => {
-        if (component.globalStateId) {
+        if (component.omniId) {
             return
         }
 
-        component.globalStateId = OmniAural.globalStateCounter++
+        component.omniId = OmniAural.listenerCounter++
         component.omniAuralMap = {}
         let state = component.state || {}
 
@@ -571,7 +571,7 @@ export class OmniAural {
     _deregister = (base, component) => {
         if (!isObject(base.value)) {
             base.listeners.forEach((listener, listenerId) => {
-                if (listener.component.globalStateId === component.globalStateId) {
+                if (listener.component.omniId === component.omniId) {
                     base.listeners.delete(listenerId)
                 }
             })

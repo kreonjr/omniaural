@@ -147,7 +147,7 @@ class OmniAural {
 
   constructor(initialState) {
     _defineProperty(this, "_registerProperty", (aliasPath, component, propertyObject) => {
-      const mapKey = aliasPath ? component.globalStateId + "." + aliasPath : component.globalStateId;
+      const mapKey = aliasPath ? component.omniId + "." + aliasPath : component.omniId;
       propertyObject.listeners.set(mapKey, {
         aliasPath,
         component
@@ -284,7 +284,7 @@ class OmniAural {
     _defineProperty(this, "_deregister", (base, component) => {
       if (!isObject(base.value)) {
         base.listeners.forEach((listener, listenerId) => {
-          if (listener.component.globalStateId === component.globalStateId) {
+          if (listener.component.omniId === component.omniId) {
             base.listeners.delete(listenerId);
           }
         });
@@ -355,7 +355,7 @@ _defineProperty(OmniAural, "state", {
   }
 });
 
-_defineProperty(OmniAural, "globalStateCounter", 1);
+_defineProperty(OmniAural, "listenerCounter", 1);
 
 _defineProperty(OmniAural, "UnsafeGlobalInstance", null);
 
@@ -387,11 +387,11 @@ _defineProperty(OmniAural, "addProperty", (path, property) => {
 });
 
 _defineProperty(OmniAural, "register", (component, properties) => {
-  if (component.globalStateId) {
+  if (component.omniId) {
     return;
   }
 
-  component.globalStateId = OmniAural.globalStateCounter++;
+  component.omniId = OmniAural.listenerCounter++;
   component.omniAuralMap = {};
   let state = component.state || {};
 
