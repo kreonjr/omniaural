@@ -1,6 +1,6 @@
-import { OmniAural, getDeepValue } from "../src/index";
+import { OmniAural } from "../src/index";
 import React from 'react';
-import renderer from "react-test-renderer"
+import renderer, { act } from "react-test-renderer"
 import MyComponent from "./MyComponent";
 import MyBadComponent from "./MyBadComponent";
 import MyFunctional from "./MyFunctional";

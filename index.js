@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withGlobal = exports.initGlobalState = exports.OmniAural = exports.getDeepValue = void 0;
+exports.withOmniAural = exports.initGlobalState = exports.OmniAural = exports.getDeepValue = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -199,7 +199,7 @@ class OmniAural {
               path.split('.').forEach(pathStep => {
                 obj = obj.value[pathStep];
               });
-              return sanitize(obj.value);
+              return sanitize(obj);
             }
           };
         }
@@ -351,7 +351,7 @@ exports.OmniAural = OmniAural;
 
 _defineProperty(OmniAural, "state", {
   value: () => {
-    return sanitize(OmniAural.UnsafeGlobalInstance.value);
+    return sanitize(OmniAural.UnsafeGlobalInstance);
   }
 });
 
@@ -508,7 +508,7 @@ _defineProperty(OmniAural, "addActions", (...args) => {
 
 const initGlobalState = OmniAural.initGlobalState;
 /**
- * withGlobal
+ * withOmniAural
  *
  * Adds the a global state object as a prop to a component
  *
@@ -531,14 +531,14 @@ const initGlobalState = OmniAural.initGlobalState;
  *    </div>
  * }
  *
- * export default withGlobal(MyAddress, ["account.address.street as streetName"])
+ * export default withOmniAural(MyAddress, ["account.address.street as streetName"])
  *
  *
  */
 
 exports.initGlobalState = initGlobalState;
 
-const withGlobal = (RegisteredComponent, paths = []) => {
+const withOmniAural = (RegisteredComponent, paths = []) => {
   return class GlobalComponent extends _react.default.Component {
     constructor(props) {
       super(props);
@@ -554,4 +554,4 @@ const withGlobal = (RegisteredComponent, paths = []) => {
   };
 };
 
-exports.withGlobal = withGlobal;
+exports.withOmniAural = withOmniAural;

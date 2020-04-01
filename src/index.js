@@ -111,7 +111,7 @@ const flatten = (obj, prefix = '') => {
 export class OmniAural {
     static state = {
         value: () => {
-            return sanitize(OmniAural.UnsafeGlobalInstance.value)
+            return sanitize(OmniAural.UnsafeGlobalInstance)
         }
     }
     /**
@@ -464,7 +464,7 @@ export class OmniAural {
                         path.split('.').forEach((pathStep) => {
                             obj = obj.value[pathStep]
                         })
-                        return sanitize(obj.value)
+                        return sanitize(obj)
                     }
                 }
             }
@@ -608,7 +608,7 @@ export class OmniAural {
 export const initGlobalState = OmniAural.initGlobalState
 
 /**
- * withGlobal
+ * withOmniAural
  *
  * Adds the a global state object as a prop to a component
  *
@@ -631,11 +631,11 @@ export const initGlobalState = OmniAural.initGlobalState
  *    </div>
  * }
  *
- * export default withGlobal(MyAddress, ["account.address.street as streetName"])
+ * export default withOmniAural(MyAddress, ["account.address.street as streetName"])
  *
  *
  */
-export const withGlobal = (RegisteredComponent, paths = []) => {
+export const withOmniAural = (RegisteredComponent, paths = []) => {
 
     return class GlobalComponent extends React.Component {
         constructor(props) {

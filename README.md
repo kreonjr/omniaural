@@ -100,12 +100,12 @@ const styles = StyleSheet.create({
 
 ### Functional components
 
-You can register a functional component by wrapping it in the [withGlobal](#withGlobal) HOC function
+You can register a functional component by wrapping it in the [withOmniAural](#withOmniAural) HOC function
 
 ```javascript
 import React from 'react'
 import { View, Text } from 'react-native'
-import { withGlobal } from 'omniaural'
+import { withOmniAural } from 'omniaural'
 
 const PersonScreen = (props) => {
   return (
@@ -115,7 +115,7 @@ const PersonScreen = (props) => {
   )
 }
 
-export default withGlobal(PersonScreen, ["account as person"])
+export default withOmniAural(PersonScreen, ["account as person"])
 ```
 
 ---
@@ -285,7 +285,7 @@ OmniAural.addProperty("account", {id: 4568585})
 
 ### Functions
 
-#### withGlobal
+#### withOmniAural
 
 This function can be used to register a functional component with a collection of properties from the global state using a higher order component.
 The registered properties will be passed in as props to the functional component.
@@ -301,7 +301,7 @@ The registered properties will be passed in as props to the functional component
 ```javascript
 import React from 'react'
 import { View, Text } from 'react-native'
-import { withGlobal } from 'omniaural'
+import { withOmniAural } from 'omniaural'
 
 const PersonScreen = (props) => {
   return (
@@ -311,7 +311,7 @@ const PersonScreen = (props) => {
   )
 }
 
-export default withGlobal(PersonScreen, ["account as person"])
+export default withOmniAural(PersonScreen, ["account as person"])
 ```
 
 
