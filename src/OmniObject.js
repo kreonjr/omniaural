@@ -2,7 +2,7 @@ export default class OmniObject {
     static map = {}
 
     constructor() {
-        let id = this.getClassName()
+        const id = this.getClassName()
         if (OmniObject.map[id]) {
             return OmniObject.map[id]
         }

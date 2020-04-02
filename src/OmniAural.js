@@ -18,13 +18,15 @@ export const getDeepValue = (obj, path) => {
 const sanitize = (obj) => {
     let newObj = {}
 
-    if (!isObject(obj.value)) {
-        return obj.value
-    } else {
+    if (isObject(obj.value)) {
         Object.keys(obj.value).forEach((key) => {
             newObj[key] = sanitize(obj.value[key])
         })
+    } else {
+        //exit case for recursion
+        return obj.value
     }
+
     return newObj
 }
 
@@ -33,9 +35,9 @@ const sanitize = (obj) => {
 * Does not return because it works by reference
 */
 const assign = (obj, keyPath, value) => {
-    let lastKeyIndex = keyPath.length - 1
-    for (var i = 0; i < lastKeyIndex; ++i) {
-        let key = keyPath[i]
+    const lastKeyIndex = keyPath.length - 1
+    for (let i = 0; i < lastKeyIndex; ++i) {
+        const key = keyPath[i]
         if (!(key in obj)) {
             obj[key] = {}
         }
@@ -66,16 +68,16 @@ const assign = (obj, keyPath, value) => {
 *
 */
 const flatten = (obj, prefix = '') => {
-    return Object.keys(obj).reduce((acc, key) => {
-        const pre = prefix.length ? prefix + '.' : '';
+    return Object.keys(obj).reduce((prev, key) => {
+        const path = prefix.length ? prefix + '.' : ''
         if (isObject(obj[key])) {
-            Object.assign(acc, flatten(obj[key], pre + key))
+            Object.assign(prev, flatten(obj[key], path + key))
         }
         else {
-            acc[pre + key] = obj[key]
+            prev[path + key] = obj[key]
         }
 
-        return acc;
+        return prev
     }, {});
 }
 
@@ -205,7 +207,7 @@ export default class OmniAural {
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
                 const newPath = aliasPath ? aliasPath + "." + key : null
-                OmniAural.UnsafeGlobalInstance._registerProperty(
+                this._registerProperty(
                     newPath,
                     component,
                     propertyObject.value[key]
@@ -315,13 +317,13 @@ export default class OmniAural {
         }
 
         if (component.__proto__.componentWillUnmount) {
-            const unMount = component.componentWillUnmount
+            const willUnMount = component.componentWillUnmount
             component.componentWillUnmount = function () {
                 OmniAural.UnsafeGlobalInstance._deregister(
                     OmniAural.UnsafeGlobalInstance,
                     component
                 )
-                unMount()
+                willUnMount()
             }
         } else {
             component.componentWillUnmount = function () {
@@ -363,16 +365,14 @@ export default class OmniAural {
      * It adds specific actions to the global object class to be able to
      * encapsulate global state manipulation.
      *
-     * @param {string}      actionName   The name of the action to add to the global state object.
-     * @param {function}  actionFunc     A function that will be set on the OmniAural object. Has a `props`
-     *                                   parameter which contains the parameters passed in when the callback 
-     *                                   is invoked and some more properties like the `getGlobalState` function
-     *                                   to get the a snapshot of the global state object
+     * @param {string}    actionName   The name of the anonymous function to be added to the OmniAural class.
+     * @param {function}  actionFunc   An anonymous function that will be added on the OmniAural class.
+     * or
+     * @param {function}  actionFunc   A named fucntion to be added on the OmniAural class
      * 
      * @example
      *
      * OmniAural.addAction("updateAccount", (account) => {
-     * 
      * 
      *   OmniAural.state.account.phone.set(account.phone)
      *   OmniAural.account.name.set(account.name)
@@ -410,6 +410,15 @@ export default class OmniAural {
         OmniAural[name] = func
     }
 
+   /**
+     * addActions
+     *
+     * This function accepts any number of named functions to be added to the OmniAural class
+     * 
+     * @param {...function}  actionFuncs   Any number of named fucntions to be added on the OmniAural class
+     *
+     * 
+     */
     static addActions = (...args) => {
         args.forEach((func) => {
             if (typeof func === "function" && func.name) {
@@ -487,9 +496,10 @@ export default class OmniAural {
     /**
      * @private _addKeyValue
      *
-     * @param {object} base           The object that will be created and added to the global object.
-     * @param {string} key            The key for the property to be added to the {base} object.
-     * @param {any}    initialVal     The initial value the property should have.
+     * @param {object} base              The object that will be created and added to the global object.
+     * @param {string} key               The key for the property to be added to the {base} object.
+     * @param {any}    initialVal        The initial value the property should have.
+     * @param {object} initialListeners  A collection of listeners that might already exist for an existing property
      *
      * It creates an object for each global property set on initialization. It saves
      * the property key/value pair on the global object instance and also creates a setter

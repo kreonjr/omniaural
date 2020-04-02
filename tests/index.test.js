@@ -348,7 +348,7 @@ describe("Component Testing", () => {
             let tree = component.toJSON()
             expect(tree).toMatchSnapshot()
 
-            expect(tree.children.includes("Dev mode: true")).toBeTruthy()
+            expect(tree.children[0].children.includes("Dev mode: true")).toBeTruthy()
         })
 
         test('Listeners contain the correct name of the functional component', () => {
@@ -361,22 +361,35 @@ describe("Component Testing", () => {
         test('should update correctly when global state changes', () => {
             const component = renderer.create(<MyFunctional />)
             let tree = component.toJSON()
-            expect(tree.children.includes("Dev mode: true")).toBeTruthy()
+            expect(tree.children[0].children.includes("Dev mode: true")).toBeTruthy()
 
             OmniAural.state.dev_mode.set(false)
             expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].value).toBeFalsy()
 
             tree = component.toJSON();
-            expect(tree.children.includes("Dev mode: false")).toBeTruthy()
+            expect(tree.children[0].children.includes("Dev mode: false")).toBeTruthy()
+        })
+
+        test('should update correctly when a global state change happens from another component', () => {
+            const functional = renderer.create(<MyFunctional />)
+            const component = renderer.create(<MyComponent />)
+
+            let tree1 = component.toJSON()
+            expect(tree1.children[0].children.includes("Michael")).toBeTruthy()
+
+            let tree2 = functional.toJSON()
+            expect(tree2.children[0].children.includes("Dev mode: false")).toBeTruthy()
+
+            tree1.props.onClick("Linus")
+
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Linus").toBeTruthy()
+
+            tree1 = component.toJSON();
+            expect(tree1.children[0].children.includes("Linus")).toBeTruthy()
+
+            tree2 = functional.toJSON();
+            expect(tree2.children[1].children.includes("Linus")).toBeTruthy()
         })
     })
 
 })
-
-let addAction = (action) => {
-    OmniAural.addAction(action.name, action)
-}
-
-let myAction = (props) => { }
-addAction(myAction)
-
