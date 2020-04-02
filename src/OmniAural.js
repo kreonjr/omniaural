@@ -108,7 +108,7 @@ const flatten = (obj, prefix = '') => {
  * OmniAural.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
-export class OmniAural {
+export default class OmniAural {
     static state = {
         value: () => {
             return sanitize(OmniAural.UnsafeGlobalInstance)
@@ -222,8 +222,8 @@ export class OmniAural {
      * It registers a component to listent to specific global properties.
      * It also deregisters components from listening to global state changes when they unmount.
      *
-     * @param {React.Component}       component       The component to listen to specific global properties.
-     * @param {string[] | null}       properties      An array of strings with the names of the global properties you
+     * @param {React.Component}          component    The component to listen to specific global properties.
+     * @param {string | string[] | null} properties   A string or an array of strings with the names of the global properties you
      *                                                want the component to listen to. Can be a top level object
      *                                                (i.e. account) or a nested object (i.e acount.address.street).
      *                                                Registered properties can be given aliases to be used on the component state
@@ -267,7 +267,7 @@ export class OmniAural {
         component.omniAuralMap = {}
         let state = component.state || {}
 
-        if (!properties || !properties.length) {
+        if (!properties) {
             OmniAural.UnsafeGlobalInstance._registerProperty(
                 null,
                 component,
@@ -275,6 +275,10 @@ export class OmniAural {
             )
             state = { ...state, ...sanitize(OmniAural.UnsafeGlobalInstance) }
         } else {
+            if (typeof properties === "string") {
+                properties = [properties]
+            }
+
             properties.forEach((prop) => {
                 let propertyObject = OmniAural.UnsafeGlobalInstance
                 let aliasPath = null

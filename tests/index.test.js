@@ -1,14 +1,15 @@
-import { OmniAural } from "../src/index";
+import OmniAural, { initGlobalState } from "../src/OmniAural";
 import React from 'react';
 import renderer, { act } from "react-test-renderer"
 import MyComponent from "./MyComponent";
+import MyOtherComponent from "./MyOtherComponent";
 import MyBadComponent from "./MyBadComponent";
 import MyFunctional from "./MyFunctional";
 import mockInitialState from "./mockInitialState";
 const fetch = require("node-fetch").default
 
 beforeAll(() => {
-    OmniAural.initGlobalState(mockInitialState)
+    initGlobalState(mockInitialState)
 });
 
 describe('Global State Manager', () => {
@@ -181,6 +182,15 @@ describe("Component Testing", () => {
             expect(tree.children[0].children.includes("Josh")).toBeTruthy()
         })
 
+        test('should register and contain the phone number on initialization', () => {
+            const component = renderer.create(<MyOtherComponent />)
+            let tree = component.toJSON()
+
+            expect(tree).toMatchSnapshot()
+            expect(component.root.instance.state.account.phone_number === 1234567890).toBeTruthy()
+            expect(tree.children[0].children.includes("1234567890")).toBeTruthy()
+        })
+
         test('should register and contain the address street on initialization using an alias', () => {
             const component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
@@ -201,6 +211,25 @@ describe("Component Testing", () => {
             expect(tree.children[0].children.includes("Victor")).toBeTruthy()
         })
 
+        test('should reflect global state updates on all its live instances', () => {
+            const component1 = renderer.create(<MyComponent />)
+            const component2 = renderer.create(<MyComponent />)
+
+            let tree1 = component1.toJSON()
+            expect(tree1.children[0].children.includes("Victor")).toBeTruthy()
+
+            let tree2 = component2.toJSON()
+            expect(tree2.children[0].children.includes("Victor")).toBeTruthy()
+
+            OmniAural.state.account.name.set("Manny")
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Manny").toBeTruthy()
+
+            tree1 = component1.toJSON();
+            expect(tree1.children[0].children.includes("Manny")).toBeTruthy()
+            tree2 = component2.toJSON();
+            expect(tree2.children[0].children.includes("Manny")).toBeTruthy()
+        })
+
         test('should update correctly the address street name global property and also be listening to global updates through the alias', () => {
             const component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
@@ -218,12 +247,32 @@ describe("Component Testing", () => {
             const component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
-            expect(tree.children[0].children.includes("Victor")).toBeTruthy()
+            expect(tree.children[0].children.includes("Manny")).toBeTruthy()
             tree.props.onClick("Jack")
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Jack").toBeTruthy()
 
             tree = component.toJSON();
             expect(tree.children[0].children.includes("Jack")).toBeTruthy()
+        })
+
+        test('should reflect global property updates from one component to another', () => {
+            const component1 = renderer.create(<MyComponent />)
+            const component2 = renderer.create(<MyComponent />)
+
+            let tree1 = component1.toJSON()
+            let tree2 = component2.toJSON()
+
+            expect(tree1.children[0].children.includes("Jack")).toBeTruthy()
+            expect(tree2.children[0].children.includes("Jack")).toBeTruthy()
+
+            tree1.props.onClick("Michael")
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Michael").toBeTruthy()
+
+            tree1 = component1.toJSON();
+            expect(tree1.children[0].children.includes("Michael")).toBeTruthy()
+
+            tree2 = component2.toJSON();
+            expect(tree2.children[0].children.includes("Michael")).toBeTruthy()
         })
 
         test('should add a property and include it in its state', () => {
@@ -236,7 +285,6 @@ describe("Component Testing", () => {
 
             tree = component.toJSON()
             expect(tree.children[2].children.includes("12345")).toBeTruthy()
-
         })
 
         test('should not allow to update local state of global property', () => {
@@ -246,7 +294,7 @@ describe("Component Testing", () => {
             expect(() => tree.children[5].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.name\". Please use the global property setter.')
 
             tree = component.toJSON()
-            expect(tree.children[5].children.includes("Jack")).toBeTruthy()
+            expect(tree.children[5].children.includes("Michael")).toBeTruthy()
         })
 
         test('should not allow to update local state of global property with alias', () => {
@@ -256,7 +304,7 @@ describe("Component Testing", () => {
             expect(() => tree.children[6].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.person.name\". Please use the global property setter.')
 
             tree = component.toJSON()
-            expect(tree.children[6].children.includes("Jack")).toBeTruthy()
+            expect(tree.children[6].children.includes("Michael")).toBeTruthy()
         })
 
         test('should not allow to update local state of global property with alias with function format ', () => {
@@ -266,7 +314,7 @@ describe("Component Testing", () => {
             expect(() => tree.children[7].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.person.name\". Please use the global property setter.')
 
             tree = component.toJSON()
-            expect(tree.children[7].children.includes("Jack")).toBeTruthy()
+            expect(tree.children[7].children.includes("Michael")).toBeTruthy()
         })
 
         test('should allow to update local state properties', () => {

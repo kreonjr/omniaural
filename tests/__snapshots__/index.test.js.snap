@@ -44,6 +44,7 @@ exports[`Component Testing The Class Component should register and contain the a
   >
     Small Description
   </div>
+  <div />
 </div>
 `;
 
@@ -90,6 +91,15 @@ exports[`Component Testing The Class Component should register and contain the a
     onClick={[Function]}
   >
     Small Description
+  </div>
+  <div />
+</div>
+`;
+
+exports[`Component Testing The Class Component should register and contain the phone number on initialization 1`] = `
+<div>
+  <div>
+    1234567890
   </div>
 </div>
 `;

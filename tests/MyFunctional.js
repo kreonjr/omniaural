@@ -1,5 +1,5 @@
 import React from "react"
-import { withOmniAural } from "../src/index"
+import { withOmniAural } from "../src/OmniAural"
 
 const MyFunctional = (props) => {
     return <div>{`Dev mode: ${props.dev_mode}`}</div>

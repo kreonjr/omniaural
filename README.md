@@ -38,6 +38,11 @@ After initialization, global state properties can be accessed directly through t
 OmniAural.state.account.name.value()
 ```
 
+Global state properties can be set directly through the `.set()` function
+```javascript
+OmniAural.state.account.name.set("John")
+```
+
 
 ### Register a component
 
@@ -47,7 +52,11 @@ You can also use aliases to keep a local naming that makes more sense for your c
 ```javascript
 import React from 'react'
 import { StyleSheet, SafeAreaView, Text } from 'react-native'
-import { OmniAural } from 'omniaural'
+import OmniAural from 'omniaural'
+
+OmniAural.addAction('updateAddress', (address) => {
+    OmniAural.state.account.address.set(address)
+})
 
 export class IntroScreen extends React.Component<*, *> {
   constructor() {
@@ -59,9 +68,6 @@ export class IntroScreen extends React.Component<*, *> {
     }
 
     OmniAural.register(this, ['account as person', 'account.address as address'])
-    OmniAural.addAction('updateAddress', (address) => {
-        OmniAural.state.account.address.set(address)
-    })
   }
 
   _updateAddress = () => {
@@ -143,9 +149,9 @@ Initialize the global state with an initial object to which components will regi
 
 ##### Example: 
 ```javascript
-import { initGlobalState } from 'omniaural';
+import OmniAural from 'omniaural';
 
-initGlobalState({
+OmniAural.initGlobalState({
    account: {
         name: 'Jack',
         phone: '3129058787',
@@ -168,17 +174,17 @@ console.log(OmniAural.state.account.phone.value()) //Prints 2125548844
 Register a component to listen to changes on the global state. This method will add the component as a listener to the passed in properties that you want to listen to and call `setState` on that component whenever a change happens. 
 An alias can be used for each property using the keyword `as` and will be added to the local state using that alias.
 
-__Note:__ This function must should be called after you have initialized your initial local state.
+__Note:__ This function must be called after you have initialized your initial local state (if any).
 
 
-| Parameter     | Type             | Description  |
-| ------------- |:---------------: | :----------- |
-| component     | React.Component  | The component to be registered as a listener to the global state properties.
-| paths         | Array<string>    | The global state paths to subscribe to. If an empty array is passed in, the whole global state will be observed (not recommended).
+| Parameter     | Type                      | Description  |
+| ------------- |:---------------:          | :----------- |
+| component     | React.Component           | The component to be registered as a listener to the global state properties.
+| paths         | string | Array<string>    | The global state path(s) to subscribe to. It cab either be a string or an array of strings. If an empty array is passed in, the whole global state will be observed (not recommended).
 
 ##### Example: 
 ```javascript
-import { OmniAural } from 'omniaural'
+import OmniAural from 'omniaural'
 
 constructor() {
     super()
@@ -201,7 +207,7 @@ You can add an action as a predeclared named function or by passing an anonymous
 
 ##### Example: 
 ```javascript
-import { OmniAural } from 'omniaural'
+import OmniAural from 'omniaural'
 
 const updateAddress = (address) => {
     OmniAural.state.account.address.set(address)
@@ -219,7 +225,7 @@ __* If you don't want to use a named function, you can also pass a string as the
 
 ##### Example: 
 ```javascript
-import { OmniAural } from 'omniaural'
+import OmniAural from 'omniaural'
 
 OmniAural.addAction('updateAddress', (opts) => {
     OmniAural.state.account.address.set(address)
@@ -241,7 +247,7 @@ Actions can be added to OmniAural in bulk by passing named functions as argument
 
 ##### Example: 
 ```javascript
-import { OmniAural } from 'omniaural'
+import OmniAural from 'omniaural'
 
 const updateAddress = (address) => {
     OmniAural.state.account.address.set(address)
@@ -274,7 +280,7 @@ This function add new properties to the global state object structure. If you ad
 
 ##### Example: 
 ```javascript
-import { OmniAural } from 'omniaural'
+import OmniAural from 'omniaural'
 
 OmniAural.addProperty("account.id", 4568585)
 //or

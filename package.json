@@ -6,8 +6,8 @@
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "build": "babel ./src -d . --copy-files",
-    "publish:npm": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files"
+    "build": "babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js",
+    "publish:npm": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
   },
   "husky": {
     "hooks": {

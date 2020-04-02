@@ -1,4 +1,4 @@
-import { OmniAural } from "../src/index";
+import OmniAural from "../src/OmniAural";
 import OmniObject from "../src/OmniObject";
 
 export default class MyOmniObject extends OmniObject {

@@ -1,5 +1,5 @@
 import React from "react";
-import { OmniAural } from "../src/index";
+import OmniAural from "../src/OmniAural";
 
 export default class MyComponent extends React.Component {
     constructor() {
@@ -61,6 +61,7 @@ export default class MyComponent extends React.Component {
             <div onClick={this._updateNameLocallyAlt}>{this.state.person.name}</div>
             <div onClick={this._updateDescription}>{this.state.description}</div>
             <div onClick={this._updateDescriptionAlt}>{this.state.description}</div>
+            <div>{this.state.phoneNumber}</div>
         </div>
     }
 }
