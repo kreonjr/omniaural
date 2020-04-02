@@ -11,7 +11,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn test && yarn build && git add ."
+      "pre-commit": "yarn test",
+      "pre-push": "yarn build && git add ."
     }
   },
   "author": "Creon Creonopoulos",
