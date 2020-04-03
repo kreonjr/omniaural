@@ -8,8 +8,7 @@ OmniAural provides global state managment with no need for boiler plate code.
 
 This is done by allowing React components to 'register' for the global state elements they need to be aware of.  Those global elements then become part of the component's local state and can be treated like, read-only, local state from the component's point of view.
 
-Changing global state is handled through a call to OmniAural that can be called from any js code (not just components).  However, the recommened pattern is to put global state changes in OmniAural actions which are a conveinent way to orginize these global state changes.  Actions are optional and may not be best suited for all types of projects, but are recommended for most.
-
+Changing global state is handled through a call to OmniAural that can be called from any js code (not just components).  However, the recommened pattern is to put global state changes in OmniAural actions which are a convenient way to orginize these global state changes.  Actions are optional and may not be best suited for all types of projects, but are recommended for most.
 
 
 ## Getting started
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
 
 ### Adding an action
 
-Actions are the prefered way to encapsolate your global state changes.  They can be added from any file in the global space, although it makes sense to group these actions in designated files.
+Actions are the prefered way to encapsulate your global state changes.  They can be added from any file in the global space, although it makes sense to group these actions in designated files.
 
 ```javascript
 import React from 'react'
@@ -188,11 +187,11 @@ export class IntroScreen extends React.Component<*, *> {
       }
     }
 
-    OmniAural.register(this, ['account', 'account.address as address'])
+    OmniAural.register(this, ['account.name as name', 'account.address as address'])
   }
 
   _updateAddress = () => {
-      // call the global action useing the name passed into OmniAural.addAction
+      // call the global action using the name passed into OmniAural.addAction
       OmniAural.updateAddress({street: "Main st"})
   }
 
@@ -204,11 +203,11 @@ export class IntroScreen extends React.Component<*, *> {
         </Text>
         <Text style={styles.instructions} onPress={this._updateAddress}>
           {'\n'}
-          {`Name: ${this.state.account.name}`}
+          {`Name: ${this.state.name}`}
           {'\n'}
           {`Currently employed: ${this.state.person.employed}`}
           {'\n'}
-          {`Street: ${this.state.account.street}`}
+          {`Street: ${this.state.address.street}`}
         </Text>
       </SafeAreaView>
     )
