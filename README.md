@@ -25,7 +25,7 @@ yarn add ccreonopoulos/omniaural
 
 ### Initialize
 
-In your top level component (Usually App.js) import OmniAural and initialize the global state
+In your top level component (usually App.js) import OmniAural and initialize the global state
 ```javascript
 import { OmniAural } from 'omniaural';
 
@@ -187,7 +187,7 @@ export class IntroScreen extends React.Component<*, *> {
       }
     }
 
-    OmniAural.register(this, ['account.name as name', 'account.address as address'])
+    OmniAural.register(this, ['account.name', 'account.address as address'])
   }
 
   _updateAddress = () => {
@@ -203,7 +203,7 @@ export class IntroScreen extends React.Component<*, *> {
         </Text>
         <Text style={styles.instructions} onPress={this._updateAddress}>
           {'\n'}
-          {`Name: ${this.state.name}`}
+          {`Name: ${this.state.account.name}`}
           {'\n'}
           {`Currently employed: ${this.state.person.employed}`}
           {'\n'}
