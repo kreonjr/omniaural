@@ -1,6 +1,15 @@
-# Omniaural
+# OmniAural
 
-Omniaural is a minimal global state manager for React/React-Native applications.
+OmniAural is a minimal global state manager for React/React-Native applications.
+
+## Core Concepts
+
+OmniAural provides global state managment with no need for boiler plate code.
+
+This is done by allowing React components to 'register' for the global state elements they need to be aware of.  Those global elements then become part of the component's local state and can be treated like, read-only, local state from the component's point of view.
+
+Changing global state is handled through a call to OmniAural that can be called from any js code (not just components).  However, the recommened pattern is to put global state changes in OmniAural actions which are a convenient way to orginize these global state changes.  Actions are optional and may not be best suited for all types of projects, but are recommended for most.
+
 
 ## Getting started
 
@@ -16,12 +25,12 @@ yarn add ccreonopoulos/omniaural
 
 ### Initialize
 
-In your top level component (usually App.js) import and initialize the global state
+In your top level component (usually App.js) import OmniAural and initialize the global state
 ```javascript
-import { initGlobalState } from 'omniaural';
+import { OmniAural } from 'omniaural';
 
 
-initGlobalState({
+OmniAural.initGlobalState({
    account: {
         name: 'Jack',
         phone: '3129058787',
@@ -33,7 +42,7 @@ initGlobalState({
 })
 ```
 
-After initialization, global state properties can be accessed directly through the `.value()` function
+After initialization, global state properties can be (but rarely need to be) accessed directly through the `.value()` function. See below (Register a component) on the recommened approach to accessing global state values.
 ```javascript
 OmniAural.state.account.name.value()
 ```
@@ -47,13 +56,124 @@ OmniAural.state.account.name.set("John")
 ### Register a component
 
 You can register to listen to a particular property or a whole object on the global state. 
-You can also use aliases to keep a local naming that makes more sense for your component:
+You can also use aliases to allow for local naming that makes more sense for your component.  IMPORTANT - if you create a state object in your component, this must be done before you call OmniAural.register.
 
 ```javascript
 import React from 'react'
 import { StyleSheet, SafeAreaView, Text } from 'react-native'
 import OmniAural from 'omniaural'
 
+export class IntroScreen extends React.Component<*, *> {
+  constructor() {
+    super()
+    this.state = {
+      person: {
+        employed: true
+      }
+    }
+
+    // Register for the global 'account' (defaults to 'account' in local state)
+    // Register for the account.address as 'address' in local state
+    OmniAural.register(this, ['account', 'account.address as address'])
+  }
+
+  render() {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.instructions}>
+          Account information
+        </Text>
+        <Text style={styles.instructions}>
+          {'\n'}
+          {`Name: ${this.state.account.name}` /* I'm accessing global state here, it just looks local to the component */}
+          {'\n'}
+          {`Currently employed: ${this.state.person.employed}` /* this is actually local state */}
+          {'\n'}
+          {`Street: ${this.state.address.street}` /* this is global state again */}
+        </Text>
+      </SafeAreaView>
+    )
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white'
+  }
+})
+
+```
+
+### Update global state
+
+Using the OmniAural.state object, you can make changes to the global state values.
+
+```javascript
+import React from 'react'
+import { StyleSheet, SafeAreaView, Text } from 'react-native'
+import OmniAural from 'omniaural'
+
+export class IntroScreen extends React.Component<*, *> {
+  constructor() {
+    super()
+    this.state = {
+      person: {
+        employed: true
+      }
+    }
+
+    OmniAural.register(this, ['account', 'account.address as address'])
+  }
+
+  _updateAddress = () => {
+      // Updating the street to a hard coded "Main st"
+      // Note this is the full global state path
+      OmniAural.state.account.address.street.set("Main st")
+  }
+
+  render() {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.instructions}>
+          Account information
+        </Text>
+        <Text style={styles.instructions} onPress={this._updateAddress}>
+          {'\n'}
+          {`Name: ${this.state.account.name}`}
+          {'\n'}
+          {`Currently employed: ${this.state.person.employed}`}
+          {'\n'}
+          {`Street: ${this.state.address.street}`}
+        </Text>
+      </SafeAreaView>
+    )
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white'
+  }
+})
+
+```
+
+### Adding an action
+
+Actions are the prefered way to encapsulate your global state changes.  They can be added from any file in the global space, although it makes sense to group these actions in designated files.
+
+```javascript
+import React from 'react'
+import { StyleSheet, SafeAreaView, Text } from 'react-native'
+import OmniAural from 'omniaural'
+
+// Add a globally accessable action to update the global address object
 OmniAural.addAction('updateAddress', (address) => {
     OmniAural.state.account.address.set(address)
 })
@@ -67,10 +187,11 @@ export class IntroScreen extends React.Component<*, *> {
       }
     }
 
-    OmniAural.register(this, ['account as person', 'account.address as address'])
+    OmniAural.register(this, ['account.name', 'account.address as address'])
   }
 
   _updateAddress = () => {
+      // call the global action using the name passed into OmniAural.addAction
       OmniAural.updateAddress({street: "Main st"})
   }
 
@@ -82,7 +203,7 @@ export class IntroScreen extends React.Component<*, *> {
         </Text>
         <Text style={styles.instructions} onPress={this._updateAddress}>
           {'\n'}
-          {`Name: ${this.state.person.name}`}
+          {`Name: ${this.state.account.name}`}
           {'\n'}
           {`Currently employed: ${this.state.person.employed}`}
           {'\n'}
