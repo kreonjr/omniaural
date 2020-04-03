@@ -16,7 +16,7 @@ yarn add ccreonopoulos/omniaural
 
 ### Initialize
 
-In your top level file (Usually App.js) import and initialize the global state
+In your top level component (usually App.js) import and initialize the global state
 ```javascript
 import { initGlobalState } from 'omniaural';
 
@@ -149,9 +149,9 @@ Initialize the global state with an initial object to which components will regi
 
 ##### Example: 
 ```javascript
-import OmniAural from 'omniaural';
+import { initGlobalState } from 'omniaural';
 
-OmniAural.initGlobalState({
+initGlobalState({
    account: {
         name: 'Jack',
         phone: '3129058787',
@@ -165,7 +165,23 @@ OmniAural.initGlobalState({
 console.log(OmniAural.state.account.phone.value()) //Prints 3129058787
 OmniAural.state.account.phone.set('2125548844')
 console.log(OmniAural.state.account.phone.value()) //Prints 2125548844
+```
 
+Can also be used directly on OmniAural:
+
+```javascript
+import OmniAural from 'omniaural';
+
+OmniAural.initGlobalState({
+   account: {
+        name: 'Jack',
+        phone: '3129058787',
+        address: {
+            "street": "1st st"
+        }
+    },
+    movies: []
+})
 ```
 
 
@@ -197,13 +213,12 @@ constructor() {
 #### addAction()
 
 Actions can be added to OmniAural to be used as batch updates or async calls that need to update the global state after they are completed. 
-You can add an action as a predeclared named function or by passing an anonymous function with a name.
+You can add an action as a predeclared named function or by passing an anonymous function and a name for it.
 
 
 | Parameter     | Type                    | Description  |
 | ------------- |:----------------------: | :----------- |
 | action        | Function                | The body of this function will be added as a global action. Must be a named function
-
 
 ##### Example: 
 ```javascript
@@ -220,8 +235,12 @@ _onClick = () => {
 }
 ```
 
-
 __* If you don't want to use a named function, you can also pass a string as the first argument that will represent the name of the function on OmniAural and an anonymous funtion as a second argument__
+
+| Parameter     | Type                    | Description  |
+| ------------- |:----------------------: | :----------- |
+| name          | String                  | The name of the function that will be save on OmniAural
+| action        | Function                | The body of this function will be added as a global action.
 
 ##### Example: 
 ```javascript

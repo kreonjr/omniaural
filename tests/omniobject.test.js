@@ -29,7 +29,7 @@ describe("Omni object singleton", () => {
         expect(controller1.state.dev_mode === controller2.state.dev_mode).toBeTruthy()
     })
 
-    describe('"stateChanged" function called on global state updated', () => {
+    describe('"stateChanged" function', () => {
         test('should be passed a top level object when updating top level properties', () => {
             expect(controller1.state.dev_mode).toBeTruthy()
             OmniAural.state.dev_mode.set(false)

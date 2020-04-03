@@ -27,9 +27,13 @@ describe('Global State Manager', () => {
         expect(JSON.stringify(currentSnapshot) === JSON.stringify(mockInitialState))
     })
 
-    test('should get properties value from the state object', () => {
+    test('should provide all the properties values from the state object', () => {
         expect(OmniAural.state.dev_mode.value()).toBeFalsy()
+        expect(OmniAural.state.account.name.value() === "Mike").toBeTruthy()
         expect(OmniAural.state.account.address.city.value() === "Chicago").toBeTruthy()
+        expect(OmniAural.state.account.address.street.value() === "Randolph").toBeTruthy()
+        expect(OmniAural.state.account.phone_number.value() === 1234567890).toBeTruthy()
+        expect(OmniAural.state.dev_mode.value()).toBeFalsy()
     })
 
     describe("Action Creator", () => {
