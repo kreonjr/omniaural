@@ -27,7 +27,7 @@ yarn add ccreonopoulos/omniaural
 
 In your top level component (usually App.js) import OmniAural and initialize the global state
 ```javascript
-import { OmniAural } from 'omniaural';
+import OmniAural from 'omniaural';
 
 
 OmniAural.initGlobalState({
