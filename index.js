@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withOmniAural = exports.initGlobalState = exports.OmniAural = exports.getDeepValue = void 0;
+exports.withOmniAural = exports.initGlobalState = exports.default = exports.getDeepValue = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -32,12 +32,13 @@ exports.getDeepValue = getDeepValue;
 const sanitize = obj => {
   let newObj = {};
 
-  if (!isObject(obj.value)) {
-    return obj.value;
-  } else {
+  if (isObject(obj.value)) {
     Object.keys(obj.value).forEach(key => {
       newObj[key] = sanitize(obj.value[key]);
     });
+  } else {
+    //exit case for recursion
+    return obj.value;
   }
 
   return newObj;
@@ -49,10 +50,10 @@ const sanitize = obj => {
 
 
 const assign = (obj, keyPath, value) => {
-  let lastKeyIndex = keyPath.length - 1;
+  const lastKeyIndex = keyPath.length - 1;
 
-  for (var i = 0; i < lastKeyIndex; ++i) {
-    let key = keyPath[i];
+  for (let i = 0; i < lastKeyIndex; ++i) {
+    const key = keyPath[i];
 
     if (!(key in obj)) {
       obj[key] = {};
@@ -86,16 +87,16 @@ const assign = (obj, keyPath, value) => {
 
 
 const flatten = (obj, prefix = '') => {
-  return Object.keys(obj).reduce((acc, key) => {
-    const pre = prefix.length ? prefix + '.' : '';
+  return Object.keys(obj).reduce((prev, key) => {
+    const path = prefix.length ? prefix + '.' : '';
 
     if (isObject(obj[key])) {
-      Object.assign(acc, flatten(obj[key], pre + key));
+      Object.assign(prev, flatten(obj[key], path + key));
     } else {
-      acc[pre + key] = obj[key];
+      prev[path + key] = obj[key];
     }
 
-    return acc;
+    return prev;
   }, {});
 };
 /**
@@ -157,7 +158,7 @@ class OmniAural {
         Object.keys(propertyObject.value).forEach(key => {
           const newPath = aliasPath ? aliasPath + "." + key : null;
 
-          OmniAural.UnsafeGlobalInstance._registerProperty(newPath, component, propertyObject.value[key]);
+          this._registerProperty(newPath, component, propertyObject.value[key]);
         });
       }
     });
@@ -347,7 +348,7 @@ class OmniAural {
  */
 
 
-exports.OmniAural = OmniAural;
+exports.default = OmniAural;
 
 _defineProperty(OmniAural, "state", {
   value: () => {
@@ -395,13 +396,17 @@ _defineProperty(OmniAural, "register", (component, properties) => {
   component.omniAuralMap = {};
   let state = component.state || {};
 
-  if (!properties || !properties.length) {
+  if (!properties) {
     OmniAural.UnsafeGlobalInstance._registerProperty(null, component, OmniAural.UnsafeGlobalInstance);
 
     state = { ...state,
       ...sanitize(OmniAural.UnsafeGlobalInstance)
     };
   } else {
+    if (typeof properties === "string") {
+      properties = [properties];
+    }
+
     properties.forEach(prop => {
       let propertyObject = OmniAural.UnsafeGlobalInstance;
       let aliasPath = null;
@@ -433,12 +438,12 @@ _defineProperty(OmniAural, "register", (component, properties) => {
   }
 
   if (component.__proto__.componentWillUnmount) {
-    const unMount = component.componentWillUnmount;
+    const willUnMount = component.componentWillUnmount;
 
     component.componentWillUnmount = function () {
       OmniAural.UnsafeGlobalInstance._deregister(OmniAural.UnsafeGlobalInstance, component);
 
-      unMount();
+      willUnMount();
     };
   } else {
     component.componentWillUnmount = function () {
