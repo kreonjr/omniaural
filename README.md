@@ -47,7 +47,7 @@ After initialization, global state properties can be (but rarely need to be) acc
 OmniAural.state.account.name.value()
 ```
 
-Global state properties can be set directly through the `.set()` function
+Global state properties can be set directly through the `.set()` function.
 ```javascript
 OmniAural.state.account.name.set("John")
 ```
