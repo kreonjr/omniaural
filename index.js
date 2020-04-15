@@ -403,6 +403,37 @@ _defineProperty(OmniAural, "addProperty", (path, property) => {
   }
 });
 
+_defineProperty(OmniAural, "updateProperty", (path, newValue) => {
+  if (typeof path !== "string") {
+    throw `Path needs to be a string representation of the global state path to the property you want to update.`;
+  }
+
+  if (!newValue) {
+    throw `Missing or undefined second argument. Please provide an update value for path '${path}'`;
+  }
+
+  const pathArr = path.split(".");
+  let property = OmniAural.state;
+  pathArr.forEach(step => {
+    if (!property.hasOwnProperty(step)) {
+      throw `Path '${path}' does not exist on the global state object`;
+    }
+
+    property = property[step];
+  });
+
+  if (isObject(newValue)) {
+    const flatObj = flatten(newValue);
+
+    for (const key in flatObj) {
+      let newPath = path + "." + key;
+      OmniAural.updateProperty(newPath, flatObj[key]);
+    }
+  } else {
+    property.set(newValue);
+  }
+});
+
 _defineProperty(OmniAural, "register", (component, properties) => {
   if (component.omniId) {
     return;

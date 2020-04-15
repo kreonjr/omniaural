@@ -122,9 +122,10 @@ describe('Global State Manager', () => {
         })
 
         test('should contain the new nested object property on the global object and have kept the structure intact', () => {
-            OmniAural.addProperty("account", { nextOfKin: { name: "James" }, job: "astronaught" })
+            OmniAural.addProperty("account", { nextOfKin: { name: "James", job: "mailman" }, job: "astronaught" })
 
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["nextOfKin"].value["name"].value === "James").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["nextOfKin"].value["job"].value === "mailman").toBeTruthy()
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["job"].value === "astronaught").toBeTruthy()
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
 
@@ -169,6 +170,19 @@ describe('Global State Updater', () => {
         OmniAural.state.account.nextOfKin.name.set("Mike")
 
         expect(OmniAural.state.account.nextOfKin.name.value() === "Mike").toBeTruthy()
+    })
+
+    test('should update the global state object using the "updateProperty" function correctly', () => {
+        OmniAural.updateProperty("account.nextOfKin.name", "Jake")
+        expect(OmniAural.state.account.nextOfKin.name.value() === "Jake").toBeTruthy()
+
+        OmniAural.updateProperty("account.nextOfKin", { name: "Luke" })
+        expect(OmniAural.state.account.nextOfKin.name.value() === "Luke").toBeTruthy()
+        expect(OmniAural.state.account.nextOfKin.job.value() === "mailman").toBeTruthy()
+
+        expect(() => OmniAural.updateProperty("account.nextOfKin.name")).toThrow("Missing or undefined second argument. Please provide an update value for path 'account.nextOfKin.name'")
+        expect(() => OmniAural.updateProperty({}, "")).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
+        expect(() => OmniAural.updateProperty("account.nextOfKin.address", { street: "Main st" })).toThrow("Path 'account.nextOfKin.address' does not exist on the global state object")
     })
 
     test('should error if a property does not exist at provided path', () => {

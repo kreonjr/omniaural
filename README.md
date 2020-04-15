@@ -273,6 +273,7 @@ The main global state manager class. It should be initialized at your top most c
    - [addAction()](#addAction)
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
+   - [updateProperty()](#updateProperty)
 
 #### initGlobalState() 
 
@@ -424,7 +425,7 @@ _onAnotherClick = () => {
 
 #### addProperty()
 
-This function add new properties to the global state object structure. If you add properties to nested objects, any listener to the parent object will also start listenting to the newly added property.
+This function adds new properties to the global state object structure. If you add properties to nested objects, any listener to the parent object will also start listenting to the newly added property.
 
 | Parameter     | Type          | Description  |
 | ------------- |:------------: | :----------- |
@@ -439,6 +440,26 @@ import OmniAural from 'omniaural'
 OmniAural.addProperty("account.id", 4568585)
 //or
 OmniAural.addProperty("account", {id: 4568585})
+```
+
+#### updateProperty()
+
+This function updates a property at a given path. It receives a string representing the path to the property and a value to update the property
+with.
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | The path in the global state to the property to update.
+| value         | any           | The value to set the passed in property with.
+
+
+##### Example: 
+```javascript
+import OmniAural from 'omniaural'
+
+OmniAural.updateProperty("account.id", 4568585)
+//or
+OmniAural.updateProperty("account", {id: 4568585})
 ```
 
 ---
