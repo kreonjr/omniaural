@@ -57,7 +57,7 @@ class OmniObject {
       return false;
     });
 
-    let id = this.getClassName();
+    const id = this.getClassName();
 
     if (OmniObject.map[id]) {
       return OmniObject.map[id];

@@ -6,13 +6,12 @@
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "build": "babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js",
+    "build": "babel ./src -d . --copy-files && mv OmniAural.js index.js",
     "publish:npm": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn test",
-      "pre-push": "yarn build && git add ."
+      "pre-commit": "yarn test && yarn build && git add ."
     }
   },
   "author": "Creon Creonopoulos",
@@ -31,5 +30,8 @@
     "node-fetch": "^2.6.0",
     "react": "^16.13.0",
     "react-test-renderer": "^16.13.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
   }
 }

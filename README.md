@@ -27,7 +27,7 @@ yarn add ccreonopoulos/omniaural
 
 In your top level component (usually App.js) import OmniAural and initialize the global state
 ```javascript
-import { OmniAural } from 'omniaural';
+import OmniAural from 'omniaural';
 
 
 OmniAural.initGlobalState({
@@ -47,7 +47,7 @@ After initialization, global state properties can be (but rarely need to be) acc
 OmniAural.state.account.name.value()
 ```
 
-Global state properties can be set directly through the `.set()` function
+Global state properties can be set directly through the `.set()` function.
 ```javascript
 OmniAural.state.account.name.set("John")
 ```

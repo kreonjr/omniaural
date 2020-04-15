@@ -114,7 +114,8 @@ export default class OmniAural {
     static state = {
         value: () => {
             return sanitize(OmniAural.UnsafeGlobalInstance)
-        }
+        },
+        context: {}
     }
     /**
      * Each component passed in is given a specific id that auto-increments,
@@ -410,15 +411,15 @@ export default class OmniAural {
         OmniAural[name] = func
     }
 
-   /**
-     * addActions
-     *
-     * This function accepts any number of named functions to be added to the OmniAural class
-     * 
-     * @param {...function}  actionFuncs   Any number of named fucntions to be added on the OmniAural class
-     *
-     * 
-     */
+    /**
+      * addActions
+      *
+      * This function accepts any number of named functions to be added to the OmniAural class
+      * 
+      * @param {...function}  actionFuncs   Any number of named fucntions to be added on the OmniAural class
+      *
+      * 
+      */
     static addActions = (...args) => {
         args.forEach((func) => {
             if (typeof func === "function" && func.name) {
@@ -534,7 +535,14 @@ export default class OmniAural {
                                 return prevState
                             }, null, true)
                         })
-                    }
+
+                        if (this.context[path]) {
+                            for (const contextKey in this.context[path]) {
+                                this.context[path][contextKey](newVal)
+                            }
+                        }
+                    },
+                    context: {}
                 }
             } else {
                 throw `${key} already exists at this global state path`
@@ -562,7 +570,14 @@ export default class OmniAural {
 
                             obj.value[key].set(path + '.' + key, params[key])
                         })
-                    }
+
+                        if (this.context[path]) {
+                            for (const contextKey in this.context[path]) {
+                                this.context[path][contextKey](Object.assign(sanitize(this), params))
+                            }
+                        }
+                    },
+                    context: {}
                 }
             }
 
@@ -620,6 +635,35 @@ export default class OmniAural {
  *
  */
 export const initGlobalState = OmniAural.initGlobalState
+
+export const useOmniAural = (path) => {
+    let pathKeys = path.split(".")
+    let omniObject = OmniAural.UnsafeGlobalInstance
+    pathKeys.forEach(key => {
+        if (omniObject.value.hasOwnProperty(key)) {
+            omniObject = omniObject.value[key]
+        } else {
+            throw `OmniAural state path ${path} is invalid.`
+        }
+    });
+
+    const initialVal = isObject(omniObject.value) ? sanitize(omniObject) : omniObject.value
+    const [property, setProperty] = React.useState(initialVal)
+
+    React.useEffect(() => {
+        const omniAuralId = OmniAural.listenerCounter++
+        if (!omniObject.context[path]) {
+            omniObject.context[path] = {}
+        }
+        omniObject.context[path][omniAuralId] = setProperty
+
+        return () => {
+            delete omniObject.context[path][omniAuralId]
+        }
+    }, [])
+
+    return [property]
+}
 
 /**
  * withOmniAural
