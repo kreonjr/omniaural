@@ -5,6 +5,7 @@ import MyComponent from "./MyComponent";
 import MyOtherComponent from "./MyOtherComponent";
 import MyBadComponent from "./MyBadComponent";
 import MyFunctional from "./MyFunctional";
+import MyHooksFunctional from "./MyHooksFunctional";
 import mockInitialState from "./mockInitialState";
 const fetch = require("node-fetch").default
 
@@ -62,7 +63,7 @@ describe('Global State Manager', () => {
 
         test('should allow for async actions to update global state', async () => {
             OmniAural.addAction('asyncAction', () => {
-                return fetch('https://jsonplaceholder.typicode.com/todos/100')
+                return fetch('https://www.google.com')
                     .then(response => {
                         OmniAural.state.account.name.set("Josh")
                     })
@@ -395,5 +396,63 @@ describe("Component Testing", () => {
             expect(tree2.children[1].children.includes("Linus")).toBeTruthy()
         })
     })
+
+    // describe("OmniAural Hook", () => {
+    //     test("Hook is created with the correct value", () => {
+    //         const component = renderer.create(<MyHooksFunctional />)
+    //         let tree = component.toJSON()
+    //         expect(tree).toMatchSnapshot()
+
+    //         expect(tree.children[0].children.includes("Linus")).toBeTruthy()
+    //         expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
+    //     })
+
+    //     test("Hook is updated with the correct value", () => {
+    //         const component = renderer.create(<MyHooksFunctional />)
+    //         let tree = component.toJSON()
+    //         expect(tree).toMatchSnapshot()
+
+    //         expect(tree.children[0].children.includes("Linus")).toBeTruthy()
+    //         act(() => {
+    //             OmniAural.state.account.name.set("Evan")
+    //         })
+
+    //         expect(OmniAural.state.account.name.value() === "Evan").toBeTruthy()
+    //         tree = component.toJSON();
+    //         console.log("Children: ", tree.children[0].children)
+    //         //expect(tree.children[0].children.includes("Evan")).toBeTruthy()
+    //     })
+
+    //     test("Hook is updated with the correct nested value", () => {
+    //         //expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.address")).toBeFalsy()
+    //         const component = renderer.create(<MyHooksFunctional />)
+    //         let tree = component.toJSON()
+    //         expect(tree).toMatchSnapshot()
+
+    //         expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
+    //         act(() => {
+    //             OmniAural.state.account.address.set({ street: "Clark" })
+    //         })
+
+    //         expect(OmniAural.state.account.address.street.value() === "Clark").toBeTruthy()
+    //         tree = component.toJSON();
+    //         expect(tree.children[1].children.includes("Clark in New York")).toBeTruthy()
+    //     })
+    // })
+
+    // describe("Stuff", () => {
+    //     test("Hooks verifying a functional component regietered", () => {
+    //         console.log(OmniAural.UnsafeGlobalInstance.value.account.value.name.context)
+    //         const originalCount = OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length
+    //         const component = renderer.create(<MyHooksFunctional />)
+    //         console.log(OmniAural.UnsafeGlobalInstance.value.account.value.name.context)
+    //         expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.name")).toBeTruthy()
+    //         console.log("Before unmount")
+    //         component.unmount()
+    //         console.log("After unmount")
+    //         console.log(OmniAural.UnsafeGlobalInstance.value.account.value.name.context)
+    //         expect(originalCount === OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length).toBeTruthy()
+    //     })
+    // })
 
 })

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.withOmniAural = exports.initGlobalState = exports.default = exports.getDeepValue = void 0;
+exports.withOmniAural = exports.useOmniAural = exports.initGlobalState = exports.default = exports.getDeepValue = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -243,7 +243,14 @@ class OmniAural {
                   return prevState;
                 }, null, true);
               });
-            }
+
+              if (this.context[path]) {
+                for (const contextKey in this.context[path]) {
+                  this.context[path][contextKey](newVal);
+                }
+              }
+            },
+            context: {}
           };
         } else {
           throw `${key} already exists at this global state path`;
@@ -272,7 +279,14 @@ class OmniAural {
 
                 obj.value[key].set(path + '.' + key, params[key]);
               });
-            }
+
+              if (this.context[path]) {
+                for (const contextKey in this.context[path]) {
+                  this.context[path][contextKey](Object.assign(sanitize(this), params));
+                }
+              }
+            },
+            context: {}
           };
         }
 
@@ -353,7 +367,8 @@ exports.default = OmniAural;
 _defineProperty(OmniAural, "state", {
   value: () => {
     return sanitize(OmniAural.UnsafeGlobalInstance);
-  }
+  },
+  context: {}
 });
 
 _defineProperty(OmniAural, "listenerCounter", 1);
@@ -512,6 +527,37 @@ _defineProperty(OmniAural, "addActions", (...args) => {
 });
 
 const initGlobalState = OmniAural.initGlobalState;
+exports.initGlobalState = initGlobalState;
+
+const useOmniAural = path => {
+  let pathKeys = path.split(".");
+  let omniObject = OmniAural.UnsafeGlobalInstance;
+  pathKeys.forEach(key => {
+    if (omniObject.value.hasOwnProperty(key)) {
+      omniObject = omniObject.value[key];
+    } else {
+      throw `OmniAural state path ${path} is invalid.`;
+    }
+  });
+  const initialVal = isObject(omniObject.value) ? sanitize(omniObject) : omniObject.value;
+
+  const [property, setProperty] = _react.default.useState(initialVal);
+
+  _react.default.useEffect(() => {
+    const omniAuralId = OmniAural.listenerCounter++;
+
+    if (!omniObject.context[path]) {
+      omniObject.context[path] = {};
+    }
+
+    omniObject.context[path][omniAuralId] = setProperty;
+    return () => {
+      delete omniObject.context[path][omniAuralId];
+    };
+  }, []);
+
+  return [property];
+};
 /**
  * withOmniAural
  *
@@ -541,7 +587,8 @@ const initGlobalState = OmniAural.initGlobalState;
  *
  */
 
-exports.initGlobalState = initGlobalState;
+
+exports.useOmniAural = useOmniAural;
 
 const withOmniAural = (RegisteredComponent, paths = []) => {
   return class GlobalComponent extends _react.default.Component {

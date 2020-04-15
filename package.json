@@ -1,22 +1,29 @@
 {
   "name": "omniaural",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight global state manager",
   "main": "index.js",
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "build": "babel ./src -d . --copy-files && mv OmniAural.js index.js",
-    "publish:npm": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
+    "build:git": "babel ./src -d . --copy-files && mv OmniAural.js index.js",
+    "build": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn test && yarn build && git add ."
+      "pre-commit": "yarn test && yarn build:git && git add ."
     }
   },
   "author": "Creon Creonopoulos",
+  "contributors": [
+    "Chris Steele",
+    "Creon Creonopoulos"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ccreonopoulos/omniaural.git"
+  },
   "license": "MIT",
-  "private": true,
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.6",
@@ -30,5 +37,8 @@
     "node-fetch": "^2.6.0",
     "react": "^16.13.0",
     "react-test-renderer": "^16.13.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
   }
 }

@@ -13,12 +13,12 @@ Changing global state is handled through a call to OmniAural that can be called 
 
 ## Getting started
 
-TBD npm repo.
+### Instalation
 
-For now, install it from github directly.
+Install package from npm
 
 ```bash
-yarn add ccreonopoulos/omniaural
+yarn add omniaural
 ```
 
 ## Usage
