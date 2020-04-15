@@ -122,9 +122,10 @@ describe('Global State Manager', () => {
         })
 
         test('should contain the new nested object property on the global object and have kept the structure intact', () => {
-            OmniAural.addProperty("account", { nextOfKin: { name: "James" } })
+            OmniAural.addProperty("account", { nextOfKin: { name: "James" }, job: "astronaught" })
 
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["nextOfKin"].value["name"].value === "James").toBeTruthy()
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["job"].value === "astronaught").toBeTruthy()
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["name"].value === "Josh").toBeTruthy()
 
             expect(OmniAural.state.account.nextOfKin.name.value() === "James").toBeTruthy()

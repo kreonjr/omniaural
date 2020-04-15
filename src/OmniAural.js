@@ -172,8 +172,9 @@ export default class OmniAural {
             OmniAural.UnsafeGlobalInstance._addKeyValue(OmniAural.UnsafeGlobalInstance.value, key, newObj[key])
         })
 
-        let setter = OmniAural.state
+
         if (!isObject(property)) {
+            let setter = OmniAural.state
             pathArr.forEach((step) => {
                 setter = setter[step]
             })
@@ -181,6 +182,7 @@ export default class OmniAural {
             setter.set(property)
         } else {
             Object.keys(flatObject).forEach((innerPath) => {
+                let setter = OmniAural.state
                 innerPath.split(".").forEach((step) => {
                     setter = setter[step]
                 })
