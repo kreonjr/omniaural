@@ -29,7 +29,6 @@ In your top level component (usually App.js) import OmniAural and initialize the
 ```javascript
 import OmniAural from 'omniaural';
 
-
 OmniAural.initGlobalState({
    account: {
         name: 'Jack',
@@ -60,7 +59,6 @@ You can also use aliases to allow for local naming that makes more sense for you
 
 ```javascript
 import React from 'react'
-import { StyleSheet, SafeAreaView, Text } from 'react-native'
 import OmniAural from 'omniaural'
 
 export class IntroScreen extends React.Component<*, *> {
@@ -79,31 +77,31 @@ export class IntroScreen extends React.Component<*, *> {
 
   render() {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.instructions}>
+      <div style={styles.container}>
+        <span style={styles.instructions}>
           Account information
-        </Text>
-        <Text style={styles.instructions}>
+        </span>
+        <div style={styles.instructions}>
           {'\n'}
           {`Name: ${this.state.account.name}` /* I'm accessing global state here, it just looks local to the component */}
           {'\n'}
           {`Currently employed: ${this.state.person.employed}` /* this is actually local state */}
           {'\n'}
           {`Street: ${this.state.address.street}` /* this is global state again */}
-        </Text>
-      </SafeAreaView>
+        </div>
+      </div>
     )
   }
 }
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white'
   }
-})
+}
 
 ```
 
@@ -113,7 +111,6 @@ Using the OmniAural.state object, you can make changes to the global state value
 
 ```javascript
 import React from 'react'
-import { StyleSheet, SafeAreaView, Text } from 'react-native'
 import OmniAural from 'omniaural'
 
 export class IntroScreen extends React.Component<*, *> {
@@ -136,31 +133,31 @@ export class IntroScreen extends React.Component<*, *> {
 
   render() {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.instructions}>
+      <div style={styles.container}>
+        <span style={styles.instructions}>
           Account information
-        </Text>
-        <Text style={styles.instructions} onPress={this._updateAddress}>
+        </span>
+        <div style={styles.instructions} onClick={this._updateAddress}>
           {'\n'}
           {`Name: ${this.state.account.name}`}
           {'\n'}
           {`Currently employed: ${this.state.person.employed}`}
           {'\n'}
           {`Street: ${this.state.address.street}`}
-        </Text>
-      </SafeAreaView>
+        </div>
+      </div>
     )
   }
 }
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white'
   }
-})
+}
 
 ```
 
@@ -170,7 +167,6 @@ Actions are the prefered way to encapsulate your global state changes.  They can
 
 ```javascript
 import React from 'react'
-import { StyleSheet, SafeAreaView, Text } from 'react-native'
 import OmniAural from 'omniaural'
 
 // Add a globally accessable action to update the global address object
@@ -197,48 +193,66 @@ export class IntroScreen extends React.Component<*, *> {
 
   render() {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.instructions}>
+      <div style={styles.container}>
+        <span style={styles.instructions}>
           Account information
-        </Text>
-        <Text style={styles.instructions} onPress={this._updateAddress}>
+        </span>
+        <div style={styles.instructions} onClick={this._updateAddress}>
           {'\n'}
           {`Name: ${this.state.account.name}`}
           {'\n'}
           {`Currently employed: ${this.state.person.employed}`}
           {'\n'}
           {`Street: ${this.state.address.street}`}
-        </Text>
-      </SafeAreaView>
+        </div>
+      </div>
     )
   }
 }
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white'
   }
-})
+}
 
 ```
 
 ### Functional components
 
-You can register a functional component by wrapping it in the [withOmniAural](#withOmniAural) HOC function
+You can register a functional component by creating an OmniAural state hook [useOmniAural](#useOmniAural)
 
 ```javascript
 import React from 'react'
-import { View, Text } from 'react-native'
+import { useOmniAural } from 'omniaural'
+
+const PersonScreen = () => {
+  const [person] = useOmniAural("account")
+  
+  return (
+    <div>
+      <span>User Id: {person.id}</span>
+    </div>
+  )
+}
+
+export default PersonScreen
+```
+
+You can also register a functional component by wrapping it in the [withOmniAural](#withOmniAural) HOC function
+
+```javascript
+import React from 'react'
 import { withOmniAural } from 'omniaural'
 
 const PersonScreen = (props) => {
   return (
-    <View>
-      <Text>User Id: {props.person.id}</Text>
-    </View>
+    <div>
+      <span>User Id: {props.person.id}</span>
+    </div>
   )
 }
 
@@ -259,6 +273,7 @@ The main global state manager class. It should be initialized at your top most c
    - [addAction()](#addAction)
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
+   - [updateProperty()](#updateProperty)
 
 #### initGlobalState() 
 
@@ -410,7 +425,7 @@ _onAnotherClick = () => {
 
 #### addProperty()
 
-This function add new properties to the global state object structure. If you add properties to nested objects, any listener to the parent object will also start listenting to the newly added property.
+This function adds new properties to the global state object structure. If you add properties to nested objects, any listener to the parent object will also start listenting to the newly added property.
 
 | Parameter     | Type          | Description  |
 | ------------- |:------------: | :----------- |
@@ -427,9 +442,60 @@ OmniAural.addProperty("account.id", 4568585)
 OmniAural.addProperty("account", {id: 4568585})
 ```
 
+#### updateProperty()
+
+This function updates a property at a given path. It receives a string representing the path to the property and a value to update the property
+with.
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | The path in the global state to the property to update.
+| value         | any           | The value to set the passed in property with.
+
+
+##### Example: 
+```javascript
+import OmniAural from 'omniaural'
+
+OmniAural.updateProperty("account.id", 4568585)
+//or
+OmniAural.updateProperty("account", {id: 4568585})
+```
+
 ---
 
-### Functions
+### HOOK 
+
+#### useOmniAural
+
+The `useOmniAural` hook is a custom hook that creates a local variable tied to a global state property value. It can be used in stateless
+functional components to register to variables that live on global state. `useOmniAural` does *not* provide a setter because any updates to 
+the global state should always be done through the property setter or custom omniaural actions.
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | A string path that represent the path to the global properties to register to.
+
+##### Example: 
+```javascript
+import React from 'react'
+import { useOmniAural } from 'omniaural'
+
+const PersonScreen = () => {
+  const [accountId] = useOmniAural("account.id")
+
+  return (
+    <div>
+      <span>User Id: {accountId}</span>
+    </div>
+  )
+}
+
+export default PersonScreen
+```
+
+
+### HOC
 
 #### withOmniAural
 
@@ -442,18 +508,16 @@ The registered properties will be passed in as props to the functional component
 | paths         | Array<string> | An array of strings that represent the paths to the global properties to listen to. Each path can receive an alias similar to the [register](#register) function to be passed into the props.
 
 
-
 ##### Example: 
 ```javascript
 import React from 'react'
-import { View, Text } from 'react-native'
 import { withOmniAural } from 'omniaural'
 
 const PersonScreen = (props) => {
   return (
-    <View>
-      <Text>User Id: {props.person.id}</Text>
-    </View>
+    <div>
+      <span>User Id: {props.person.id}</span>
+    </div>
   )
 }
 
