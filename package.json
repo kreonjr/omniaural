@@ -6,12 +6,12 @@
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "build:git": "babel ./src -d . --copy-files && mv OmniAural.js index.js",
+    "build:local": "babel ./src -d . --copy-files && mv OmniAural.js index.js",
     "build": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn test && yarn build:git && git add ."
+      "pre-commit": "yarn test"
     }
   },
   "author": "Creon Creonopoulos",
