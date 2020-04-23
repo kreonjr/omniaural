@@ -194,18 +194,18 @@ export default class OmniAural {
 
     static updateProperty = (path, newValue) => {
         if (typeof path !== "string") {
-            throw `Path needs to be a string representation of the global state path to the property you want to update.`
+            throw new Error(`Path needs to be a string representation of the global state path to the property you want to update.`)
         }
 
         if (!newValue) {
-            throw `Missing or undefined second argument. Please provide an update value for path '${path}'`
+            throw new Error(`Missing or undefined second argument. Please provide an update value for path '${path}'`)
         }
 
         const pathArr = path.split(".")
         let property = OmniAural.state
         pathArr.forEach((step) => {
             if (!property.hasOwnProperty(step)) {
-                throw `Path '${path}' does not exist on the global state object`
+                throw new Error(`Path '${path}' does not exist on the global state object`)
             }
             property = property[step]
         })
@@ -233,9 +233,10 @@ export default class OmniAural {
     * it when the value changes
     * 
     */
-    _registerProperty = (aliasPath, component, propertyObject) => {
+    _registerProperty = (aliasPath, component, propertyObject, propertKeyPath, eventCallback) => {
         const mapKey = aliasPath ? component.omniId + "." + aliasPath : component.omniId
         propertyObject.listeners.set(mapKey, { aliasPath, component })
+        if (eventCallback) this._addObserver(propertyObject, propertKeyPath, eventCallback, component.omniId)
 
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
@@ -243,7 +244,9 @@ export default class OmniAural {
                 this._registerProperty(
                     newPath,
                     component,
-                    propertyObject.value[key]
+                    propertyObject.value[key],
+                    propertKeyPath + "." + key,
+                    eventCallback
                 )
             })
         }
@@ -293,7 +296,7 @@ export default class OmniAural {
      * }
      *
      */
-    static register = (component, properties) => {
+    static register = (component, properties, callback) => {
         if (component.omniId) {
             return
         }
@@ -306,7 +309,8 @@ export default class OmniAural {
             OmniAural.UnsafeGlobalInstance._registerProperty(
                 null,
                 component,
-                OmniAural.UnsafeGlobalInstance
+                OmniAural.UnsafeGlobalInstance,
+                callback
             )
             state = { ...state, ...sanitize(OmniAural.UnsafeGlobalInstance) }
         } else {
@@ -331,7 +335,7 @@ export default class OmniAural {
                     path.forEach((step) => {
                         if (!propertyObject.value.hasOwnProperty(step)) {
                             // error
-                            throw `Invalid object path: ${prop}. Make sure the path to the property matches your global state structure.`
+                            throw new Error(`Invalid object path: ${prop}. Make sure the path to the property matches your global state structure.`)
                         } else {
                             propertyObject = propertyObject.value[step]
                         }
@@ -344,7 +348,9 @@ export default class OmniAural {
                 OmniAural.UnsafeGlobalInstance._registerProperty(
                     aliasPath,
                     component,
-                    propertyObject
+                    propertyObject,
+                    prop,
+                    callback
                 )
             })
         }
@@ -381,7 +387,7 @@ export default class OmniAural {
                     const omniVal = getDeepValue(OmniAural.state, component.omniAuralMap[key])
 
                     if (stateVal && stateVal !== omniVal.value()) {
-                        throw `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
+                        throw new Error(`You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`)
                     }
                 })
             }
@@ -430,14 +436,14 @@ export default class OmniAural {
             name = args[0]
             func = args[1]
             if (typeof func !== "function" || !name) {
-                throw `Single argument must be a named function`
+                throw new Error(`Single argument must be a named function`)
             }
         } else {
-            throw `addAction must have exactly 1 or 2 arguments`
+            throw new Error(`addAction must have exactly 1 or 2 arguments`)
         }
 
         if (typeof func !== "function" || !name) {
-            throw `Actions must be named functions`
+            throw new Error(`Actions must be named functions`)
         }
 
         OmniAural[name] = func
@@ -457,7 +463,7 @@ export default class OmniAural {
             if (typeof func === "function" && func.name) {
                 OmniAural.addAction(func)
             } else {
-                throw `All actions must be named functions`
+                throw new Error(`All actions must be named functions`)
             }
         })
     }
@@ -481,7 +487,13 @@ export default class OmniAural {
                     path.split('.').forEach((pathStep) => {
                         obj = obj.value[pathStep]
                     })
+
                     obj.set(path, newValue)
+                    if (obj.observers.has(path)) {
+                        obj.observers.get(path).forEach(callback => {
+                            callback()
+                        })
+                    }
                 },
                 value: () => {
                     let obj = OmniAural.UnsafeGlobalInstance
@@ -496,7 +508,7 @@ export default class OmniAural {
                 base[key] = {
                     set: (params) => {
                         if (!isObject(params)) {
-                            throw `You are trying to set an object. Please pass an object arguement`
+                            throw new Error(`You are trying to set an object. Please pass an object arguement`)
                         }
                         let obj = OmniAural.UnsafeGlobalInstance
                         path.split('.').forEach((pathStep) => {
@@ -504,6 +516,12 @@ export default class OmniAural {
                         })
 
                         obj.set(path, params)
+
+                        if (obj.observers.has(path)) {
+                            obj.observers[path].forEach((callback) => {
+                                callback()
+                            })
+                        }
                     },
                     value: () => {
                         let obj = OmniAural.UnsafeGlobalInstance
@@ -574,10 +592,11 @@ export default class OmniAural {
                             }
                         }
                     },
-                    context: {}
+                    context: {},
+                    observers: new Map()
                 }
             } else {
-                throw `${key} already exists at this global state path`
+                throw new Error(`${key} already exists at this global state path`)
             }
         } else {
             let baseValue = initialVal
@@ -597,7 +616,7 @@ export default class OmniAural {
                             })
 
                             if (!obj.value.hasOwnProperty(key)) {
-                                throw `Property '${key}' not present in object '${path}'`
+                                throw new Error(`Property '${key}' not present in object '${path}'`)
                             }
 
                             obj.value[key].set(path + '.' + key, params[key])
@@ -609,7 +628,8 @@ export default class OmniAural {
                             }
                         }
                     },
-                    context: {}
+                    context: {},
+                    observers: new Map()
                 }
             }
 
@@ -617,7 +637,30 @@ export default class OmniAural {
                 this._addKeyValue(baseValue, innerKey, initialVal[innerKey], base[key].listeners)
             })
         }
+    }
 
+    _addObserver = (prop, path, observer, newId = OmniAural.listenerCounter++) => {
+        if (!prop.observers.has(path)) {
+            prop.observers.set(path, new Map())
+        }
+        prop.observers.get(path).set(newId, observer)
+
+        if (isObject(prop.value)) {
+            let removers = []
+            Object.keys(prop.value).forEach((key) => {
+                removers.push(this._addObserver(prop.value[key], `${path}.${key}`, observer))
+            })
+            return () => {
+                removers.forEach((remover) => {
+                    remover()
+                })
+                prop.observers.get(path).delete(newId)
+            }
+        } else {
+            return () => {
+                prop.observers.get(path).delete(newId)
+            }
+        }
     }
 
     /**
@@ -634,6 +677,11 @@ export default class OmniAural {
             base.listeners.forEach((listener, listenerId) => {
                 if (listener.component.omniId === component.omniId) {
                     base.listeners.delete(listenerId)
+                }
+            })
+            base.observers.forEach((observer) => {
+                if (observer.has(component.omniId)) {
+                    observer.delete(component.omniId)
                 }
             })
         } else {
@@ -675,7 +723,7 @@ export const useOmniAural = (path) => {
         if (omniObject.value.hasOwnProperty(key)) {
             omniObject = omniObject.value[key]
         } else {
-            throw `OmniAural state path ${path} is invalid.`
+            throw new Error(`OmniAural state path ${path} is invalid.`)
         }
     });
 
@@ -692,9 +740,34 @@ export const useOmniAural = (path) => {
         return () => {
             delete omniObject.context[path][omniAuralId]
         }
-    }, [])
+    }, [path, omniObject.context])
 
     return [property]
+}
+
+export const useOmniAuralEffect = (callback, listeners = []) => {
+    React.useEffect(() => {
+        let listerPaths = []
+        if (typeof listeners === "string") {
+            listerPaths = [listeners]
+        } else {
+            listerPaths = [...listeners]
+        }
+
+        let removers = []
+        listerPaths.forEach((path) => {
+            let property = OmniAural.UnsafeGlobalInstance
+            path.split('.').forEach((pathStep) => {
+                property = property.value[pathStep]
+            })
+
+            removers.push(OmniAural.UnsafeGlobalInstance._addObserver(property, path, callback))
+        })
+
+        return () => {
+            removers.forEach((rem) => rem())
+        }
+    }, [callback, listeners])
 }
 
 /**
