@@ -525,10 +525,10 @@ export default PersonScreen
 The `useOmniAuralEffect` hook takes a function and a path (or an array of paths) to properties on the OmniAural state and fires the
 passed in function when those properties values change.
 
-| Parameter     | Type           | Description  |
-| ------------- |:------------:  | :----------- |
-| listener      | Function       | A function that will be called when any of the passed in property paths values change
-| path(s)       | String | Array | A string (or array of strings) that represent the path to the global property to register the listener to.
+| Parameter     | Type            | Description  |
+| ------------- |:------------:   | :----------- |
+| listener      | Function        | A function that will be called when any of the passed in property paths values change
+| path(s)       | String or Array | A string (or array of strings) that represent the path to the global property to register the listener to.
 
 ##### Example: 
 ```javascript
@@ -562,7 +562,7 @@ The registered properties will be passed in as props to the functional component
 | Parameter     | Type          | Description  |
 | ------------- |:------------: | :----------- |
 | component     | Function      | The functional component to start listening to the global state.
-| paths         | Array<string> | An array of strings that represent the paths to the global properties to listen to. Each path can receive an alias similar to the [register](#register) function to be passed into the props.
+| paths         | Array         | An array of strings that represent the paths to the global properties to listen to. Each path can receive an alias similar to the [register](#register) function to be passed into the props.
 
 
 ##### Example: 
