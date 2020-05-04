@@ -5,7 +5,8 @@ export default {
             street: "Randolph",
             city: "Chicago"
         },
-        phone_number: 1234567890
+        phone_number: 1234567890,
+        id: "abcd1234"
     },
     dev_mode: false
 }
