@@ -9,6 +9,9 @@ export default class MyComponent extends React.Component {
         }
 
         OmniAural.register(this, ["account.name as name", "account.name as person.name", "account.address", "account.address.street as street", "account as info.account"])
+        OmniAural.register(this, ["account.phone_number as number"], () => {
+            console.log("Global State Changed")
+        })
     }
 
     _updateName = (name) => {

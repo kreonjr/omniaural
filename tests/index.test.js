@@ -412,6 +412,35 @@ describe("Component Testing", () => {
         })
     })
 
+
+
+    describe("Property change listener function testing", () => {
+        const originalLog = console.log
+        let consoleOutput = []
+        const mockedLog = output => consoleOutput.push(output)
+
+        describe("Class component listerner tester", () => {
+            beforeEach(() => (console.log = mockedLog))
+
+            afterEach(() => {
+                console.log = originalLog
+                consoleOutput = []
+            })
+
+            it("Verifies a listener was set and is fired on global registered property change", () => {
+                const component = renderer.create(<MyComponent />)
+                let tree = component.toJSON()
+
+                OmniAural.state.account.phone_number.set(3112114343)
+
+                expect(consoleOutput).toEqual([
+                    "Global state Changed"
+                ])
+
+            })
+        })
+    })
+
     // describe("OmniAural Hook", () => {
     //     test("Hook is created with the correct value", () => {
     //         const component = renderer.create(<MyHooksFunctional />)
