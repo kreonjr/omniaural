@@ -192,9 +192,28 @@ describe('Global State Updater', () => {
 
 
 describe("Component Testing", () => {
+    let component
+    let component1
+    let component2
+
+    afterEach(() => {
+        if(component) {
+            component.unmount()
+            component = null
+        }
+        if(component1) {
+            component1.unmount()
+            component1 = null
+        }
+        if(component2) {
+            component2.unmount()
+            component2 = null
+        }
+    })
+    
     describe("The Class Component", () => {
         test('should register and contain the account name on initialization', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(tree).toMatchSnapshot()
@@ -203,7 +222,7 @@ describe("Component Testing", () => {
         })
 
         test('should register and contain the phone number on initialization', () => {
-            const component = renderer.create(<MyOtherComponent />)
+            component = renderer.create(<MyOtherComponent />)
             let tree = component.toJSON()
 
             expect(tree).toMatchSnapshot()
@@ -212,7 +231,7 @@ describe("Component Testing", () => {
         })
 
         test('should register and contain the address street on initialization using an alias', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
             expect(tree).toMatchSnapshot()
 
@@ -220,7 +239,7 @@ describe("Component Testing", () => {
         })
 
         test('should update correctly the account name global property and also be listening to global updates', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
             expect(tree.children[0].children.includes("Josh")).toBeTruthy()
 
@@ -232,8 +251,8 @@ describe("Component Testing", () => {
         })
 
         test('should reflect global state updates on all its live instances', () => {
-            const component1 = renderer.create(<MyComponent />)
-            const component2 = renderer.create(<MyComponent />)
+            component1 = renderer.create(<MyComponent />)
+            component2 = renderer.create(<MyComponent />)
 
             let tree1 = component1.toJSON()
             expect(tree1.children[0].children.includes("Victor")).toBeTruthy()
@@ -251,7 +270,7 @@ describe("Component Testing", () => {
         })
 
         test('should update correctly the address street name global property and also be listening to global updates through the alias', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(tree.children[1].children.includes("State")).toBeTruthy()
@@ -264,7 +283,7 @@ describe("Component Testing", () => {
         })
 
         test('should update correctly the account name global property from within the component', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(tree.children[0].children.includes("Manny")).toBeTruthy()
@@ -276,8 +295,8 @@ describe("Component Testing", () => {
         })
 
         test('should reflect global property updates from one component to another', () => {
-            const component1 = renderer.create(<MyComponent />)
-            const component2 = renderer.create(<MyComponent />)
+            component1 = renderer.create(<MyComponent />)
+            component2 = renderer.create(<MyComponent />)
 
             let tree1 = component1.toJSON()
             let tree2 = component2.toJSON()
@@ -296,19 +315,21 @@ describe("Component Testing", () => {
         })
 
         test('should add a property and include it in its state', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["zip"]).toBeUndefined()
             expect(tree.children[2].children).toBeNull()
-            tree.children[2].props.onClick()
-            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["zip"].value === 12345).toBeTruthy()
 
+            tree.children[2].props.onClick()
+            
+            expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["zip"].value === 12345).toBeTruthy()
             tree = component.toJSON()
             expect(tree.children[2].children.includes("12345")).toBeTruthy()
         })
 
         test('should not allow to update local state of global property', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(() => tree.children[5].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.name\". Please use the global property setter.')
@@ -318,7 +339,7 @@ describe("Component Testing", () => {
         })
 
         test('should not allow to update local state of global property with alias', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(() => tree.children[6].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.person.name\". Please use the global property setter.')
@@ -328,7 +349,7 @@ describe("Component Testing", () => {
         })
 
         test('should not allow to update local state of global property with alias with function format ', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(() => tree.children[7].props.onClick()).toThrow('You are attempting to localy update a global variable registered at path \"state.person.name\". Please use the global property setter.')
@@ -338,7 +359,7 @@ describe("Component Testing", () => {
         })
 
         test('should allow to update local state properties', () => {
-            const component = renderer.create(<MyComponent />)
+          component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(tree.children[8].children.includes("Small Description")).toBeTruthy()
@@ -348,7 +369,7 @@ describe("Component Testing", () => {
         })
 
         test('should allow to update local state properties with functional setState', () => {
-            const component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(tree.children[9].children.includes("Small Description")).toBeTruthy()
@@ -369,6 +390,7 @@ describe("Component Testing", () => {
             expect(tree).toMatchSnapshot()
 
             expect(tree.children[0].children.includes("Dev mode: true")).toBeTruthy()
+            component.unmount()
         })
 
         test('Listeners contain the correct name of the functional component', () => {
@@ -376,6 +398,7 @@ describe("Component Testing", () => {
             const instance = component.getInstance()
 
             expect(OmniAural.UnsafeGlobalInstance.value["dev_mode"].listeners.get(instance.omniId).component.name === instance.name).toBeTruthy()
+            component.unmount()
         })
 
         test('should update correctly when global state changes', () => {
@@ -388,6 +411,7 @@ describe("Component Testing", () => {
 
             tree = component.toJSON();
             expect(tree.children[0].children.includes("Dev mode: false")).toBeTruthy()
+            component.unmount()
         })
 
         test('should update correctly when a global state change happens from another component', () => {
@@ -409,12 +433,13 @@ describe("Component Testing", () => {
 
             tree2 = functional.toJSON();
             expect(tree2.children[1].children.includes("Linus")).toBeTruthy()
+
+            functional.unmount()
+            component.unmount()
         })
     })
 
-
-
-    describe("Property change listener function testing", () => {
+    describe("Property update listener function testing", () => {
         const originalLog = console.log
         let consoleOutput = []
         const mockedLog = output => consoleOutput.push(output)
@@ -427,76 +452,85 @@ describe("Component Testing", () => {
                 consoleOutput = []
             })
 
-            it("Verifies a listener was set and is fired on global registered property change", () => {
+            test("Verifies a listener was set and is fired on global registered property change", () => {
                 const component = renderer.create(<MyComponent />)
                 let tree = component.toJSON()
 
                 OmniAural.state.account.phone_number.set(3112114343)
 
                 expect(consoleOutput).toEqual([
-                    "Global state Changed"
+                    "Global State Changed"
                 ])
 
+                component.unmount()
             })
         })
     })
 
-    // describe("OmniAural Hook", () => {
-    //     test("Hook is created with the correct value", () => {
-    //         const component = renderer.create(<MyHooksFunctional />)
-    //         let tree = component.toJSON()
-    //         expect(tree).toMatchSnapshot()
+    describe("OmniAural Hooks", () => {
+        test("Hook is created with the correct value", () => {
+            let component
+            act(() =>{
+                component = renderer.create(<MyHooksFunctional />)
+            })
+            let tree = component.toJSON()
+            expect(tree).toMatchSnapshot()
 
-    //         expect(tree.children[0].children.includes("Linus")).toBeTruthy()
-    //         expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
-    //     })
+            expect(tree.children[0].children.includes("Linus")).toBeTruthy()
+            expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
+        })
 
-    //     test("Hook is updated with the correct value", () => {
-    //         const component = renderer.create(<MyHooksFunctional />)
-    //         let tree = component.toJSON()
-    //         expect(tree).toMatchSnapshot()
+        test("Hook is updated with the correct value", () => {
+            let component
+            act(() =>{
+                component = renderer.create(<MyHooksFunctional />)
+            })
 
-    //         expect(tree.children[0].children.includes("Linus")).toBeTruthy()
-    //         act(() => {
-    //             OmniAural.state.account.name.set("Evan")
-    //         })
+            let tree = component.toJSON()
+            expect(tree).toMatchSnapshot()
 
-    //         expect(OmniAural.state.account.name.value() === "Evan").toBeTruthy()
-    //         tree = component.toJSON();
-    //         console.log("Children: ", tree.children[0].children)
-    //         //expect(tree.children[0].children.includes("Evan")).toBeTruthy()
-    //     })
+            expect(tree.children[0].children.includes("Linus")).toBeTruthy()
+            
+            act(() =>{
+                OmniAural.state.account.name.set("Evan")
+            })
 
-    //     test("Hook is updated with the correct nested value", () => {
-    //         //expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.address")).toBeFalsy()
-    //         const component = renderer.create(<MyHooksFunctional />)
-    //         let tree = component.toJSON()
-    //         expect(tree).toMatchSnapshot()
+            expect(OmniAural.state.account.name.value() === "Evan").toBeTruthy()
+            tree = component.toJSON();
+            
+            expect(tree.children[0].children.includes("Evan")).toBeTruthy()
+        })
 
-    //         expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
-    //         act(() => {
-    //             OmniAural.state.account.address.set({ street: "Clark" })
-    //         })
+        test("Hook is updated with the correct nested value", () => {
+            let component
+            
+            act(() => {
+              component = renderer.create(<MyHooksFunctional />)
+            })
 
-    //         expect(OmniAural.state.account.address.street.value() === "Clark").toBeTruthy()
-    //         tree = component.toJSON();
-    //         expect(tree.children[1].children.includes("Clark in New York")).toBeTruthy()
-    //     })
-    // })
+            let tree = component.toJSON()
+            expect(tree).toMatchSnapshot()
 
-    // describe("Stuff", () => {
-    //     test("Hooks verifying a functional component regietered", () => {
-    //         console.log(OmniAural.UnsafeGlobalInstance.value.account.value.name.context)
-    //         const originalCount = OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length
-    //         const component = renderer.create(<MyHooksFunctional />)
-    //         console.log(OmniAural.UnsafeGlobalInstance.value.account.value.name.context)
-    //         expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.name")).toBeTruthy()
-    //         console.log("Before unmount")
-    //         component.unmount()
-    //         console.log("After unmount")
-    //         console.log(OmniAural.UnsafeGlobalInstance.value.account.value.name.context)
-    //         expect(originalCount === OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length).toBeTruthy()
-    //     })
-    // })
+            expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
 
+            act(() => {
+                OmniAural.state.account.address.set({ street: "Clark" })
+            })
+            
+            expect(OmniAural.state.account.address.street.value() === "Clark").toBeTruthy()
+            tree = component.toJSON();
+            expect(tree.children[1].children.includes("Clark in New York")).toBeTruthy()
+        })
+
+        test("Verifying property listeners registered and unregistered correctly", () => {
+            const originalCount = OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length
+            const component = renderer.create(<MyHooksFunctional />)
+            
+            expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.name")).toBeTruthy()
+
+            component.unmount()
+            
+            expect(originalCount === OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length).toBeTruthy()
+        })
+    })
 })

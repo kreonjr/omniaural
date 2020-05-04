@@ -323,10 +323,55 @@ export default class OmniAural {
      * }
      *
      */
-    static register = (component, properties, callback) => {
+    static register = (component, properties, listener) => {
         if (!component.omniId) {
             component.omniId = OmniAural.listenerCounter++;
             component.omniAuralMap = {};
+
+            if (component.__proto__.componentWillUnmount) {
+                const willUnMount = component.componentWillUnmount;
+                component.componentWillUnmount = function () {
+                    OmniAural.UnsafeGlobalInstance._deregister(
+                        OmniAural.UnsafeGlobalInstance,
+                        component
+                    );
+                    willUnMount();
+                };
+            } else {
+                component.componentWillUnmount = function () {
+                    OmniAural.UnsafeGlobalInstance._deregister(
+                        OmniAural.UnsafeGlobalInstance,
+                        component
+                    );
+                };
+            }
+
+            const defaultSetState = component.setState.bind(component);
+
+            component.setState = (stateUpdates, callback, fromOmni = false) => {
+                if (!fromOmni) {
+                    if (typeof stateUpdates === 'function') {
+                        stateUpdates = stateUpdates(component.state);
+                    }
+
+                    const flattenUpdates = flatten(stateUpdates);
+                    Object.keys(component.omniAuralMap).forEach((key) => {
+                        const stateVal = flattenUpdates[key];
+                        const omniVal = getDeepValue(
+                            OmniAural.state,
+                            component.omniAuralMap[key]
+                        );
+
+                        if (stateVal && stateVal !== omniVal.value()) {
+                            throw new Error(
+                                `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
+                            );
+                        }
+                    });
+                }
+
+                defaultSetState(stateUpdates, callback);
+            };
         }
 
         let state = component.state || {};
@@ -336,7 +381,7 @@ export default class OmniAural {
                 null,
                 component,
                 OmniAural.UnsafeGlobalInstance,
-                callback
+                listener
             );
             state = { ...state, ...sanitize(OmniAural.UnsafeGlobalInstance) };
         } else {
@@ -378,55 +423,10 @@ export default class OmniAural {
                     component,
                     propertyObject,
                     prop,
-                    callback
+                    listener
                 );
             });
         }
-
-        if (component.__proto__.componentWillUnmount) {
-            const willUnMount = component.componentWillUnmount;
-            component.componentWillUnmount = function () {
-                OmniAural.UnsafeGlobalInstance._deregister(
-                    OmniAural.UnsafeGlobalInstance,
-                    component
-                );
-                willUnMount();
-            };
-        } else {
-            component.componentWillUnmount = function () {
-                OmniAural.UnsafeGlobalInstance._deregister(
-                    OmniAural.UnsafeGlobalInstance,
-                    component
-                );
-            };
-        }
-
-        const defaultSetState = component.setState.bind(component);
-
-        component.setState = (stateUpdates, callback, fromOmni = false) => {
-            if (!fromOmni) {
-                if (typeof stateUpdates === 'function') {
-                    stateUpdates = stateUpdates(component.state);
-                }
-
-                const flattenUpdates = flatten(stateUpdates);
-                Object.keys(component.omniAuralMap).forEach((key) => {
-                    const stateVal = flattenUpdates[key];
-                    const omniVal = getDeepValue(
-                        OmniAural.state,
-                        component.omniAuralMap[key]
-                    );
-
-                    if (stateVal && stateVal !== omniVal.value()) {
-                        throw new Error(
-                            `You are attempting to localy update a global variable registered at path "state.${key}". Please use the global property setter.`
-                        );
-                    }
-                });
-            }
-
-            defaultSetState(stateUpdates, callback);
-        };
 
         component.state = state;
     };
@@ -786,11 +786,11 @@ export const initGlobalState = OmniAural.initGlobalState;
  *
  * Creates a hook to a property at the given path
  *
- * This function creates a variable hook to a property at the given path. Variable value will change as the value to 
+ * This function creates a variable hook to a property at the given path. Variable value will change as the value to
  * amniaural state path is changed
  *
  * @param {string} path  The path to the omniaural state property to create the hook varible to
- * 
+ *
  * @return {Array} An array where the first element is the variable hook to the requested property
  *
  */

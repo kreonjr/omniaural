@@ -6,8 +6,8 @@ export default () => {
     const [address] = useOmniAural("account.address")
 
     useOmniAuralEffect(() => {
-        console.log(OmniAural.state.account.foo.value())
-    }, "account.foo")
+        console.log(OmniAural.state.account.id.value())
+    }, "account.id")
 
     return <div>
         <div>{name}</div>

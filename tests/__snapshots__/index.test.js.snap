@@ -1,5 +1,38 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Component Testing OmniAural Hooks Hook is created with the correct value 1`] = `
+<div>
+  <div>
+    Linus
+  </div>
+  <div>
+    Randolph in New York
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value 1`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    Randolph in New York
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated with the correct value 1`] = `
+<div>
+  <div>
+    Linus
+  </div>
+  <div>
+    Randolph in New York
+  </div>
+</div>
+`;
+
 exports[`Component Testing The Class Component should register and contain the account name on initialization 1`] = `
 <div
   onClick={[Function]}

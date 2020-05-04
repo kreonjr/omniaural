@@ -242,6 +242,29 @@ const PersonScreen = () => {
 export default PersonScreen
 ```
 
+You can register a functional component to listen to OmniAural state property updates using [useOmniAuralEffect](#useOmniAuralEffect)
+
+```javascript
+import React from 'react'
+import { useOmniAuralEffect } from 'omniaural'
+
+const PersonScreen = () => {
+  const [person] = useOmniAural("account")
+
+  useOmniAuralEffect(()=> {
+    console.log("The account id has changed")
+  }, "account.id")
+  
+  return (
+    <div>
+      <span>User Id: {person.id}</span>
+    </div>
+  )
+}
+
+export default PersonScreen
+```
+
 You can also register a functional component by wrapping it in the [withOmniAural](#withOmniAural) HOC function
 
 ```javascript
@@ -274,6 +297,8 @@ The main global state manager class. It should be initialized at your top most c
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
    - [updateProperty()](#updateProperty)
+   - [useOmniAural()](#useOmniAural)
+   - [useOmniAuralEffect()](#useOmniAuralEffect)
 
 #### initGlobalState() 
 
@@ -333,6 +358,7 @@ __Note:__ This function must be called after you have initialized your initial l
 | ------------- |:---------------:          | :----------- |
 | component     | React.Component           | The component to be registered as a listener to the global state properties.
 | paths         | string | Array<string>    | The global state path(s) to subscribe to. It cab either be a string or an array of strings. If an empty array is passed in, the whole global state will be observed (not recommended).
+| listener      | Function | null           | (Optional) A function that will fire when one of values of the passed in paths changes.
 
 ##### Example: 
 ```javascript
@@ -494,6 +520,37 @@ const PersonScreen = () => {
 export default PersonScreen
 ```
 
+#### useOmniAuralEffect
+
+The `useOmniAuralEffect` hook takes a function and a path (or an array of paths) to properties on the OmniAural state and fires the
+passed in function when those properties values change.
+
+| Parameter     | Type           | Description  |
+| ------------- |:------------:  | :----------- |
+| listener      | Function       | A function that will be called when any of the passed in property paths values change
+| path(s)       | String | Array | A string (or array of strings) that represent the path to the global property to register the listener to.
+
+##### Example: 
+```javascript
+import React from 'react'
+import { useOmniAuralEffect } from 'omniaural'
+
+const PersonScreen = () => {
+  const [accountId] = useOmniAural("account.id")
+
+  useOmniAuralEffect(() => {
+    console.log("Account Id has changed")
+  }, ["account.id"])
+
+  return (
+    <div>
+      <span>User Id: {accountId}</span>
+    </div>
+  )
+}
+
+export default PersonScreen
+```
 
 ### HOC
 
