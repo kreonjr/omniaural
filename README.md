@@ -299,6 +299,7 @@ The main global state manager class. It should be initialized at your top most c
    - [updateProperty()](#updateProperty)
    - [useOmniAural()](#useOmniAural)
    - [useOmniAuralEffect()](#useOmniAuralEffect)
+   - [withOmniAural()](#withOmniAural)
 
 #### initGlobalState() 
 
@@ -554,7 +555,7 @@ export default PersonScreen
 
 ### HOC
 
-#### withOmniAural
+#### withOmniAural()
 
 This function can be used to register a functional component with a collection of properties from the global state using a higher order component.
 The registered properties will be passed in as props to the functional component.
