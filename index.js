@@ -596,13 +596,24 @@ _defineProperty(OmniAural, "addAction", (...args) => {
 });
 
 _defineProperty(OmniAural, "addActions", (...args) => {
-  args.forEach(func => {
-    if (typeof func === 'function' && func.name) {
-      OmniAural.addAction(func);
-    } else {
-      throw new Error(`All actions must be named functions`);
-    }
-  });
+  if (typeof args[0] === "object") {
+    const obj = args[0];
+    Object.keys(obj).forEach(funcName => {
+      if (typeof obj[funcName] === 'function') {
+        OmniAural.addAction(funcName, obj[funcName]);
+      } else {
+        throw new Error(`All actions must be named functions`);
+      }
+    });
+  } else {
+    args.forEach(func => {
+      if (typeof func === 'function' && func.name) {
+        OmniAural.addAction(func);
+      } else {
+        throw new Error(`All actions must be named functions`);
+      }
+    });
+  }
 });
 
 const initGlobalState = OmniAural.initGlobalState;
