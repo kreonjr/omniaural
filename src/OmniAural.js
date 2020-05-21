@@ -496,7 +496,7 @@ export default class OmniAural {
             const obj = args[0]
             Object.keys(obj).forEach((funcName) => {
                 if (typeof obj[funcName] === 'function') {
-                    OmniAural.addAction(funcName, obj[prop]);
+                    OmniAural.addAction(funcName, obj[funcName]);
                 } else {
                     throw new Error(`All actions must be named functions`);
                 }
