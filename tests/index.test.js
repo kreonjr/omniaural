@@ -172,6 +172,35 @@ describe('Global State Updater', () => {
         expect(OmniAural.state.account.nextOfKin.name.value() === "Mike").toBeTruthy()
     })
 
+    test('should update an existing object property', () => {
+        const newInvoice = {
+            number: 1234,
+            amount: 300,
+            type: "$"
+        }
+
+        OmniAural.state.invoice.set(newInvoice)
+        expect(JSON.stringify(newInvoice) === JSON.stringify(OmniAural.state.invoice.value())).toBeTruthy()
+    })
+
+    test("should update the value of an internal property that didn't exist on initialization", () => {
+        const newInvoice = {
+            number: 1234,
+            amount: 300,
+            type: "$"
+        }
+
+        OmniAural.state.invoice.set(newInvoice)
+        expect(JSON.stringify(newInvoice) === JSON.stringify(OmniAural.state.invoice.value())).toBeTruthy()
+        OmniAural.state.invoice.amount.set(500)
+        expect(OmniAural.state.invoice.amount.value() === 500).toBeTruthy()
+    })
+
+    test('should throw an error when trying to add a property using the set function', () => {
+        expect(() => OmniAural.state.anotherInvoice.set({})).toThrow("Cannot read property 'set' of undefined")
+        expect(() => OmniAural.state.invoice.someOtherPieceOfInfo.set({})).toThrow("Cannot read property 'set' of undefined")
+    })
+
     test('should update the global state object using the "updateProperty" function correctly', () => {
         OmniAural.updateProperty("account.nextOfKin.name", "Jake")
         expect(OmniAural.state.account.nextOfKin.name.value() === "Jake").toBeTruthy()
@@ -182,12 +211,8 @@ describe('Global State Updater', () => {
 
         expect(() => OmniAural.updateProperty("account.nextOfKin.name")).toThrow("Missing or undefined second argument. Please provide an update value for path 'account.nextOfKin.name'")
         expect(() => OmniAural.updateProperty({}, "")).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
-        expect(() => OmniAural.updateProperty("account.nextOfKin.address", { street: "Main st" })).toThrow("Path 'account.nextOfKin.address' does not exist on the global state object")
     })
 
-    test('should error if a property does not exist at provided path', () => {
-        expect(() => OmniAural.state.account.set({ contact: { tel: 1234345544 } })).toThrow("Property 'contact' not present in object 'account'")
-    })
 })
 
 
@@ -197,20 +222,20 @@ describe("Component Testing", () => {
     let component2
 
     afterEach(() => {
-        if(component) {
+        if (component) {
             component.unmount()
             component = null
         }
-        if(component1) {
+        if (component1) {
             component1.unmount()
             component1 = null
         }
-        if(component2) {
+        if (component2) {
             component2.unmount()
             component2 = null
         }
     })
-    
+
     describe("The Class Component", () => {
         test('should register and contain the account name on initialization', () => {
             component = renderer.create(<MyComponent />)
@@ -322,7 +347,7 @@ describe("Component Testing", () => {
             expect(tree.children[2].children).toBeNull()
 
             tree.children[2].props.onClick()
-            
+
             expect(OmniAural.UnsafeGlobalInstance.value["account"].value["address"].value["zip"].value === 12345).toBeTruthy()
             tree = component.toJSON()
             expect(tree.children[2].children.includes("12345")).toBeTruthy()
@@ -359,7 +384,7 @@ describe("Component Testing", () => {
         })
 
         test('should allow to update local state properties', () => {
-          component = renderer.create(<MyComponent />)
+            component = renderer.create(<MyComponent />)
             let tree = component.toJSON()
 
             expect(tree.children[8].children.includes("Small Description")).toBeTruthy()
@@ -470,7 +495,7 @@ describe("Component Testing", () => {
     describe("OmniAural Hooks", () => {
         test("Hook is created with the correct value", () => {
             let component
-            act(() =>{
+            act(() => {
                 component = renderer.create(<MyHooksFunctional />)
             })
             let tree = component.toJSON()
@@ -482,7 +507,7 @@ describe("Component Testing", () => {
 
         test("Hook is updated with the correct value", () => {
             let component
-            act(() =>{
+            act(() => {
                 component = renderer.create(<MyHooksFunctional />)
             })
 
@@ -490,22 +515,22 @@ describe("Component Testing", () => {
             expect(tree).toMatchSnapshot()
 
             expect(tree.children[0].children.includes("Linus")).toBeTruthy()
-            
-            act(() =>{
+
+            act(() => {
                 OmniAural.state.account.name.set("Evan")
             })
 
             expect(OmniAural.state.account.name.value() === "Evan").toBeTruthy()
             tree = component.toJSON();
-            
+
             expect(tree.children[0].children.includes("Evan")).toBeTruthy()
         })
 
         test("Hook is updated with the correct nested value", () => {
             let component
-            
+
             act(() => {
-              component = renderer.create(<MyHooksFunctional />)
+                component = renderer.create(<MyHooksFunctional />)
             })
 
             let tree = component.toJSON()
@@ -516,7 +541,7 @@ describe("Component Testing", () => {
             act(() => {
                 OmniAural.state.account.address.set({ street: "Clark" })
             })
-            
+
             expect(OmniAural.state.account.address.street.value() === "Clark").toBeTruthy()
             tree = component.toJSON();
             expect(tree.children[1].children.includes("Clark in New York")).toBeTruthy()
@@ -525,11 +550,11 @@ describe("Component Testing", () => {
         test("Verifying property listeners registered and unregistered correctly", () => {
             const originalCount = OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length
             const component = renderer.create(<MyHooksFunctional />)
-            
+
             expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.name")).toBeTruthy()
 
             component.unmount()
-            
+
             expect(originalCount === OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length).toBeTruthy()
         })
     })

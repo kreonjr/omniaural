@@ -8,5 +8,6 @@ export default {
         phone_number: 1234567890,
         id: "abcd1234"
     },
-    dev_mode: false
+    dev_mode: false,
+    invoice: {}
 }

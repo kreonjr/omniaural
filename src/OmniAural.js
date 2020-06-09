@@ -215,11 +215,6 @@ export default class OmniAural {
         const pathArr = path.split('.');
         let property = OmniAural.state;
         pathArr.forEach((step) => {
-            if (!property.hasOwnProperty(step)) {
-                throw new Error(
-                    `Path '${path}' does not exist on the global state object`
-                );
-            }
             property = property[step];
         });
 
@@ -564,7 +559,7 @@ export default class OmniAural {
                         obj.set(path, params);
 
                         if (obj.observers.has(path)) {
-                            obj.observers[path].forEach((callback) => {
+                            obj.observers.get(path).forEach((callback) => {
                                 callback();
                             });
                         }
@@ -676,12 +671,10 @@ export default class OmniAural {
                             });
 
                             if (!obj.value.hasOwnProperty(key)) {
-                                throw new Error(
-                                    `Property '${key}' not present in object '${path}'`
-                                );
+                                OmniAural.addProperty(path + '.' + key, params[key])
+                            } else {
+                                obj.value[key].set(path + '.' + key, params[key]);
                             }
-
-                            obj.value[key].set(path + '.' + key, params[key]);
                         });
 
                         if (this.context[path]) {
