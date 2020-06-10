@@ -1,12 +1,11 @@
 {
   "name": "omniaural",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A lightweight global state manager",
   "main": "index.js",
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
-    "build:local": "babel ./src -d . --copy-files && mv OmniAural.js index.js",
     "build": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
   },
   "husky": {
