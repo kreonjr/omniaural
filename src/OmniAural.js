@@ -11,6 +11,34 @@ export const getDeepValue = (obj, path) => {
     }, obj);
 };
 
+const deletePropertyPath = (obj, path, isOmniObject) => {
+    if (!obj || !path) {
+        return;
+    }
+
+    if (typeof path === 'string') {
+        path = path.split('.');
+    }
+
+    for (var i = 0; i < path.length - 1; i++) {
+        if (isOmniObject) {
+            obj = obj.value[path[i]]
+        } else {
+            obj = obj[path[i]];
+        }
+
+        if (typeof obj === 'undefined') {
+            return;
+        }
+    }
+
+    if (isOmniObject) {
+        delete obj.value[path.pop()];
+    } else {
+        delete obj[path.pop()];
+    }
+};
+
 /**
  * Takes an OmniAural property (special object) and returns a
  * regular key/value pair object version.
@@ -161,6 +189,11 @@ export default class OmniAural {
      *
      */
     static addProperty = (path, property) => {
+
+        if (isObject(property)) {
+            property = JSON.parse(JSON.stringify(property))
+        }
+
         const newObj = {};
         const pathArr = path.split('.');
         assign(newObj, pathArr, property);
@@ -199,7 +232,70 @@ export default class OmniAural {
         }
     };
 
-    static updateProperty = (path, newValue) => {
+    static deleteProperty = (path) => {
+        if (typeof path !== 'string') {
+            throw new Error(
+                `Path needs to be a string representation of the global state path to the property you want to update.`
+            );
+        }
+
+        const pathArr = path.split(".")
+        let propertyObject = OmniAural.UnsafeGlobalInstance;
+
+        pathArr.forEach((step) => {
+            if (!propertyObject.value.hasOwnProperty(step)) {
+                // error
+                throw new Error(
+                    `Invalid property path: '${path}'. Make sure the path to the property exists.`
+                );
+            } else {
+                propertyObject = propertyObject.value[step];
+            }
+        })
+
+        propertyObject.listeners.forEach((listener) => {
+            // Should this throw an error instead of actually removing the listeners?
+            if (listener.component) {
+                propertyObject.observers.forEach((observer) => {
+                    if (observer.has(listener.component.omniId)) {
+                        observer.delete(listener.component.omniId);
+                    }
+                });
+
+                if (propertyObject.context[path]) {
+                    delete propertyObject.context[path][listener.component.omniId]
+                }
+
+                Object.keys(listener.component.omniAuralMap).forEach((key) => {
+                    if (listener.component.omniAuralMap[key].startsWith(path)) {
+                        delete listener.component.omniAuralMap[key]
+                    }
+                })
+            }
+        })
+
+        deletePropertyPath(OmniAural.state, path)
+        deletePropertyPath(OmniAural.UnsafeGlobalInstance, path, true)
+    }
+
+
+    static clearProperty = (path) => {
+        if (typeof path !== 'string') {
+            throw new Error(
+                `Path needs to be a string representation of the global state path to the property you want to update.`
+            );
+        }
+
+        const property = getDeepValue(OmniAural.state, path)
+        if (!property || !isObject(property.value())) {
+            throw new Error(`Only object properties can be cleared out. Please make sure your path is correct and that the property is an object.`)
+        }
+
+        OmniAural.deleteProperty(path)
+        OmniAural.addProperty(path, {})
+    }
+
+    static setProperty = (path, newValue) => {
         if (typeof path !== 'string') {
             throw new Error(
                 `Path needs to be a string representation of the global state path to the property you want to update.`
@@ -222,7 +318,7 @@ export default class OmniAural {
             const flatObj = flatten(newValue);
             for (const key in flatObj) {
                 let newPath = path + '.' + key;
-                OmniAural.updateProperty(newPath, flatObj[key]);
+                OmniAural.setProperty(newPath, flatObj[key]);
             }
         } else {
             property.set(newValue);
@@ -402,7 +498,7 @@ export default class OmniAural {
                         if (!propertyObject.value.hasOwnProperty(step)) {
                             // error
                             throw new Error(
-                                `Invalid object path: ${prop}. Make sure the path to the property matches your global state structure.`
+                                `Invalid property path: '${prop}'. Make sure the path to the property exists.`
                             );
                         } else {
                             propertyObject = propertyObject.value[step];

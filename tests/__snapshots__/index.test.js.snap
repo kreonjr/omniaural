@@ -77,6 +77,11 @@ exports[`Component Testing The Class Component should register and contain the a
   >
     Small Description
   </div>
+  <div
+    onClick={[Function]}
+  >
+    Test
+  </div>
   <div />
 </div>
 `;
@@ -124,6 +129,11 @@ exports[`Component Testing The Class Component should register and contain the a
     onClick={[Function]}
   >
     Small Description
+  </div>
+  <div
+    onClick={[Function]}
+  >
+    Test
   </div>
   <div />
 </div>

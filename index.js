@@ -451,7 +451,7 @@ _defineProperty(OmniAural, "addProperty", (path, property) => {
   }
 });
 
-_defineProperty(OmniAural, "updateProperty", (path, newValue) => {
+_defineProperty(OmniAural, "setProperty", (path, newValue) => {
   if (typeof path !== 'string') {
     throw new Error(`Path needs to be a string representation of the global state path to the property you want to update.`);
   }
@@ -475,7 +475,7 @@ _defineProperty(OmniAural, "updateProperty", (path, newValue) => {
 
     for (const key in flatObj) {
       let newPath = path + '.' + key;
-      OmniAural.updateProperty(newPath, flatObj[key]);
+      OmniAural.setProperty(newPath, flatObj[key]);
     }
   } else {
     property.set(newValue);
@@ -529,7 +529,8 @@ _defineProperty(OmniAural, "register", (component, properties, listener) => {
   if (!properties) {
     OmniAural.UnsafeGlobalInstance._registerProperty(null, component, OmniAural.UnsafeGlobalInstance, listener);
 
-    state = { ...state,
+    state = {
+      ...state,
       ...sanitize(OmniAural.UnsafeGlobalInstance)
     };
   } else {

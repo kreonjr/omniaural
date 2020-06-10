@@ -9,5 +9,10 @@ export default {
         id: "abcd1234"
     },
     dev_mode: false,
-    invoice: {}
+    invoice: {},
+    purchase: {
+        lastPurchase: {
+            amount: 300
+        }
+    }
 }

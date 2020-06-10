@@ -296,7 +296,7 @@ The main global state manager class. It should be initialized at your top most c
    - [addAction()](#addAction)
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
-   - [updateProperty()](#updateProperty)
+   - [setProperty()](#setProperty)
    - [useOmniAural()](#useOmniAural)
    - [useOmniAuralEffect()](#useOmniAuralEffect)
    - [withOmniAural()](#withOmniAural)
@@ -469,7 +469,7 @@ OmniAural.addProperty("account.id", 4568585)
 OmniAural.addProperty("account", {id: 4568585})
 ```
 
-#### updateProperty()
+#### setProperty()
 
 This function updates a property at a given path. It receives a string representing the path to the property and a value to update the property
 with.
@@ -484,9 +484,9 @@ with.
 ```javascript
 import OmniAural from 'omniaural'
 
-OmniAural.updateProperty("account.id", 4568585)
+OmniAural.setProperty("account.id", 4568585)
 //or
-OmniAural.updateProperty("account", {id: 4568585})
+OmniAural.setProperty("account", {id: 4568585})
 ```
 
 ---

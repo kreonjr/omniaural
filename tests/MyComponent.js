@@ -8,7 +8,7 @@ export default class MyComponent extends React.Component {
             description: "Small Description"
         }
 
-        OmniAural.register(this, ["account.name as name", "account.name as person.name", "account.address", "account.address.street as street", "account as info.account"])
+        OmniAural.register(this, ["account.name as name", "account.name as person.name", "account.address", "account.address.street as street", "account as info.account", "purchase"])
         OmniAural.register(this, ["account.phone_number as number"], () => {
             console.log("Global State Changed")
         })
@@ -52,6 +52,10 @@ export default class MyComponent extends React.Component {
         })
     }
 
+    _deletePurchase = () => {
+        OmniAural.deleteProperty("purchase.lastPurchase")
+    }
+
     render() {
         return <div onClick={this._updateName}>
             <div>{this.state.person.name}</div>
@@ -64,6 +68,7 @@ export default class MyComponent extends React.Component {
             <div onClick={this._updateNameLocallyAlt}>{this.state.person.name}</div>
             <div onClick={this._updateDescription}>{this.state.description}</div>
             <div onClick={this._updateDescriptionAlt}>{this.state.description}</div>
+            <div onClick={this._deletePurchase}>Test</div>
             <div>{this.state.phoneNumber}</div>
         </div>
     }

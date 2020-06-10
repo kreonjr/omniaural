@@ -143,6 +143,55 @@ describe('Global State Manager', () => {
         })
     })
 
+    describe("Deleting a property", () => {
+        test("Deletes an omniaural property", () => {
+            const jobInfo = {
+                title: "Software Engineer",
+                years: 10
+            }
+
+            expect(() => OmniAural.state.jobInfo.value()).toThrow("Cannot read property 'value' of undefined")
+            OmniAural.addProperty("account.jobInfo", jobInfo)
+            expect(JSON.stringify(jobInfo) === JSON.stringify(OmniAural.state.account.jobInfo.value())).toBeTruthy()
+            OmniAural.deleteProperty("account.jobInfo")
+            expect(() => OmniAural.state.account.jobInfo.value()).toThrow("Cannot read property 'value' of undefined")
+            expect(() => OmniAural.UnsafeGlobalInstance.value["account"].value["jobInfo"].value).toThrow("Cannot read property 'value' of undefined")
+        })
+
+        test("Throws an error when invalid data is passed in", () => {
+            expect(() => OmniAural.deleteProperty(5)).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
+            expect(() => OmniAural.deleteProperty("account.jobInfo.jiberish")).toThrow("Invalid property path: 'account.jobInfo.jiberish'. Make sure the path to the property exists.")
+        })
+    })
+
+    describe("Clearing a property", () => {
+        const jobInfo = {
+            title: "Software Engineer",
+            years: 10
+        }
+
+        beforeEach(() => {
+            OmniAural.addProperty("account.jobInfo", jobInfo)
+        })
+
+        afterEach(() => {
+            OmniAural.deleteProperty("account.jobInfo")
+        })
+
+        test("Clears out an omniaural object property", () => {
+            OmniAural.clearProperty("account.jobInfo")
+
+            expect(Object.keys(OmniAural.state.account.jobInfo.value()).length == 0).toBeTruthy()
+            expect(Object.keys(OmniAural.UnsafeGlobalInstance.value["account"].value["jobInfo"].value).length == 0).toBeTruthy()
+        })
+
+        test("Throws an error when invalid data is passed in", () => {
+            expect(() => OmniAural.clearProperty("account.jobInfo.years")).toThrow("Only object properties can be cleared out. Please make sure your path is correct and that the property is an object.")
+            expect(() => OmniAural.clearProperty("account.jobInfo.jiberish")).toThrow("Only object properties can be cleared out. Please make sure your path is correct and that the property is an object.")
+            expect(() => OmniAural.clearProperty(5)).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
+        })
+    })
+
 })
 
 describe('Global State Updater', () => {
@@ -201,16 +250,16 @@ describe('Global State Updater', () => {
         expect(() => OmniAural.state.invoice.someOtherPieceOfInfo.set({})).toThrow("Cannot read property 'set' of undefined")
     })
 
-    test('should update the global state object using the "updateProperty" function correctly', () => {
-        OmniAural.updateProperty("account.nextOfKin.name", "Jake")
+    test('should update the global state object using the "setProperty" function correctly', () => {
+        OmniAural.setProperty("account.nextOfKin.name", "Jake")
         expect(OmniAural.state.account.nextOfKin.name.value() === "Jake").toBeTruthy()
 
-        OmniAural.updateProperty("account.nextOfKin", { name: "Luke" })
+        OmniAural.setProperty("account.nextOfKin", { name: "Luke" })
         expect(OmniAural.state.account.nextOfKin.name.value() === "Luke").toBeTruthy()
         expect(OmniAural.state.account.nextOfKin.job.value() === "mailman").toBeTruthy()
 
-        expect(() => OmniAural.updateProperty("account.nextOfKin.name")).toThrow("Missing or undefined second argument. Please provide an update value for path 'account.nextOfKin.name'")
-        expect(() => OmniAural.updateProperty({}, "")).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
+        expect(() => OmniAural.setProperty("account.nextOfKin.name")).toThrow("Missing or undefined second argument. Please provide an update value for path 'account.nextOfKin.name'")
+        expect(() => OmniAural.setProperty({}, "")).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
     })
 
 })
@@ -403,6 +452,16 @@ describe("Component Testing", () => {
             expect(tree.children[9].children.includes("Long Description")).toBeTruthy()
         })
 
+        test('Delete a property that was previously registered', () => {
+            let component = renderer.create(<MyComponent />)
+            let tree = component.toJSON()
+
+            tree.children[10].props.onClick()
+            tree = component.toJSON()
+            expect(() => OmniAural.state.purchase.lastPurchase.value()).toThrow("Cannot read property 'value' of undefined")
+            expect(() => OmniAural.UnsafeGlobalInstance.value["purchase"].value["lastPurchase"].value).toThrow("Cannot read property 'value' of undefined")
+        })
+
         test('should throw an error if trying to register for an nonexistent property', () => {
             expect(() => shallow(<MyBadComponent />)).toThrow();
         })
@@ -479,11 +538,11 @@ describe("Component Testing", () => {
 
             test("Verifies a listener was set and is fired on global registered property change", () => {
                 const component = renderer.create(<MyComponent />)
-                let tree = component.toJSON()
 
                 OmniAural.state.account.phone_number.set(3112114343)
 
                 expect(consoleOutput).toEqual([
+                    "Global State Changed",
                     "Global State Changed"
                 ])
 
