@@ -21,8 +21,6 @@ Install package from npm
 yarn add omniaural
 ```
 
-## Usage
-
 ### Initialize
 
 In your top level component (usually App.js) import OmniAural and initialize the global state
@@ -40,6 +38,8 @@ OmniAural.initGlobalState({
     movies: []
 })
 ```
+
+## Usage
 
 After initialization, global state properties can be (but rarely need to be) accessed directly through the `.value()` function. See below (Register a component) on the recommened approach to accessing global state values.
 ```javascript
@@ -297,6 +297,8 @@ The main global state manager class. It should be initialized at your top most c
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
    - [setProperty()](#setProperty)
+   - [deleteProperty()](#deleteProperty)
+   - [clearProperty()](#clearProperty)
    - [useOmniAural()](#useOmniAural)
    - [useOmniAuralEffect()](#useOmniAuralEffect)
    - [withOmniAural()](#withOmniAural)
@@ -487,6 +489,38 @@ import OmniAural from 'omniaural'
 OmniAural.setProperty("account.id", 4568585)
 //or
 OmniAural.setProperty("account", {id: 4568585})
+```
+
+#### deleteProperty()
+
+This function deletes a property at a given path. It receives a string representing the path to the property to delete.
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | The path in the global state to the property to delete.
+
+
+##### Example: 
+```javascript
+import OmniAural from 'omniaural'
+
+OmniAural.deleteProperty("account.address")
+```
+
+#### clearProperty()
+
+This function empties an object property at a given path. It receives a string representing the path to the property
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | The path in the global state to the property to update.
+
+
+##### Example: 
+```javascript
+import OmniAural from 'omniaural'
+
+OmniAural.clearProperty("account.address")
 ```
 
 ---

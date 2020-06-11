@@ -5,12 +5,16 @@ const isObject = (val) => {
 };
 
 //Get the value of an object given a deep path
-export const getDeepValue = (obj, path) => {
+const getDeepValue = (obj, path) => {
     return path.split('.').reduce((acc, key) => {
         return acc ? acc[key] : undefined;
     }, obj);
 };
 
+/*
+* Deletes a property of an object at the given path
+* Third parameter is used to delete OmniAural instance properties
+*/
 const deletePropertyPath = (obj, path, isOmniObject) => {
     if (!obj || !path) {
         return;
@@ -39,7 +43,7 @@ const deletePropertyPath = (obj, path, isOmniObject) => {
     }
 };
 
-/**
+/*
  * Takes an OmniAural property (special object) and returns a
  * regular key/value pair object version.
  */
@@ -58,7 +62,7 @@ const sanitize = (obj) => {
     return newObj;
 };
 
-/**
+/*
  * Assigns or creates a key/value pair property to the passed in object
  * Does not return because it works by reference
  */
@@ -75,7 +79,7 @@ const assign = (obj, keyPath, value) => {
     obj[keyPath[lastKeyIndex]] = value;
 };
 
-/**
+/*
  * Flattens an nested object to a single layer object
  * with the key representing each path
  *
@@ -108,11 +112,11 @@ const flatten = (obj, prefix = '') => {
     }, {});
 };
 
-/**
+/*
  * @class
  * OmniAural Class
  *
- * Used to create and maintain a global state used throught an app execution.
+ * Used to create and maintain a global state used throughout an app execution.
  * This Object is a singelton and it should be initialized at the top most component
  * of the render hierarchy.
  *
@@ -176,7 +180,7 @@ export default class OmniAural {
      * Adds a property to the global state
      *
      * This function can be used to add a property on the global state object after initialization.
-     * It will through an error if the path to the property already exists. It will also update all the
+     * It will throw an error if the path to the property already exists. It will also update all the
      * top level listeners state to include this property
      *
      * @param {string}       path       The path to which to add the new property
@@ -232,6 +236,22 @@ export default class OmniAural {
         }
     };
 
+    /**
+     * deleteProperty
+     *
+     * Deletes a property from the global state
+     *
+     * This function can be used to delete a property on the global state object after initialization.
+     * It will throw an error if the path to the property does not exist. It will also remove itself from any 
+     * component listeners
+     *
+     * @param {string}       path       The path from where to delete the property
+     *
+     * @example
+     *
+     * OmniAural.deleteProperty("account.id")
+     *
+     */
     static deleteProperty = (path) => {
         if (typeof path !== 'string') {
             throw new Error(
@@ -283,7 +303,22 @@ export default class OmniAural {
         deletePropertyPath(OmniAural.UnsafeGlobalInstance, path, true)
     }
 
-
+    /**
+     * clearProperty
+     *
+     * Empties an object property in the global state
+     *
+     * This function can be used to empty out an object property on the global state object after initialization.
+     * It will throw an error if the path to the property does not exist or is not an object. It will also remove itself 
+     * and it's content from component listeners.
+     *
+     * @param {string} path The path to which object property to clear
+     *
+     * @example
+     *
+     * OmniAural.clearProperty("account")
+     *
+     */
     static clearProperty = (path) => {
         if (typeof path !== 'string') {
             throw new Error(
@@ -300,6 +335,22 @@ export default class OmniAural {
         OmniAural.addProperty(path, {})
     }
 
+    /**
+     * setProperty
+     *
+     * Updates a property to the given global state path
+     *
+     * This function can be used to set a property on the global state object after initialization to a given path.
+     * It will throw an error if the path to the property does not exist.
+     *
+     * @param {string}       path       The path to which to add the new property
+     * @param {any}          newValue   The value to set the property to
+     *
+     * @example
+     *
+     * OmniAural.setProperty("account.id", 1234123412341234)
+     *
+     */
     static setProperty = (path, newValue) => {
         if (typeof path !== 'string') {
             throw new Error(
