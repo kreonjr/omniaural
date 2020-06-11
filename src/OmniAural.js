@@ -1,7 +1,7 @@
 import React from 'react';
 
 const isObject = (val) => {
-    return !Array.isArray(val) && typeof val == 'object';
+    return !Array.isArray(val) && typeof val == 'object' && val != null;
 };
 
 //Get the value of an object given a deep path
@@ -254,7 +254,6 @@ export default class OmniAural {
         })
 
         propertyObject.listeners.forEach((listener) => {
-            // Should this throw an error instead of actually removing the listeners?
             if (listener.component) {
                 propertyObject.observers.forEach((observer) => {
                     if (observer.has(listener.component.omniId)) {
@@ -273,6 +272,12 @@ export default class OmniAural {
                 })
             }
         })
+
+        if (isObject(propertyObject.value)) {
+            Object.keys(propertyObject.value).forEach((key) => {
+                OmniAural.deleteProperty(path + "." + key)
+            })
+        }
 
         deletePropertyPath(OmniAural.state, path)
         deletePropertyPath(OmniAural.UnsafeGlobalInstance, path, true)
@@ -642,22 +647,28 @@ export default class OmniAural {
             if (!base[key]) {
                 base[key] = {
                     set: (params) => {
-                        if (!isObject(params)) {
+                        if (!isObject(params) && params !== null) {
                             throw new Error(
                                 `You are trying to set an object. Please pass an object arguement`
                             );
                         }
+
                         let obj = OmniAural.UnsafeGlobalInstance;
                         path.split('.').forEach((pathStep) => {
                             obj = obj.value[pathStep];
                         });
 
-                        obj.set(path, params);
+                        if (params === null) {
+                            OmniAural.deleteProperty(path)
+                            OmniAural.addProperty(path, null)
+                        } else {
+                            obj.set(path, params);
 
-                        if (obj.observers.has(path)) {
-                            obj.observers.get(path).forEach((callback) => {
-                                callback();
-                            });
+                            if (obj.observers.has(path)) {
+                                obj.observers.get(path).forEach((callback) => {
+                                    callback();
+                                });
+                            }
                         }
                     },
                     value: () => {

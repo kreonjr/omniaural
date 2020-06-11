@@ -262,6 +262,23 @@ describe('Global State Updater', () => {
         expect(() => OmniAural.setProperty({}, "")).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
     })
 
+    test('should delete the property content when an object is set to "null"', () => {
+        const objectToDelete = { "innerValue": 50 }
+        OmniAural.addProperty("deleteValue", 100)
+        OmniAural.addProperty("objectToDelete", objectToDelete)
+
+        expect(OmniAural.state.deleteValue.value() === 100).toBeTruthy()
+        expect(OmniAural.state.objectToDelete.innerValue.value() === 50).toBeTruthy()
+
+        OmniAural.state.deleteValue.set(null)
+        expect(OmniAural.state.deleteValue.value() === null).toBeTruthy()
+
+        OmniAural.state.objectToDelete.set(null)
+
+        expect(() => OmniAural.state.objectToDelete.innerValue.value()).toThrow("Cannot read property 'value' of undefined")
+        expect(OmniAural.state.objectToDelete.value() === null).toBeTruthy()
+    })
+
 })
 
 
