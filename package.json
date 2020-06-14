@@ -2,7 +2,10 @@
   "name": "omniaural",
   "version": "1.1.0",
   "description": "A lightweight global state manager",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prepare": "yarn build",
     "test": "jest",
