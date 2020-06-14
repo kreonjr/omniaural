@@ -20,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ccreonopoulos/omniaural.git"
+    "url": "https://github.com/kreonjr/omniaural.git"
   },
   "license": "MIT",
   "devDependencies": {
