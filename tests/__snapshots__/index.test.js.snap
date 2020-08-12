@@ -8,6 +8,37 @@ exports[`Component Testing OmniAural Hooks Hook is created with the correct valu
   <div>
     Randolph in New York
   </div>
+  <div>
+    Works in Chicago
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated when nested object is deleted 1`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    undefined in New York
+  </div>
+  <div>
+    Works in Chicago
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated when nested value is deleted 1`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    State in New York
+  </div>
+  <div>
+    Works in Chicago
+  </div>
 </div>
 `;
 
@@ -19,6 +50,23 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   <div>
     Randolph in New York
   </div>
+  <div>
+    Works in Chicago
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value 2`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    Clark in New York
+  </div>
+  <div>
+    Works in Chicago
+  </div>
 </div>
 `;
 
@@ -29,6 +77,9 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct valu
   </div>
   <div>
     Randolph in New York
+  </div>
+  <div>
+    Works in Chicago
   </div>
 </div>
 `;
