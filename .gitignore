@@ -104,4 +104,4 @@ dist
 .tern-port
 
 # VSCode generated files
-#.vscode
+.vscode
