@@ -21,6 +21,7 @@ describe('Global State Manager', () => {
         expect(globalObject["dev_mode"].value).toBeFalsy()
         expect(globalObject["account"].value["name"].value === "Mike").toBeTruthy()
         expect(globalObject["account"].value["address"].value["street"].value === "Randolph").toBeTruthy()
+        expect(globalObject["items"].value.length === 0).toBeTruthy()
     })
 
     test('should validate global state was declared correctly in the state object', () => {
@@ -153,14 +154,14 @@ describe('Global State Manager', () => {
             expect(() => OmniAural.state.jobInfo.value()).toThrow("Cannot read property 'value' of undefined")
             OmniAural.addProperty("account.jobInfo", jobInfo)
             expect(JSON.stringify(jobInfo) === JSON.stringify(OmniAural.state.account.jobInfo.value())).toBeTruthy()
-            OmniAural.deleteProperty("account.jobInfo")
+            OmniAural.state.account.jobInfo.delete()
             expect(() => OmniAural.state.account.jobInfo.value()).toThrow("Cannot read property 'value' of undefined")
             expect(() => OmniAural.UnsafeGlobalInstance.value["account"].value["jobInfo"].value).toThrow("Cannot read property 'value' of undefined")
         })
 
-        test("Throws an error when invalid data is passed in", () => {
-            expect(() => OmniAural.deleteProperty(5)).toThrow("Path needs to be a string representation of the global state path to the property you want to update.")
-            expect(() => OmniAural.deleteProperty("account.jobInfo.jiberish")).toThrow("Invalid property path: 'account.jobInfo.jiberish'. Make sure the path to the property exists.")
+        test("Throws an error when invalid data is passed in the _deleteProperty private function", () => {
+            expect(() => OmniAural.UnsafeGlobalInstance._deleteProperty(5)).toThrow("Path needs to be a string representation of the global state path to the property you want to delete.")
+            expect(() => OmniAural.UnsafeGlobalInstance._deleteProperty("account.jobInfo.jiberish")).toThrow("Invalid property path: 'account.jobInfo.jiberish'. Make sure the path to the property exists.")
         })
     })
 
@@ -175,7 +176,7 @@ describe('Global State Manager', () => {
         })
 
         afterEach(() => {
-            OmniAural.deleteProperty("account.jobInfo")
+            OmniAural.state.account.jobInfo.delete()
         })
 
         test("Clears out an omniaural object property", () => {
@@ -578,6 +579,7 @@ describe("Component Testing", () => {
             expect(tree).toMatchSnapshot()
 
             expect(tree.children[0].children.includes("Linus")).toBeTruthy()
+
             expect(tree.children[1].children.includes("Randolph in New York")).toBeTruthy()
         })
 
@@ -623,8 +625,75 @@ describe("Component Testing", () => {
             expect(tree.children[1].children.includes("Clark in New York")).toBeTruthy()
         })
 
+        test("Hook is updated with the correct nested value", () => {
+            let component
+
+            act(() => {
+                component = renderer.create(<MyHooksFunctional />)
+            })
+
+            let tree = component.toJSON()
+            expect(tree).toMatchSnapshot()
+
+            expect(tree.children[1].children.includes("Clark in New York")).toBeTruthy()
+
+            act(() => {
+                OmniAural.state.account.address.street.set("State")
+            })
+
+            expect(OmniAural.state.account.address.street.value() === "State").toBeTruthy()
+
+            tree = component.toJSON();
+            expect(tree.children[1].children.includes("State in New York")).toBeTruthy()
+        })
+
+        test("Hook is updated when nested value is deleted", () => {
+            let component
+
+            act(() => {
+                component = renderer.create(<MyHooksFunctional />)
+            })
+
+            let tree = component.toJSON()
+            expect(tree).toMatchSnapshot()
+
+            expect(tree.children[1].children.includes("State in New York")).toBeTruthy()
+
+            act(() => {
+                OmniAural.state.account.address.street.delete()
+            })
+
+            expect(OmniAural.state.account.address.street === undefined).toBeTruthy()
+            tree = component.toJSON();
+
+            expect(tree.children[1].children.includes("undefined in New York")).toBeTruthy()
+        })
+
+        test("Hook is updated when nested object is deleted", () => {
+            let component
+
+            act(() => {
+                component = renderer.create(<MyHooksFunctional />)
+            })
+
+            let tree = component.toJSON()
+            expect(tree).toMatchSnapshot()
+            expect(tree.children[2].children.includes("Works in Chicago")).toBeTruthy()
+
+            act(() => {
+                OmniAural.state.account.currentEmployment.address.delete()
+            })
+
+            expect(OmniAural.state.account.currentEmployment.address === undefined).toBeTruthy()
+            expect(OmniAural.state.account.currentEmployment.title.value() === "Engineer").toBeTruthy()
+
+            tree = component.toJSON();
+            expect(tree.children[2].children.includes("Works in undefined")).toBeTruthy()
+        })
+
         test("Verifying property listeners registered and unregistered correctly", () => {
             const originalCount = OmniAural.UnsafeGlobalInstance.value.account.value.name.context["account.name"].length
+
             const component = renderer.create(<MyHooksFunctional />)
 
             expect(OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty("account.name")).toBeTruthy()

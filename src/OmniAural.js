@@ -11,6 +11,20 @@ const getDeepValue = (obj, path) => {
     }, obj);
 };
 
+const getOmniAuralPropertyAtPath = (path = "") => {
+    if (path) {
+        let omniObj = OmniAural.UnsafeGlobalInstance;
+        path.split('.').forEach((pathStep) => {
+            omniObj = omniObj.value[pathStep];
+        });
+
+        return omniObj
+    }
+
+    throw new Error(`Invalid 'path' passed to getOmniAuralPropertyAtPath`)
+}
+
+
 /*
 * Deletes a property of an object at the given path
 * Third parameter is used to delete OmniAural instance properties
@@ -237,73 +251,6 @@ export default class OmniAural {
     };
 
     /**
-     * deleteProperty
-     *
-     * Deletes a property from the global state
-     *
-     * This function can be used to delete a property on the global state object after initialization.
-     * It will throw an error if the path to the property does not exist. It will also remove itself from any 
-     * component listeners
-     *
-     * @param {string}       path       The path from where to delete the property
-     *
-     * @example
-     *
-     * OmniAural.deleteProperty("account.id")
-     *
-     */
-    static deleteProperty = (path) => {
-        if (typeof path !== 'string') {
-            throw new Error(
-                `Path needs to be a string representation of the global state path to the property you want to update.`
-            );
-        }
-
-        const pathArr = path.split(".")
-        let propertyObject = OmniAural.UnsafeGlobalInstance;
-
-        pathArr.forEach((step) => {
-            if (!propertyObject.value.hasOwnProperty(step)) {
-                // error
-                throw new Error(
-                    `Invalid property path: '${path}'. Make sure the path to the property exists.`
-                );
-            } else {
-                propertyObject = propertyObject.value[step];
-            }
-        })
-
-        propertyObject.listeners.forEach((listener) => {
-            if (listener.component) {
-                propertyObject.observers.forEach((observer) => {
-                    if (observer.has(listener.component.omniId)) {
-                        observer.delete(listener.component.omniId);
-                    }
-                });
-
-                if (propertyObject.context[path]) {
-                    delete propertyObject.context[path][listener.component.omniId]
-                }
-
-                Object.keys(listener.component.omniAuralMap).forEach((key) => {
-                    if (listener.component.omniAuralMap[key].startsWith(path)) {
-                        delete listener.component.omniAuralMap[key]
-                    }
-                })
-            }
-        })
-
-        if (isObject(propertyObject.value)) {
-            Object.keys(propertyObject.value).forEach((key) => {
-                OmniAural.deleteProperty(path + "." + key)
-            })
-        }
-
-        deletePropertyPath(OmniAural.state, path)
-        deletePropertyPath(OmniAural.UnsafeGlobalInstance, path, true)
-    }
-
-    /**
      * clearProperty
      *
      * Empties an object property in the global state
@@ -331,7 +278,7 @@ export default class OmniAural {
             throw new Error(`Only object properties can be cleared out. Please make sure your path is correct and that the property is an object.`)
         }
 
-        OmniAural.deleteProperty(path)
+        OmniAural.UnsafeGlobalInstance._deleteProperty(path)
         OmniAural.addProperty(path, {})
     }
 
@@ -668,16 +615,13 @@ export default class OmniAural {
      * @param {string} path           The path to the property in which to add the setter
      *
      * This function creates a setter function for each property in the global object to be called outside this file.
-     * It then creates a key for each global state property and adds it to the GlobalSetters object
+     * 
      */
     _addSetter = (base, key, value, path) => {
         if (!isObject(value)) {
             base[key] = {
                 set: (newValue) => {
-                    let obj = OmniAural.UnsafeGlobalInstance;
-                    path.split('.').forEach((pathStep) => {
-                        obj = obj.value[pathStep];
-                    });
+                    const obj = getOmniAuralPropertyAtPath(path)
 
                     obj.set(path, newValue);
                     if (obj.observers.has(path)) {
@@ -687,12 +631,12 @@ export default class OmniAural {
                     }
                 },
                 value: () => {
-                    let obj = OmniAural.UnsafeGlobalInstance;
-                    path.split('.').forEach((pathStep) => {
-                        obj = obj.value[pathStep];
-                    });
-                    return obj.value;
+                    return getOmniAuralPropertyAtPath(path).value;
                 },
+                delete: () => {
+                    const obj = getOmniAuralPropertyAtPath(path)
+                    obj.delete(path)
+                }
             };
         } else {
             if (!base[key]) {
@@ -704,13 +648,10 @@ export default class OmniAural {
                             );
                         }
 
-                        let obj = OmniAural.UnsafeGlobalInstance;
-                        path.split('.').forEach((pathStep) => {
-                            obj = obj.value[pathStep];
-                        });
+                        const obj = getOmniAuralPropertyAtPath(path)
 
                         if (params === null) {
-                            OmniAural.deleteProperty(path)
+                            this._deleteProperty(path)
                             OmniAural.addProperty(path, null)
                         } else {
                             obj.set(path, params);
@@ -723,12 +664,13 @@ export default class OmniAural {
                         }
                     },
                     value: () => {
-                        let obj = OmniAural.UnsafeGlobalInstance;
-                        path.split('.').forEach((pathStep) => {
-                            obj = obj.value[pathStep];
-                        });
+                        const obj = getOmniAuralPropertyAtPath(path)
                         return sanitize(obj);
                     },
+                    delete: () => {
+                        const obj = getOmniAuralPropertyAtPath(path)
+                        obj.delete(path)
+                    }
                 };
             }
 
@@ -801,6 +743,21 @@ export default class OmniAural {
                                 this.context[path][contextKey](newVal);
                             }
                         }
+
+                        this.refreshParent(path)
+                    },
+                    refreshParent: function (path) {
+                        let pathArr = path.split(".")
+                        if (pathArr.length > 1) {
+                            pathArr = pathArr.slice(0, -1)
+                            const parentPath = pathArr.join(".")
+                            const parentOmniObject = getOmniAuralPropertyAtPath(parentPath)
+                            parentOmniObject.refresh(parentPath)
+                        }
+                    },
+                    delete: function (path) {
+                        OmniAural.UnsafeGlobalInstance._deleteProperty(path)
+                        this.set(path, null)
                     },
                     context: {},
                     observers: new Map(),
@@ -821,19 +778,23 @@ export default class OmniAural {
                     value: initialVal,
                     listeners: new Map([...initialListeners]),
                     set: function (path, params) {
-                        Object.keys(params).forEach(function (key) {
-                            let obj = OmniAural.UnsafeGlobalInstance;
-                            const pathArr = path.split('.');
-                            pathArr.forEach((step) => {
-                                obj = obj.value[step];
-                            });
+                        if (params !== null) {
+                            Object.keys(params).forEach(function (key) {
+                                const obj = getOmniAuralPropertyAtPath(path)
 
-                            if (!obj.value.hasOwnProperty(key)) {
-                                OmniAural.addProperty(path + '.' + key, params[key])
-                            } else {
-                                obj.value[key].set(path + '.' + key, params[key]);
-                            }
-                        });
+                                if (!obj.value.hasOwnProperty(key)) {
+                                    OmniAural.addProperty(path + '.' + key, params[key])
+                                } else {
+                                    obj.value[key].set(path + '.' + key, params[key]);
+                                }
+                            });
+                        } else {
+                            Object.keys(this.value).forEach(function (key) {
+                                const childPath = path + '.' + key
+                                const obj = getOmniAuralPropertyAtPath(childPath)
+                                obj.delete(childPath)
+                            });
+                        }
 
                         if (this.context[path]) {
                             for (const contextKey in this.context[path]) {
@@ -841,6 +802,30 @@ export default class OmniAural {
                                     Object.assign(sanitize(this), params)
                                 );
                             }
+                        }
+
+                        this.refreshParent(path)
+                    },
+                    delete: function (path) {
+                        OmniAural.UnsafeGlobalInstance._deleteProperty(path)
+                        this.set(path, null)
+                    },
+                    refresh: function (path) {
+                        if (this.context[path]) {
+                            for (const contextKey in this.context[path]) {
+                                this.context[path][contextKey](sanitize(this));
+                            }
+                        }
+
+                        this.refreshParent(path)
+                    },
+                    refreshParent: function (path) {
+                        let pathArr = path.split(".")
+                        if (pathArr.length > 1) {
+                            pathArr = pathArr.slice(0, -1)
+                            const parentPath = pathArr.join(".")
+                            const parentOmniObject = getOmniAuralPropertyAtPath(parentPath)
+                            parentOmniObject.refresh(parentPath)
                         }
                     },
                     context: {},
@@ -917,6 +902,71 @@ export default class OmniAural {
             });
         }
     };
+
+
+    /**
+     * @private _deleteProperty
+     *
+     * Deletes a property from the global state
+     *
+     * This function can be used to delete a property on the global state object after initialization.
+     * It will throw an error if the path to the property does not exist. It will also remove itself from any 
+     * component listeners
+     *
+     * @param {string}       path       The path from where to delete the property
+     *
+     *
+     */
+    _deleteProperty = (path) => {
+        if (typeof path !== 'string') {
+            throw new Error(
+                `Path needs to be a string representation of the global state path to the property you want to delete.`
+            );
+        }
+
+        const pathArr = path.split(".")
+        let propertyObject = OmniAural.UnsafeGlobalInstance;
+
+        pathArr.forEach((step) => {
+            if (!propertyObject.value.hasOwnProperty(step)) {
+                // error
+                throw new Error(
+                    `Invalid property path: '${path}'. Make sure the path to the property exists.`
+                );
+            } else {
+                propertyObject = propertyObject.value[step];
+            }
+        })
+
+        propertyObject.listeners.forEach((listener) => {
+            if (listener.component) {
+                propertyObject.observers.forEach((observer) => {
+                    if (observer.has(listener.component.omniId)) {
+                        observer.delete(listener.component.omniId);
+                    }
+                });
+
+                if (propertyObject.context[path]) {
+                    delete propertyObject.context[path][listener.component.omniId]
+                }
+
+                Object.keys(listener.component.omniAuralMap).forEach((key) => {
+                    if (listener.component.omniAuralMap[key].startsWith(path)) {
+                        delete listener.component.omniAuralMap[key]
+                    }
+                })
+            }
+        })
+
+        if (isObject(propertyObject.value)) {
+            Object.keys(propertyObject.value).forEach((key) => {
+                this._deleteProperty(path + "." + key)
+            })
+        }
+
+        deletePropertyPath(OmniAural.state, path)
+        deletePropertyPath(OmniAural.UnsafeGlobalInstance, path, true)
+    }
 }
 
 /**
@@ -958,19 +1008,11 @@ export const initGlobalState = OmniAural.initGlobalState;
  */
 
 export const useOmniAural = (path) => {
-    let pathKeys = path.split('.');
-    let omniObject = OmniAural.UnsafeGlobalInstance;
-    pathKeys.forEach((key) => {
-        if (omniObject.value.hasOwnProperty(key)) {
-            omniObject = omniObject.value[key];
-        } else {
-            throw new Error(`OmniAural state path ${path} is invalid.`);
-        }
-    });
+    const omniObject = getOmniAuralPropertyAtPath(path)
 
-    const initialVal = isObject(omniObject.value)
-        ? sanitize(omniObject)
-        : omniObject.value;
+    const isPureObject = isObject(omniObject.value)
+    const initialVal = isPureObject ? sanitize(omniObject) : omniObject.value
+
     const [property, setProperty] = React.useState(initialVal);
 
     React.useEffect(() => {
@@ -978,7 +1020,8 @@ export const useOmniAural = (path) => {
         if (!omniObject.context[path]) {
             omniObject.context[path] = {};
         }
-        omniObject.context[path][omniAuralId] = setProperty;
+
+        omniObject.context[path][omniAuralId] = setProperty
 
         return () => {
             delete omniObject.context[path][omniAuralId];
@@ -1014,10 +1057,7 @@ export const useOmniAuralEffect = (callback, listeners = []) => {
 
         let removers = [];
         listerPaths.forEach((path) => {
-            let property = OmniAural.UnsafeGlobalInstance;
-            path.split('.').forEach((pathStep) => {
-                property = property.value[pathStep];
-            });
+            const property = getOmniAuralPropertyAtPath(path)
 
             removers.push(
                 OmniAural.UnsafeGlobalInstance._addObserver(

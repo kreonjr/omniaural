@@ -53,7 +53,7 @@ export default class MyComponent extends React.Component {
     }
 
     _deletePurchase = () => {
-        OmniAural.deleteProperty("purchase.lastPurchase")
+        OmniAural.state.purchase.lastPurchase.delete()
     }
 
     render() {

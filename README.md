@@ -51,6 +51,11 @@ Global state properties can be set directly through the `.set()` function.
 OmniAural.state.account.name.set("John")
 ```
 
+Global state properties can also be deleted directly through the `.delete()` function. 
+(This function should be used with care. It can cause UI issues if you are not handling property existence checking in your components)
+```javascript
+OmniAural.state.account.name.delete()
+```
 
 ### Register a component
 
@@ -297,7 +302,6 @@ The main global state manager class. It should be initialized at your top most c
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
    - [setProperty()](#setProperty)
-   - [deleteProperty()](#deleteProperty)
    - [clearProperty()](#clearProperty)
    - [useOmniAural()](#useOmniAural)
    - [useOmniAuralEffect()](#useOmniAuralEffect)
@@ -489,22 +493,6 @@ import OmniAural from 'omniaural'
 OmniAural.setProperty("account.id", 4568585)
 //or
 OmniAural.setProperty("account", {id: 4568585})
-```
-
-#### deleteProperty()
-
-This function deletes a property at a given path. It receives a string representing the path to the property to delete.
-
-| Parameter     | Type          | Description  |
-| ------------- |:------------: | :----------- |
-| path          | String        | The path in the global state to the property to delete.
-
-
-##### Example: 
-```javascript
-import OmniAural from 'omniaural'
-
-OmniAural.deleteProperty("account.address")
 ```
 
 #### clearProperty()
