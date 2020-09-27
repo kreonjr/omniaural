@@ -278,8 +278,8 @@ export default class OmniAural {
             throw new Error(`Only object properties can be cleared out. Please make sure your path is correct and that the property is an object.`)
         }
 
-        OmniAural.UnsafeGlobalInstance._deleteProperty(path)
-        OmniAural.addProperty(path, {})
+        const obj = getOmniAuralPropertyAtPath(path)
+        obj.set(path, {})        
     }
 
     /**
@@ -779,15 +779,26 @@ export default class OmniAural {
                     listeners: new Map([...initialListeners]),
                     set: function (path, params) {
                         if (params !== null) {
-                            Object.keys(params).forEach(function (key) {
-                                const obj = getOmniAuralPropertyAtPath(path)
+                            const keys = Object.keys(params)
+                            if(keys.length) {
+                                keys.forEach(function (key) {
+                                    const obj = getOmniAuralPropertyAtPath(path)
+                                    
+                                    if (!obj.value.hasOwnProperty(key)) {
+                                        OmniAural.addProperty(path + '.' + key, params[key])
+                                    } else {
+                                        obj.value[key].set(path + '.' + key, params[key]);
+                                    }
+                                });
+                            } else {
+                                keys.forEach(function (key) {
+                                    const obj = getOmniAuralPropertyAtPath(path)
 
-                                if (!obj.value.hasOwnProperty(key)) {
-                                    OmniAural.addProperty(path + '.' + key, params[key])
-                                } else {
-                                    obj.value[key].set(path + '.' + key, params[key]);
-                                }
-                            });
+                                    obj.delete(path + '.' + key)
+                                });
+
+                                this.value = params
+                            }
                         } else {
                             Object.keys(this.value).forEach(function (key) {
                                 const childPath = path + '.' + key

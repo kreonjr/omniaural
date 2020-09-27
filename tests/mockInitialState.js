@@ -12,7 +12,8 @@ export default {
                 city: "Chicago"
             },
             title: "Engineer"
-        }
+        },
+        empty: {}
     },
     dev_mode: false,
     invoice: {
