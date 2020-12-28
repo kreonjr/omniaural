@@ -388,7 +388,8 @@ export default class OmniAural {
      *                                                Registered properties can be given aliases to be used on the component state
      *                                                (i.e acount.address.street as user.street).
      *                                                Passing nothing or an empty array will register the whole global object
-     *
+     * @param {function | null}          listener     An optional function that will be called whenever one of the registered properties
+     *                                                registered is updated in state
      *
      * @example
      *

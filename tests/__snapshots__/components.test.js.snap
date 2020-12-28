@@ -6,7 +6,7 @@ exports[`Component Testing OmniAural Hooks Hook is created with the correct valu
     Linus
   </div>
   <div>
-    Randolph in New York
+    State in Chicago
   </div>
   <div>
     Works in Chicago
@@ -20,7 +20,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested object is
     Evan
   </div>
   <div>
-    undefined in New York
+    undefined in Chicago
   </div>
   <div>
     Works in Chicago
@@ -34,7 +34,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested value is 
     Evan
   </div>
   <div>
-    State in New York
+    Randolph in Chicago
   </div>
   <div>
     Works in Chicago
@@ -42,13 +42,13 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested value is 
 </div>
 `;
 
-exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value 1`] = `
+exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value through setting a property 1`] = `
 <div>
   <div>
     Evan
   </div>
   <div>
-    Randolph in New York
+    Clark in Chicago
   </div>
   <div>
     Works in Chicago
@@ -56,13 +56,13 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
 </div>
 `;
 
-exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value 2`] = `
+exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value through setting an object 1`] = `
 <div>
   <div>
     Evan
   </div>
   <div>
-    Clark in New York
+    State in Chicago
   </div>
   <div>
     Works in Chicago
@@ -76,7 +76,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct valu
     Linus
   </div>
   <div>
-    Randolph in New York
+    State in Chicago
   </div>
   <div>
     Works in Chicago
@@ -89,34 +89,34 @@ exports[`Component Testing The Class Component should register and contain the a
   onClick={[Function]}
 >
   <div>
-    Josh
+    Mike
   </div>
   <div>
-    State
+    Randolph
   </div>
   <div
     onClick={[Function]}
   />
   <div>
-    State
+    Randolph
   </div>
   <div>
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
   >
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
   >
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
   >
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
@@ -142,34 +142,34 @@ exports[`Component Testing The Class Component should register and contain the a
   onClick={[Function]}
 >
   <div>
-    Josh
+    Mike
   </div>
   <div>
-    State
+    Randolph
   </div>
   <div
     onClick={[Function]}
   />
   <div>
-    State
+    Randolph
   </div>
   <div>
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
   >
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
   >
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
   >
-    Josh
+    Mike
   </div>
   <div
     onClick={[Function]}
@@ -201,7 +201,7 @@ exports[`Component Testing The Class Component should register and contain the p
 exports[`Component Testing The Functional Component should be registered through the high order function 1`] = `
 <div>
   <div>
-    Dev mode: true
+    Dev mode: false
   </div>
   <div>
     Michael
