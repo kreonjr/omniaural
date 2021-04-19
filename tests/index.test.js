@@ -325,6 +325,21 @@ describe("Global State Updater", () => {
     expect(OmniAural.state.invoice.amount.value()).toBe(500);
   });
 
+  test("should update the value of an internal property that was null on initialization", () => {
+    const lastReceipt = {
+      number: 1234,
+      amount: 300,
+      type: "$",
+    };
+
+    OmniAural.state.lastReceipt.set(lastReceipt);
+    expect(JSON.stringify(OmniAural.state.lastReceipt.value())).toBe(
+      JSON.stringify(lastReceipt)
+    );
+
+    expect(OmniAural.state.lastReceipt.amount.value()).toBe(300);
+  });
+
   test("should throw an error when trying to add a property using the set function", () => {
     expect(() => OmniAural.state.anotherInvoice.set({})).toThrow(
       "Cannot read property 'set' of undefined"

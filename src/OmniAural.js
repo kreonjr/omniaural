@@ -155,7 +155,7 @@ const flatten = (obj, prefix = '') => {
  * OmniAural.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
-export default class OmniAural {
+class OmniAural {
     static state = {
         value: () => {
             return sanitize(OmniAural.UnsafeGlobalInstance);
@@ -623,12 +623,16 @@ export default class OmniAural {
             base[key] = {
                 set: (newValue) => {
                     const obj = getOmniAuralPropertyAtPath(path)
-
-                    obj.set(path, newValue);
-                    if (obj.observers.has(path)) {
-                        obj.observers.get(path).forEach((callback) => {
-                            callback();
-                        });
+                    if(obj.value === null && isObject(newValue)){
+                        this._deleteProperty(path)
+                        OmniAural.addProperty(path, newValue)
+                    } else {   
+                        obj.set(path, newValue);
+                        if (obj.observers.has(path)) {
+                            obj.observers.get(path).forEach((callback) => {
+                                callback();
+                            });
+                        }
                     }
                 },
                 value: () => {
@@ -1128,3 +1132,5 @@ export const withOmniAural = (RegisteredComponent, paths = []) => {
         }
     };
 };
+
+export default OmniAural
