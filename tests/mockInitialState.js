@@ -16,8 +16,8 @@ export default {
         empty: {}
     },
     dev_mode: false,
-    invoice: {
-    },
+    invoice: {},
+    lastReceipt: null,
     purchase: {
         lastPurchase: {
             amount: 300
