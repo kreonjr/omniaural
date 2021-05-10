@@ -521,7 +521,7 @@ describe("Component Testing", () => {
       ).toBeTruthy();
     });
 
-    test("Hook is updated when nested object is set to null", () => {
+    test("Hook is updated when property is set to null", () => {
       let component;
 
       act(() => {
@@ -545,6 +545,33 @@ describe("Component Testing", () => {
       tree = component.toJSON();
       expect(
         tree.children[3].children.includes("undefined")
+      ).toBeTruthy();
+    });
+
+    test("Hook is updated when null object is set to a value", () => {
+      let component;
+
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      });
+
+      let tree = component.toJSON();
+      expect(tree).toMatchSnapshot();
+      expect(
+        tree.children[3].children.includes("undefined")
+      ).toBeTruthy();
+
+      act(() => {
+        OmniAural.state.nulledOut.set({key:"value"});
+      });
+
+      expect(
+        OmniAural.state.nulledOut.key.value()
+      ).toBe("value");
+
+      tree = component.toJSON();
+      expect(
+        tree.children[3].children.includes("value")
       ).toBeTruthy();
     });
 

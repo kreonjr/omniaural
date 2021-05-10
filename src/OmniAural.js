@@ -654,18 +654,12 @@ class OmniAural {
                         }
 
                         const obj = getOmniAuralPropertyAtPath(path)
+                        obj.set(path, params);
 
-                        if (params === null) {
-                            this._deleteProperty(path)
-                            OmniAural.addProperty(path, null)
-                        } else {
-                            obj.set(path, params);
-
-                            if (obj.observers.has(path)) {
-                                obj.observers.get(path).forEach((callback) => {
-                                    callback();
-                                });
-                            }
+                        if (obj.observers.has(path)) {
+                            obj.observers.get(path).forEach((callback) => {
+                                callback();
+                            });
                         }
                     },
                     value: () => {
@@ -785,10 +779,13 @@ class OmniAural {
                     set: function (path, params) {
                         if (params !== null) {
                             const keys = Object.keys(params)
-                            if(keys.length) {
+                            const obj = getOmniAuralPropertyAtPath(path)
+                            if(obj.value === null) {
+                                obj.value = {}
+                            } 
+                            
+                            if (keys.length) {
                                 keys.forEach(function (key) {
-                                    const obj = getOmniAuralPropertyAtPath(path)
-                                    
                                     if (!obj.value.hasOwnProperty(key)) {
                                         OmniAural.addProperty(path + '.' + key, params[key])
                                     } else {
@@ -796,27 +793,21 @@ class OmniAural {
                                     }
                                 });
                             } else {
-                                keys.forEach(function (key) {
-                                    const obj = getOmniAuralPropertyAtPath(path)
-
-                                    obj.delete(path + '.' + key)
-                                });
-
                                 this.value = params
                             }
                         } else {
-                            Object.keys(this.value).forEach(function (key) {
-                                const childPath = path + '.' + key
-                                const obj = getOmniAuralPropertyAtPath(childPath)
-                                obj.delete(childPath)
-                            });
+                            this.value = null
                         }
 
                         if (this.context[path]) {
                             for (const contextKey in this.context[path]) {
-                                this.context[path][contextKey](
-                                    Object.assign(sanitize(this), params)
-                                );
+                                let newValue = null
+
+                                if (params !== null) {
+                                    newValue = Object.assign(sanitize(this), params)
+                                }
+
+                                this.context[path][contextKey](newValue);
                             }
                         }
 
