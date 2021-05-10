@@ -11,6 +11,9 @@ exports[`Component Testing OmniAural Hooks Hook is created with the correct valu
   <div>
     Works in Chicago
   </div>
+  <div>
+    value
+  </div>
 </div>
 `;
 
@@ -24,6 +27,9 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested object is
   </div>
   <div>
     Works in Chicago
+  </div>
+  <div>
+    value
   </div>
 </div>
 `;
@@ -39,6 +45,43 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested value is 
   <div>
     Works in Chicago
   </div>
+  <div>
+    value
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated when null object is set to a value 1`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    undefined in Chicago
+  </div>
+  <div>
+    Works in undefined
+  </div>
+  <div>
+    undefined
+  </div>
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks Hook is updated when property is set to null 1`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    undefined in Chicago
+  </div>
+  <div>
+    Works in undefined
+  </div>
+  <div>
+    value
+  </div>
 </div>
 `;
 
@@ -52,6 +95,9 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   </div>
   <div>
     Works in Chicago
+  </div>
+  <div>
+    value
   </div>
 </div>
 `;
@@ -67,6 +113,9 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   <div>
     Works in Chicago
   </div>
+  <div>
+    value
+  </div>
 </div>
 `;
 
@@ -80,6 +129,9 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct valu
   </div>
   <div>
     Works in Chicago
+  </div>
+  <div>
+    value
   </div>
 </div>
 `;
@@ -131,7 +183,12 @@ exports[`Component Testing The Class Component should register and contain the a
   <div
     onClick={[Function]}
   >
-    Test
+    Purchase Test
+  </div>
+  <div
+    onClick={[Function]}
+  >
+    200
   </div>
   <div />
 </div>
@@ -184,7 +241,12 @@ exports[`Component Testing The Class Component should register and contain the a
   <div
     onClick={[Function]}
   >
-    Test
+    Purchase Test
+  </div>
+  <div
+    onClick={[Function]}
+  >
+    200
   </div>
   <div />
 </div>

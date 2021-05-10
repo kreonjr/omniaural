@@ -255,6 +255,19 @@ describe("Component Testing", () => {
       ).toThrow("Cannot read property 'value' of undefined");
     });
 
+    test("Set a previously registered property to null", () => {
+      let component = renderer.create(<MyComponent />);
+      let tree = component.toJSON();
+
+      tree.children[11].children.includes("200");
+      tree.children[11].props.onClick();
+      tree = component.toJSON();
+      expect(OmniAural.state.nulledPurchase.value()).toBeNull()
+      expect(OmniAural.UnsafeGlobalInstance.value["nulledPurchase"].value).toBeNull()
+
+      tree.children[11].children.includes("null");
+    });
+
     test("should throw an error if trying to register for an nonexistent property", () => {
       expect(() => shallow(<MyBadComponent />)).toThrow();
     });
@@ -352,6 +365,7 @@ describe("Component Testing", () => {
         expect(consoleOutput).toEqual([
           "Global State Changed",
           "Global State Changed",
+          "Global State Changed"
         ]);
 
         component.unmount();
@@ -504,6 +518,60 @@ describe("Component Testing", () => {
       tree = component.toJSON();
       expect(
         tree.children[2].children.includes("Works in undefined")
+      ).toBeTruthy();
+    });
+
+    test("Hook is updated when property is set to null", () => {
+      let component;
+
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      });
+
+      let tree = component.toJSON();
+      expect(tree).toMatchSnapshot();
+      expect(
+        tree.children[3].children.includes("value")
+      ).toBeTruthy();
+
+      act(() => {
+        OmniAural.state.nulledOut.set(null);
+      });
+
+      expect(
+        OmniAural.state.nulledOut.value()
+      ).toBeNull();
+
+      tree = component.toJSON();
+      expect(
+        tree.children[3].children.includes("undefined")
+      ).toBeTruthy();
+    });
+
+    test("Hook is updated when null object is set to a value", () => {
+      let component;
+
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      });
+
+      let tree = component.toJSON();
+      expect(tree).toMatchSnapshot();
+      expect(
+        tree.children[3].children.includes("undefined")
+      ).toBeTruthy();
+
+      act(() => {
+        OmniAural.state.nulledOut.set({key:"value"});
+      });
+
+      expect(
+        OmniAural.state.nulledOut.key.value()
+      ).toBe("value");
+
+      tree = component.toJSON();
+      expect(
+        tree.children[3].children.includes("value")
       ).toBeTruthy();
     });
 

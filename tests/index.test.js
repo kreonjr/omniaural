@@ -379,7 +379,7 @@ describe("Global State Updater", () => {
     OmniAural.state.objectToDelete.set(null);
 
     expect(() => OmniAural.state.objectToDelete.innerValue.value()).toThrow(
-      "Cannot read property 'value' of undefined"
+      "Cannot read property 'innerValue' of null"
     );
     expect(OmniAural.state.objectToDelete.value()).toBe(null);
   });
