@@ -962,10 +962,6 @@ class OmniAural {
                     }
                 });
 
-                if (propertyObject.context[path]) {
-                    delete propertyObject.context[path][listener.component.omniId]
-                }
-
                 Object.keys(listener.component.omniAuralMap).forEach((key) => {
                     if (listener.component.omniAuralMap[key].startsWith(path)) {
                         delete listener.component.omniAuralMap[key]
@@ -973,6 +969,13 @@ class OmniAural {
                 })
             }
         })
+
+        if (propertyObject.context[path]) {
+            for (const contextKey in propertyObject.context[path]) {
+                propertyObject.context[path][contextKey](null);
+            }
+            delete propertyObject.context[path]
+        }
 
         if (isObject(propertyObject.value)) {
             Object.keys(propertyObject.value).forEach((key) => {
@@ -1040,7 +1043,9 @@ export const useOmniAural = (path) => {
         omniObject.context[path][omniAuralId] = setProperty
 
         return () => {
-            delete omniObject.context[path][omniAuralId];
+            if (omniObject.context[path]){
+                delete omniObject.context[path][omniAuralId];
+            }
         };
     }, [path, omniObject.context]);
 

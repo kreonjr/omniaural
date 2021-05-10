@@ -8,7 +8,7 @@ export default class MyComponent extends React.Component {
             description: "Small Description"
         }
 
-        OmniAural.register(this, ["account.name as name", "account.name as person.name", "account.address", "account.address.street as street", "account as info.account", "purchase"])
+        OmniAural.register(this, ["account.name as name", "account.name as person.name", "account.address", "account.address.street as street", "account as info.account", "purchase", "nulledPurchase"])
         OmniAural.register(this, ["account.phone_number as number"], () => {
             console.log("Global State Changed")
         })
@@ -20,6 +20,10 @@ export default class MyComponent extends React.Component {
 
     _addZipCode = () => {
         OmniAural.addProperty("account.address", { zip: 12345 })
+    }
+
+    _setPurchaseToNull = () => {
+        OmniAural.state.nulledPurchase.set(null)
     }
 
     _updateNameLocally = () => {
@@ -68,7 +72,8 @@ export default class MyComponent extends React.Component {
             <div onClick={this._updateNameLocallyAlt}>{this.state.person.name}</div>
             <div onClick={this._updateDescription}>{this.state.description}</div>
             <div onClick={this._updateDescriptionAlt}>{this.state.description}</div>
-            <div onClick={this._deletePurchase}>Test</div>
+            <div onClick={this._deletePurchase}>Purchase Test</div>
+            <div onClick={this._setPurchaseToNull}>{`${this.state.nulledPurchase}`}</div>
             <div>{this.state.phoneNumber}</div>
         </div>
     }

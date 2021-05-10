@@ -23,5 +23,9 @@ export default {
             amount: 300
         }
     },
+    nulledPurchase:200,
+    nulledOut: {
+        key: "value"
+    },
     items: []
 }
