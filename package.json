@@ -11,11 +11,6 @@
     "test": "jest",
     "build": "rm -rf dist && mkdir dist && babel ./src -d dist --copy-files && mv dist/OmniAural.js dist/index.js"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn test"
-    }
-  },
   "author": "Creon Creonopoulos",
   "contributors": [
     "Chris Steele"
