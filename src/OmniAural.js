@@ -422,10 +422,12 @@ class OmniAural {
         if (!component.omniId) {
             component.omniId = OmniAural.listenerCounter++;
             component.omniAuralMap = {};
+            let defaultSetState = component.setState.bind(component);
 
             if (component.__proto__.componentWillUnmount) {
                 const willUnMount = component.componentWillUnmount;
                 component.componentWillUnmount = function () {
+                    defaultSetState = null
                     OmniAural.UnsafeGlobalInstance._deregister(
                         OmniAural.UnsafeGlobalInstance,
                         component
@@ -434,6 +436,7 @@ class OmniAural {
                 };
             } else {
                 component.componentWillUnmount = function () {
+                    defaultSetState = null
                     OmniAural.UnsafeGlobalInstance._deregister(
                         OmniAural.UnsafeGlobalInstance,
                         component
@@ -441,7 +444,6 @@ class OmniAural {
                 };
             }
 
-            const defaultSetState = component.setState.bind(component);
 
             component.setState = (stateUpdates, callback, fromOmni = false) => {
                 if (!fromOmni) {
@@ -464,8 +466,7 @@ class OmniAural {
                         }
                     });
                 }
-
-                defaultSetState(stateUpdates, callback);
+                defaultSetState && defaultSetState(stateUpdates, callback);
             };
         }
 
