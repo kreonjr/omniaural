@@ -207,7 +207,11 @@ class OmniAural {
      *
      */
     static addProperty = (path, property) => {
+        OmniAural.UnsafeGlobalInstance._addProperty(path, property)
+    }
 
+    _addProperty = (path, property, inheritedListeners) => {
+        
         if (isObject(property)) {
             property = JSON.parse(JSON.stringify(property))
         }
@@ -227,7 +231,10 @@ class OmniAural {
             OmniAural.UnsafeGlobalInstance._addKeyValue(
                 OmniAural.UnsafeGlobalInstance.value,
                 key,
-                newObj[key]
+                newObj[key],
+                inheritedListeners ? inheritedListeners.listeners : new Map(),
+                inheritedListeners ? inheritedListeners.observers : new Map(),
+                inheritedListeners ? inheritedListeners.context : {},
             );
         });
 
@@ -624,9 +631,9 @@ class OmniAural {
             base[key] = {
                 set: (newValue) => {
                     const obj = getOmniAuralPropertyAtPath(path)
-                    if(obj.value === null && isObject(newValue)){
-                        this._deleteProperty(path)
-                        OmniAural.addProperty(path, newValue)
+                    if(!isObject(obj.value) && isObject(newValue)){
+                        const inheritedListeners = this._deleteProperty(path)
+                        OmniAural.UnsafeGlobalInstance._addProperty(path, newValue, inheritedListeners)
                     } else {   
                         obj.set(path, newValue);
                         if (obj.observers.has(path)) {
@@ -688,10 +695,12 @@ class OmniAural {
     /**
      * @private _addKeyValue
      *
-     * @param {object} base              The object that will be created and added to the global object.
-     * @param {string} key               The key for the property to be added to the {base} object.
-     * @param {any}    initialVal        The initial value the property should have.
-     * @param {object} initialListeners  A collection of listeners that might already exist for an existing property
+     * @param {object} base                The object that will be created and added to the global object.
+     * @param {string} key                 The key for the property to be added to the {base} object.
+     * @param {any}    initialVal          The initial value the property should have.
+     * @param {object} initialListeners    A collection of listeners that might already exist for an existing property
+     * @param {object} inheritedObservers  A collection of observers that might already exist for an existing property
+     * @param {object} initialListeners    A context objects for hook that might already exist for an existing property
      *
      * It creates an object for each global property set on initialization. It saves
      * the property key/value pair on the global object instance and also creates a setter
@@ -701,7 +710,9 @@ class OmniAural {
         base,
         key,
         initialVal = null,
-        initialListeners = new Map()
+        initialListeners = new Map(),
+        inheritedObservers = new Map(),
+        inheritedContext = {}
     ) => {
         if (!isObject(initialVal)) {
             if (!base[key] || !base[key].value) {
@@ -759,8 +770,8 @@ class OmniAural {
                         OmniAural.UnsafeGlobalInstance._deleteProperty(path)
                         this.set(path, null)
                     },
-                    context: {},
-                    observers: new Map(),
+                    context: inheritedContext,
+                    observers: inheritedObservers,
                 };
             } else {
                 throw new Error(`${key} already exists at this global state path`);
@@ -836,8 +847,8 @@ class OmniAural {
                             parentOmniObject.refresh(parentPath)
                         }
                     },
-                    context: {},
-                    observers: new Map(),
+                    context: inheritedContext,
+                    observers: inheritedObservers,
                 };
             }
 
@@ -846,7 +857,9 @@ class OmniAural {
                     baseValue,
                     innerKey,
                     initialVal[innerKey],
-                    base[key].listeners
+                    base[key].listeners,
+                    inheritedObservers,
+                    inheritedContext
                 );
             });
         }
@@ -934,18 +947,23 @@ class OmniAural {
 
         const pathArr = path.split(".")
         let propertyObject = OmniAural.UnsafeGlobalInstance;
-
+        
         pathArr.forEach((step) => {
             if (!propertyObject.value.hasOwnProperty(step)) {
                 // error
                 throw new Error(
                     `Invalid property path: '${path}'. Make sure the path to the property exists.`
-                );
-            } else {
-                propertyObject = propertyObject.value[step];
-            }
-        })
-
+                    );
+                } else {
+                    propertyObject = propertyObject.value[step];
+                }
+            })
+            
+        const inheritedListeners = {
+            context: { [path]:{} },
+            listeners: new Map(propertyObject.listeners),
+            observer: new Map(propertyObject.observers)
+        }
         propertyObject.listeners.forEach((listener) => {
             if (listener.component) {
                 propertyObject.observers.forEach((observer) => {
@@ -964,6 +982,7 @@ class OmniAural {
 
         if (propertyObject.context[path]) {
             for (const contextKey in propertyObject.context[path]) {
+                inheritedListeners.context[path][contextKey] = propertyObject.context[path][contextKey]
                 propertyObject.context[path][contextKey](null);
             }
             delete propertyObject.context[path]
@@ -977,6 +996,8 @@ class OmniAural {
 
         deletePropertyPath(OmniAural.state, path)
         deletePropertyPath(OmniAural.UnsafeGlobalInstance, path, true)
+        
+        return inheritedListeners
     }
 }
 
@@ -1026,8 +1047,8 @@ export const useOmniAural = (path) => {
 
     const [property, setProperty] = React.useState(initialVal);
 
+    const omniAuralId = OmniAural.listenerCounter++;
     React.useEffect(() => {
-        const omniAuralId = OmniAural.listenerCounter++;
         if (!omniObject.context[path]) {
             omniObject.context[path] = {};
         }
