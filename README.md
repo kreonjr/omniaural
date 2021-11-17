@@ -431,7 +431,7 @@ Actions can be added to OmniAural in bulk by passing named functions as argument
 
 | Parameter     | Type                    | Description  |
 | ------------- |:----------------------: | :----------- |
-| action        | ...Function             | One or more named functions to be added to OmniAural. __Note:__ All actions must be named functions
+| actions        | Object             | An object with one or more named functions to be added to OmniAural. __Note:__ All actions must be named functions
 
 ##### Example: 
 ```javascript
@@ -445,7 +445,7 @@ const updateAccount = (account) => {
     OmniAural.state.account.set(account)
 }
 
-OmniAural.addActions(updateAccount, updateAddress)
+OmniAural.addActions({updateAccount, updateAddress})
 
 _onClick = () => {
     OmniAural.updateAddress({street: "Main st"})
@@ -513,7 +513,7 @@ OmniAural.clearProperty("account.address")
 
 ---
 
-### HOOK 
+### HOOKS
 
 #### useOmniAural
 
@@ -603,6 +603,46 @@ const PersonScreen = (props) => {
 
 export default withOmniAural(PersonScreen, ["account as person"])
 ```
+
+## Troubleshooting & Gotchas
+
+Most of the errors that OmniAural can throw come from incorrectly listening to nested properties. If you are experiencing a crash referring to accessing `property of null`, or something similar, you are most likely listening to a property of an object that was either initialized to null or was set to null during some part of execution.
+
+If you know an object can become null, avoid listening to its properties. Rather, listen to the object itself. This way you can code against attempting to access a property of a null object.
+
+
+##### Example: 
+```javascript
+const initialState = {
+  account: {
+    address: null
+  },
+  movies: []
+}
+
+=========================================
+
+import React from 'react'
+import { useOmniAural } from 'omniaural'
+
+const PersonScreen = () => {
+  //BAD Because you are listening to a property of a potentially null object and this will crash if address is null
+  const [streetAddress] = useOmniAural("account.address.street")   
+
+  //GOOD Because you can code against *address* being null, either on initialization or set to null later
+  const [address] = useOmniAural("account.address")
+  const streetAddress = address !== null ? address.street : "Not found"
+
+  return (
+    <div>
+      <span>Street Address: {streetAddress}</span>
+    </div>
+  )
+}
+
+export default PersonScreen
+```
+
 
 
 ## License
