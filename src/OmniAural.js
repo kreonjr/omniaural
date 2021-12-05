@@ -180,12 +180,26 @@ class OmniAural {
         }
     }
 
-    constructor(initialState) {
+    constructor(initState) {
+        const {initialState, synthesizable} = this._synthesize(initState)
+
         this.value = {};
         Object.keys(initialState).forEach((key) => {
             this._addSetter(OmniAural.state, key, initialState[key], key);
             this._addKeyValue(this.value, key, initialState[key]);
         });
+    }
+
+    _synthesize = (initialState) => {
+        // const synthesizable = {};
+        // const flatInitialState = flatten(initialState);
+        // Object.keys(flatInitialState).forEach((key) => {
+        //     if(key.endsWith("_")) {
+        //         synthesizable[key.slice(-1)] = flatInitialState[key]
+        //     }
+        // })
+
+        return {initialState, synthesizable: []}
     }
 
     /**
@@ -1060,7 +1074,7 @@ export const useOmniAural = (path) => {
                 delete omniObject.context[path][omniAuralId];
             }
         };
-    }, [path, omniObject.context]);
+    }, []);
 
     return [property];
 };
