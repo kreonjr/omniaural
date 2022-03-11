@@ -27,5 +27,6 @@ export default {
     nulledOut: {
         key: "value"
     },
-    items: []
+    items: [],
+    thousandItems: {}
 }

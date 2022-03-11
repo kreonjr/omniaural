@@ -575,6 +575,30 @@ describe("Component Testing", () => {
       ).toBeTruthy();
     });
 
+    test("Hook is updated when an object is set to a really large object", () => {
+      let component;
+
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      });
+
+      let tree = component.toJSON();
+      expect(tree).toMatchSnapshot();
+      expect(
+        tree.children[5].children.includes("Large object contains data: ")
+      ).toBeTruthy();
+      
+      act(() => {
+        component.root.findByType('button').props.onClick();
+      });
+
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.c.value()).toBeTruthy()
+
+      expect(
+        tree.children[5].children.includes("Large object contains data: true")
+      ).toBeTruthy();
+    });
+
     test("Verifying property listeners registered and unregistered correctly", () => {
       const originalCount =
         OmniAural.UnsafeGlobalInstance.value.account.value.name.context[

@@ -1,11 +1,13 @@
 import React from "react"
 import OmniAural, { useOmniAural, useOmniAuralEffect } from "../src/OmniAural"
+const bigdata = require("./bigdata.json")
 
 export default () => {
     const [name] = useOmniAural("account.name")
     const [address] = useOmniAural("account.address")
     const [currentEmployment] = useOmniAural("account.currentEmployment")
     const [nulledOut] = useOmniAural("nulledOut")
+    const [thousandItems] = useOmniAural("thousandItems")
 
     let employmentCity
     let customValue
@@ -27,6 +29,10 @@ export default () => {
         <div>{`${address.street} in ${address.city}`}</div>
         <div>{`Works in ${employmentCity}`}</div>
         <div>{`${customValue}`}</div>
+        <button id="thousands" onClick={function(){
+            OmniAural.state.thousandItems.set(bigdata)
+        }}/>
+        <div>Large object contains data: {thousandItems?.episodes?.UtlJT6vWjE?.c}</div>
     </div>
 }
 
