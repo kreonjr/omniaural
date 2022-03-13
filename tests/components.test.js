@@ -579,7 +579,7 @@ describe("Component Testing", () => {
       );
 
       act(() => {
-        component.root.findByType("button").props.onClick();
+        component.root.findAllByType("button")[0].props.onClick();
       });
 
       expect(
@@ -590,6 +590,39 @@ describe("Component Testing", () => {
       expect(tree.children[5].children[0]).toBe(
         "Large object contains data: true"
       );
+    });
+
+    test("correctly pass context when setting new properties to object", () => {
+      let component;
+      const globalObject = OmniAural.UnsafeGlobalInstance.value;
+
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      });
+
+      act(() => {
+        component.root.findAllByType("button")[1].props.onClick();
+      });
+
+      expect(
+        OmniAural.state.account?.address?.tempAddress?.street?.value() ===
+          "State"
+      ).toBeTruthy();
+      expect(
+        OmniAural.state.account?.address?.tempAddress?.number?.value() === 13
+      ).toBeTruthy();
+      expect(
+        OmniAural.state.account?.address?.tempAddress?.street?.value() === "State"
+      ).toBeTruthy();
+      expect(
+        Object.keys(globalObject.account.value.address.value.tempAddress.context).length > 0
+      ).toBeTruthy();
+      expect(
+        Object.keys(globalObject.account.value.address.value.tempAddress.value.number.context).length > 0
+      ).toBeTruthy();
+      expect(
+        Object.keys(globalObject.account.value.address.value.tempAddress.value.street.context).length > 0
+      ).toBeTruthy();
     });
 
     test("Verifying property listeners registered and unregistered correctly", () => {

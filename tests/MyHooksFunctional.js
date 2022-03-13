@@ -8,6 +8,8 @@ export default () => {
     const [currentEmployment] = useOmniAural("account.currentEmployment")
     const [nulledOut] = useOmniAural("nulledOut")
     const [thousandItems] = useOmniAural("thousandItems")
+    const [tempAddr] = useOmniAural("account.address.tempAddress")
+
 
     let employmentCity
     let customValue
@@ -24,7 +26,6 @@ export default () => {
         customValue = nulledOut.key
     }
 
-    console.log("Rendering")
     const dataPopulated = (thousandItems?.episodes?.UtlJT6vWjE?.c) ? 'true' : 'false'
     return <div>
         <div>{name}</div>
@@ -35,6 +36,9 @@ export default () => {
             OmniAural.state.thousandItems.set(bigdata)
         }}/>
         <div>{"Large object contains data: " + dataPopulated}</div>
+        <button id="nested_set" onClick={function(){
+            OmniAural.state.account.address.tempAddress.set({street: "State", number: 13})
+        }}/>
     </div>
 }
 

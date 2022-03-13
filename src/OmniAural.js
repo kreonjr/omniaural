@@ -756,10 +756,6 @@ class OmniAural {
                     value: initialVal,
                     listeners: newListeners,
                     set: function (path, newVal) {
-                        // if(this.value === newVal) {
-                        //     return
-                        // }
-
                         this.value = newVal;
                         this.listeners.forEach((listener) => {
                             listener.component.setState(
@@ -831,7 +827,13 @@ class OmniAural {
                             if (keys.length) {
                                 keys.forEach(function (key) {
                                     if (!obj.value.hasOwnProperty(key)) {
-                                        OmniAural.addProperty(path + '.' + key, params[key])
+                                        const inheritedListeners = {
+                                            context: Object.assign({}, obj.context),
+                                            listeners: new Map(obj.listeners),
+                                            observers: new Map(obj.observers)
+                                        }
+
+                                        OmniAural.UnsafeGlobalInstance._addProperty(path + '.' + key, params[key], inheritedListeners)
                                     } else {
                                         obj.value[key].set(path + '.' + key, params[key]);
                                     }

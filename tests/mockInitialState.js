@@ -3,7 +3,8 @@ export default {
         name: "Mike",
         address: {
             street: "Randolph",
-            city: "Chicago"
+            city: "Chicago",
+            tempAddress: {}
         },
         phone_number: 1234567890,
         id: "abcd1234",

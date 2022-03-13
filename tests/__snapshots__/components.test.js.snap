@@ -21,6 +21,10 @@ exports[`Component Testing OmniAural Hooks Hook is created with the correct valu
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -45,6 +49,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated when an object is set
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -69,6 +77,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested object is
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -93,6 +105,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested value is 
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -117,6 +133,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated when null object is s
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -141,6 +161,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated when property is set 
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -165,6 +189,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -189,6 +217,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -213,6 +245,38 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct valu
   <div>
     Large object contains data: false
   </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
+</div>
+`;
+
+exports[`Component Testing OmniAural Hooks correctly pass context to nested object set 1`] = `
+<div>
+  <div>
+    Evan
+  </div>
+  <div>
+    undefined in Chicago
+  </div>
+  <div>
+    Works in undefined
+  </div>
+  <div>
+    value
+  </div>
+  <button
+    id="thousands"
+    onClick={[Function]}
+  />
+  <div>
+    Large object contains data: true
+  </div>
+  <button
+    id="nested_set"
+    onClick={[Function]}
+  />
 </div>
 `;
 
