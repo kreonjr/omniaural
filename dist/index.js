@@ -76,9 +76,9 @@ const sanitize = obj => {
   let newObj = {};
 
   if (isObject(obj.value)) {
-    Object.keys(obj.value).forEach(key => {
+    for (let key in obj.value) {
       newObj[key] = sanitize(obj.value[key]);
-    });
+    }
   } else {
     //exit case for recursion
     return obj.value;
@@ -170,6 +170,19 @@ const flatten = (obj, prefix = '') => {
  *
  * OmniAural.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
+ * OmniAural Object Properties
+ * 
+ * 
+ * value:          The value of the property. If it's a scalar or array, the raw value, otherwise another OmniAural object
+ * listeners:      A map where the key is a uique id + the property being listened to (or path), and the value 
+ *                 is a reference to component that is listening to changes
+ * observers:      A map of callback functions to be ran when the value of this objects changes
+ * context:        An object where the ke represents a unique id created when a react hook is created and the value is the
+ *                 function setter of that hook
+ * set:            The function that gets called when the value needs to be updated,
+ * refreshParent:  A function that checks if the current object has a parent that needs to be refreshed and re-rendered
+ * delete:         A function that is called when this property is to be deleted from the OmniAural state (rare)
+ * 
  */
 
 
@@ -268,12 +281,6 @@ class OmniAural {
               OmniAural.UnsafeGlobalInstance._addProperty(path, newValue, inheritedListeners);
             } else {
               obj.set(path, newValue);
-
-              if (obj.observers.has(path)) {
-                obj.observers.get(path).forEach(callback => {
-                  callback();
-                });
-              }
             }
           },
           value: () => {
@@ -342,6 +349,9 @@ class OmniAural {
             value: initialVal,
             listeners: newListeners,
             set: function (path, newVal) {
+              // if(this.value === newVal) {
+              //     return
+              // }
               this.value = newVal;
               this.listeners.forEach(listener => {
                 listener.component.setState(prevState => {
@@ -350,6 +360,12 @@ class OmniAural {
                   return prevState;
                 }, null, true);
               });
+
+              if (this.observers.has(path)) {
+                this.observers.get(path).forEach(callback => {
+                  callback();
+                });
+              }
 
               if (this.context[path]) {
                 for (const contextKey in this.context[path]) {
@@ -436,6 +452,7 @@ class OmniAural {
             refresh: function (path) {
               if (this.context[path]) {
                 for (const contextKey in this.context[path]) {
+                  // Each child and each child of the child is calling this , causing it to block the event loop for really long
                   this.context[path][contextKey](sanitize(this));
                 }
               }
@@ -833,7 +850,7 @@ const useOmniAural = path => {
         delete omniObject.context[path][omniAuralId];
       }
     };
-  }, []);
+  }, [initialVal]);
 
   return [property];
 };

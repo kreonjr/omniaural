@@ -1080,8 +1080,9 @@ export const useOmniAural = (path) => {
 
     const [property, setProperty] = React.useState(initialVal);
 
-    const omniAuralId = OmniAural.listenerCounter++;
     React.useEffect(() => {
+        const omniAuralId = OmniAural.listenerCounter++;
+
         if (!omniObject.context[path]) {
             omniObject.context[path] = {};
         }
@@ -1093,7 +1094,7 @@ export const useOmniAural = (path) => {
                 delete omniObject.context[path][omniAuralId];
             }
         };
-    }, [initialVal]);
+    }, []);
 
     return [property];
 };

@@ -19,7 +19,7 @@ exports[`Component Testing OmniAural Hooks Hook is created with the correct valu
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -43,7 +43,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when an object is set
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -67,7 +67,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested object is
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -91,7 +91,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested value is 
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -115,7 +115,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when null object is s
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -139,7 +139,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated when property is set 
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -163,7 +163,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -187,7 +187,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;
@@ -211,7 +211,7 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct valu
     onClick={[Function]}
   />
   <div>
-    Large object contains data: 
+    Large object contains data: false
   </div>
 </div>
 `;

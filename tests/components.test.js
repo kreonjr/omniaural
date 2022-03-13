@@ -262,8 +262,10 @@ describe("Component Testing", () => {
       tree.children[11].children.includes("200");
       tree.children[11].props.onClick();
       tree = component.toJSON();
-      expect(OmniAural.state.nulledPurchase.value()).toBeNull()
-      expect(OmniAural.UnsafeGlobalInstance.value["nulledPurchase"].value).toBeNull()
+      expect(OmniAural.state.nulledPurchase.value()).toBeNull();
+      expect(
+        OmniAural.UnsafeGlobalInstance.value["nulledPurchase"].value
+      ).toBeNull();
 
       tree.children[11].children.includes("null");
     });
@@ -365,7 +367,7 @@ describe("Component Testing", () => {
         expect(consoleOutput).toEqual([
           "Global State Changed",
           "Global State Changed",
-          "Global State Changed"
+          "Global State Changed",
         ]);
 
         component.unmount();
@@ -530,22 +532,16 @@ describe("Component Testing", () => {
 
       let tree = component.toJSON();
       expect(tree).toMatchSnapshot();
-      expect(
-        tree.children[3].children.includes("value")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("value")).toBeTruthy();
 
       act(() => {
         OmniAural.state.nulledOut.set(null);
       });
 
-      expect(
-        OmniAural.state.nulledOut.value()
-      ).toBeNull();
+      expect(OmniAural.state.nulledOut.value()).toBeNull();
 
       tree = component.toJSON();
-      expect(
-        tree.children[3].children.includes("undefined")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("undefined")).toBeTruthy();
     });
 
     test("Hook is updated when null object is set to a value", () => {
@@ -557,22 +553,16 @@ describe("Component Testing", () => {
 
       let tree = component.toJSON();
       expect(tree).toMatchSnapshot();
-      expect(
-        tree.children[3].children.includes("undefined")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("undefined")).toBeTruthy();
 
       act(() => {
-        OmniAural.state.nulledOut.set({key:"value"});
+        OmniAural.state.nulledOut.set({ key: "value" });
       });
 
-      expect(
-        OmniAural.state.nulledOut.key.value()
-      ).toBe("value");
+      expect(OmniAural.state.nulledOut.key.value()).toBe("value");
 
       tree = component.toJSON();
-      expect(
-        tree.children[3].children.includes("value")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("value")).toBeTruthy();
     });
 
     test("Hook is updated when an object is set to a really large object", () => {
@@ -584,19 +574,22 @@ describe("Component Testing", () => {
 
       let tree = component.toJSON();
       expect(tree).toMatchSnapshot();
-      expect(
-        tree.children[5].children.includes("Large object contains data: ")
-      ).toBeTruthy();
-      
+      expect(tree.children[5].children[0]).toBe(
+        "Large object contains data: false"
+      );
+
       act(() => {
-        component.root.findByType('button').props.onClick();
+        component.root.findByType("button").props.onClick();
       });
 
-      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.c.value()).toBeTruthy()
-
       expect(
-        tree.children[5].children.includes("Large object contains data: true")
+        OmniAural.state.thousandItems.episodes.UtlJT6vWjE.c.value()
       ).toBeTruthy();
+
+      tree = component.toJSON();
+      expect(tree.children[5].children[0]).toBe(
+        "Large object contains data: true"
+      );
     });
 
     test("Verifying property listeners registered and unregistered correctly", () => {

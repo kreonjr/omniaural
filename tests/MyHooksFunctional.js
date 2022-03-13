@@ -24,6 +24,8 @@ export default () => {
         customValue = nulledOut.key
     }
 
+    console.log("Rendering")
+    const dataPopulated = (thousandItems?.episodes?.UtlJT6vWjE?.c) ? 'true' : 'false'
     return <div>
         <div>{name}</div>
         <div>{`${address.street} in ${address.city}`}</div>
@@ -32,7 +34,7 @@ export default () => {
         <button id="thousands" onClick={function(){
             OmniAural.state.thousandItems.set(bigdata)
         }}/>
-        <div>Large object contains data: {thousandItems?.episodes?.UtlJT6vWjE?.c}</div>
+        <div>{"Large object contains data: " + dataPopulated}</div>
     </div>
 }
 
