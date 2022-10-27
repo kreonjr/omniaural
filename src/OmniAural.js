@@ -1,12 +1,14 @@
 import React from "react";
 
+export let PATH_DELIM = "|";
+
 const isObject = (val) => {
   return !Array.isArray(val) && typeof val == "object" && val != null;
 };
 
 //Get the value of an object given a deep path
 const getDeepValue = (obj, path) => {
-  return path.split(".").reduce((acc, key) => {
+  return path.split(PATH_DELIM).reduce((acc, key) => {
     return acc ? acc[key] : undefined;
   }, obj);
 };
@@ -14,7 +16,7 @@ const getDeepValue = (obj, path) => {
 const getOmniAuralPropertyAtPath = (path = "") => {
   if (path) {
     let omniObj = OmniAural.UnsafeGlobalInstance;
-    path.split(".").forEach((pathStep) => {
+    path.split(PATH_DELIM).forEach((pathStep) => {
       omniObj = omniObj.value[pathStep];
     });
 
@@ -34,7 +36,7 @@ const deletePropertyPath = (obj, path, isOmniObject) => {
   }
 
   if (typeof path === "string") {
-    path = path.split(".");
+    path = path.split(PATH_DELIM);
   }
 
   for (var i = 0; i < path.length - 1; i++) {
@@ -114,7 +116,7 @@ const assign = (obj, keyPath, value) => {
  */
 const flatten = (obj, prefix = "") => {
   return Object.keys(obj).reduce((prev, key) => {
-    const path = prefix.length ? prefix + "." : "";
+    const path = prefix.length ? prefix + PATH_DELIM : "";
     if (isObject(obj[key])) {
       Object.assign(prev, flatten(obj[key], path + key));
     } else {
@@ -154,7 +156,7 @@ const flatten = (obj, prefix = "") => {
  * OmniAural.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
-class OmniAural {
+export class OmniAural {
   static state = {
     value: () => {
       return sanitize(OmniAural.UnsafeGlobalInstance);
@@ -173,7 +175,9 @@ class OmniAural {
    */
   static UnsafeGlobalInstance = null;
 
-  static initGlobalState(initialState = {}) {
+  static initGlobalState(initialState = {}, config = { pathDelimiter: "|" }) {
+    PATH_DELIM = config?.pathDelimiter || "|";
+
     if (!OmniAural.UnsafeGlobalInstance) {
       OmniAural.UnsafeGlobalInstance = new OmniAural(initialState);
     }
@@ -215,7 +219,7 @@ class OmniAural {
     }
 
     const newObj = {};
-    const pathArr = path.split(".");
+    const pathArr = path.split(PATH_DELIM);
     assign(newObj, pathArr, property);
     const flatObject = flatten(newObj);
 
@@ -246,7 +250,7 @@ class OmniAural {
     } else {
       Object.keys(flatObject).forEach((innerPath) => {
         let setter = OmniAural.state;
-        innerPath.split(".").forEach((step) => {
+        innerPath.split(PATH_DELIM).forEach((step) => {
           setter = setter[step];
         });
 
@@ -318,7 +322,7 @@ class OmniAural {
       );
     }
 
-    const pathArr = path.split(".");
+    const pathArr = path.split(PATH_DELIM);
     let property = OmniAural.state;
     pathArr.forEach((step) => {
       property = property[step];
@@ -327,7 +331,7 @@ class OmniAural {
     if (isObject(newValue)) {
       const flatObj = flatten(newValue);
       for (const key in flatObj) {
-        let newPath = path + "." + key;
+        let newPath = path + PATH_DELIM + key;
         OmniAural.setProperty(newPath, flatObj[key]);
       }
     } else {
@@ -354,7 +358,7 @@ class OmniAural {
     eventCallback
   ) => {
     const mapKey = aliasPath
-      ? component.omniId + "." + aliasPath
+      ? component.omniId + PATH_DELIM + aliasPath
       : component.omniId;
     propertyObject.listeners.set(mapKey, { aliasPath, component });
     if (eventCallback) {
@@ -368,12 +372,12 @@ class OmniAural {
 
     if (isObject(propertyObject.value)) {
       Object.keys(propertyObject.value).forEach((key) => {
-        const newPath = aliasPath ? aliasPath + "." + key : null;
+        const newPath = aliasPath ? aliasPath + PATH_DELIM + key : null;
         this._registerProperty(
           newPath,
           component,
           propertyObject.value[key],
-          propertyKeyPath + "." + key,
+          propertyKeyPath + PATH_DELIM + key,
           eventCallback
         );
       });
@@ -503,7 +507,7 @@ class OmniAural {
 
         component.omniAuralMap[aliasPath || prop] = prop;
 
-        let path = prop.split(".");
+        let path = prop.split(PATH_DELIM);
         if (path.length > 0) {
           path.forEach((step) => {
             if (!propertyObject.value.hasOwnProperty(step)) {
@@ -516,7 +520,7 @@ class OmniAural {
             }
           });
 
-          const propPath = aliasPath ? aliasPath.split(".") : path;
+          const propPath = aliasPath ? aliasPath.split(PATH_DELIM) : path;
           assign(state, propPath, sanitize(propertyObject));
         }
 
@@ -689,7 +693,7 @@ class OmniAural {
           base[key],
           innerKey,
           value[innerKey],
-          path + "." + innerKey
+          path + PATH_DELIM + innerKey
         );
       });
     }
@@ -728,9 +732,9 @@ class OmniAural {
             };
 
             if (listener.aliasPath) {
-              newListener.aliasPath = listener.aliasPath + "." + key;
+              newListener.aliasPath = listener.aliasPath + PATH_DELIM + key;
             }
-            newListeners.set(mapKey + "." + key, newListener);
+            newListeners.set(mapKey + PATH_DELIM + key, newListener);
           });
         }
         base[key] = {
@@ -742,8 +746,8 @@ class OmniAural {
               listener.component.setState(
                 (prevState) => {
                   const newPath = listener.aliasPath
-                    ? listener.aliasPath.split(".")
-                    : path.split(".");
+                    ? listener.aliasPath.split(PATH_DELIM)
+                    : path.split(PATH_DELIM);
                   assign(prevState, newPath, newVal);
                   return prevState;
                 },
@@ -761,10 +765,10 @@ class OmniAural {
             this.refreshParent(path);
           },
           refreshParent: function (path) {
-            let pathArr = path.split(".");
+            let pathArr = path.split(PATH_DELIM);
             if (pathArr.length > 1) {
               pathArr = pathArr.slice(0, -1);
-              const parentPath = pathArr.join(".");
+              const parentPath = pathArr.join(PATH_DELIM);
               const parentOmniObject = getOmniAuralPropertyAtPath(parentPath);
               parentOmniObject.refresh(parentPath);
             }
@@ -802,9 +806,9 @@ class OmniAural {
               if (keys.length) {
                 keys.forEach(function (key) {
                   if (!obj.value.hasOwnProperty(key)) {
-                    OmniAural.addProperty(path + "." + key, params[key]);
+                    OmniAural.addProperty(path + PATH_DELIM + key, params[key]);
                   } else {
-                    obj.value[key].set(path + "." + key, params[key]);
+                    obj.value[key].set(path + PATH_DELIM + key, params[key]);
                   }
                 });
               } else {
@@ -842,10 +846,10 @@ class OmniAural {
             this.refreshParent(path);
           },
           refreshParent: function (path) {
-            let pathArr = path.split(".");
+            let pathArr = path.split(PATH_DELIM);
             if (pathArr.length > 1) {
               pathArr = pathArr.slice(0, -1);
-              const parentPath = pathArr.join(".");
+              const parentPath = pathArr.join(PATH_DELIM);
               const parentOmniObject = getOmniAuralPropertyAtPath(parentPath);
               parentOmniObject.refresh(parentPath);
             }
@@ -947,7 +951,7 @@ class OmniAural {
       );
     }
 
-    const pathArr = path.split(".");
+    const pathArr = path.split(PATH_DELIM);
     let propertyObject = OmniAural.UnsafeGlobalInstance;
 
     pathArr.forEach((step) => {
@@ -993,7 +997,7 @@ class OmniAural {
 
     if (isObject(propertyObject.value)) {
       Object.keys(propertyObject.value).forEach((key) => {
-        this._deleteProperty(path + "." + key);
+        this._deleteProperty(path + PATH_DELIM + key);
       });
     }
 

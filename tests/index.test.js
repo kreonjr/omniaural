@@ -1,4 +1,4 @@
-import OmniAural, { initGlobalState } from "../src/OmniAural";
+import OmniAural, { initGlobalState, PATH_DELIM } from "../src/OmniAural";
 import mockInitialState from "./mockInitialState";
 const fetch = require("node-fetch").default;
 
@@ -122,7 +122,9 @@ describe("Global State Manager", () => {
     });
 
     test("should contain the new property on the global object and have kept the state structure intact", () => {
-      OmniAural.addProperty("account.billing", { cc: 1234123412341234 });
+      OmniAural.addProperty(`account${PATH_DELIM}billing`, {
+        cc: 1234123412341234,
+      });
 
       expect(
         OmniAural.UnsafeGlobalInstance.value["account"].value["billing"].value[
@@ -161,7 +163,10 @@ describe("Global State Manager", () => {
       expect(OmniAural.state.account.nextOfKin.name.value()).toBe("James");
       expect(OmniAural.state.account.name.value()).toBe("Josh");
 
-      OmniAural.addProperty("account.grandParent.name", "Sue");
+      OmniAural.addProperty(
+        `account${PATH_DELIM}grandParent${PATH_DELIM}name`,
+        "Sue"
+      );
       expect(
         OmniAural.UnsafeGlobalInstance.value["account"].value["grandParent"]
           .value["name"].value
@@ -171,19 +176,25 @@ describe("Global State Manager", () => {
     });
 
     test("should error if an existing property is attempted to be added", () => {
-      expect(() => OmniAural.addProperty("account.name", "Victor")).toThrow(
-        "name already exists at this global state path"
-      );
+      expect(() =>
+        OmniAural.addProperty(`account${PATH_DELIM}name`, "Victor")
+      ).toThrow("name already exists at this global state path");
     });
 
     test("should be able to handle property keys with the '.' character in the name", () => {
-      OmniAural.addProperty("account.domain", {"omniaural.com": "token"});
+      OmniAural.addProperty(`account${PATH_DELIM}domain`, {
+        "omniaural.com": "token",
+      });
 
       expect(
-        OmniAural.UnsafeGlobalInstance.value["account"].value["domain"].value["omniaural.com"].value
+        OmniAural.UnsafeGlobalInstance.value["account"].value["domain"].value[
+          "omniaural.com"
+        ].value
       ).toBe("token");
 
-      expect(OmniAural.state.account.domain["omniaural.com"].value()).toBe("omniaural.com");
+      expect(OmniAural.state.account.domain["omniaural.com"].value()).toBe(
+        "token"
+      );
     });
   });
 
@@ -197,7 +208,7 @@ describe("Global State Manager", () => {
       expect(() => OmniAural.state.jobInfo.value()).toThrow(
         "Cannot read property 'value' of undefined"
       );
-      OmniAural.addProperty("account.jobInfo", jobInfo);
+      OmniAural.addProperty(`account${PATH_DELIM}jobInfo`, jobInfo);
       expect(JSON.stringify(OmniAural.state.account.jobInfo.value())).toBe(
         JSON.stringify(jobInfo)
       );
@@ -232,7 +243,7 @@ describe("Global State Manager", () => {
     };
 
     beforeEach(() => {
-      OmniAural.addProperty("account.jobInfo", jobInfo);
+      OmniAural.addProperty(`account${PATH_DELIM}jobInfo`, jobInfo);
     });
 
     afterEach(() => {
@@ -240,7 +251,7 @@ describe("Global State Manager", () => {
     });
 
     test("Clears out an omniaural object property", () => {
-      OmniAural.clearProperty("account.jobInfo");
+      OmniAural.clearProperty(`account${PATH_DELIM}jobInfo`);
 
       expect(Object.keys(OmniAural.state.account.jobInfo.value()).length).toBe(
         0
@@ -253,10 +264,16 @@ describe("Global State Manager", () => {
     });
 
     test("Throws an error when invalid data is passed in", () => {
-      expect(() => OmniAural.clearProperty("account.jobInfo.years")).toThrow(
+      expect(() =>
+        OmniAural.clearProperty(`account${PATH_DELIM}jobInfo${PATH_DELIM}years`)
+      ).toThrow(
         "Only object properties can be cleared out. Please make sure your path is correct and that the property is an object."
       );
-      expect(() => OmniAural.clearProperty("account.jobInfo.jiberish")).toThrow(
+      expect(() =>
+        OmniAural.clearProperty(
+          `account${PATH_DELIM}jobInfo${PATH_DELIM}jiberish`
+        )
+      ).toThrow(
         "Only object properties can be cleared out. Please make sure your path is correct and that the property is an object."
       );
       expect(() => OmniAural.clearProperty(5)).toThrow(
@@ -360,10 +377,13 @@ describe("Global State Updater", () => {
   });
 
   test('should update the global state object using the "setProperty" function correctly', () => {
-    OmniAural.setProperty("account.nextOfKin.name", "Jake");
+    OmniAural.setProperty(
+      `account${PATH_DELIM}nextOfKin${PATH_DELIM}name`,
+      "Jake"
+    );
     expect(OmniAural.state.account.nextOfKin.name.value()).toBe("Jake");
 
-    OmniAural.setProperty("account.nextOfKin", { name: "Luke" });
+    OmniAural.setProperty(`account${PATH_DELIM}nextOfKin`, { name: "Luke" });
     expect(OmniAural.state.account.nextOfKin.name.value()).toBe("Luke");
     expect(OmniAural.state.account.nextOfKin.job.value()).toBe("mailman");
 
