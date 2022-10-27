@@ -175,6 +175,16 @@ describe("Global State Manager", () => {
         "name already exists at this global state path"
       );
     });
+
+    test("should be able to handle property keys with the '.' character in the name", () => {
+      OmniAural.addProperty("account.domain", {"omniaural.com": "token"});
+
+      expect(
+        OmniAural.UnsafeGlobalInstance.value["account"].value["domain"].value["omniaural.com"].value
+      ).toBe("token");
+
+      expect(OmniAural.state.account.domain["omniaural.com"].value()).toBe("omniaural.com");
+    });
   });
 
   describe("Deleting a property", () => {
