@@ -309,11 +309,19 @@ The main global state manager class. It should be initialized at your top most c
 
 #### initGlobalState() 
 
-Initialize the global state with an initial object to which components will register and listen to its changes. You can access and update properties directly from the creates state object
+Initialize the global state with an initial object to which components will register and listen to its changes. You can access and update properties directly from the creates state object.
 
 | Parameter     | Type          | Description  |
 | ------------- |:------------: | :----------- |
 | initialState  | Object        | The object with which to initialize your global object.
+| config        | Object        | (Optional) Optional configuration object to set special properties on **OmniAural** initialization.
+
+**Config**
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| pathDelimiter | String        | (Optional) If you plan on using object keys with periods `.` i.e.(a url path), you will want to change the default delimiter to another character eg. `\|`. Doing so will change string based path interpretation from needing `"account.address.street"` to needing `"account\|address\|street"`.
+
 
 ##### Example: 
 ```javascript

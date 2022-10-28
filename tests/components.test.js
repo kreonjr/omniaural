@@ -9,7 +9,7 @@ import MyHooksFunctional from "./MyHooksFunctional";
 import mockInitialState from "./mockInitialState";
 
 beforeAll(() => {
-  initGlobalState(mockInitialState);
+  initGlobalState(mockInitialState, { pathDelimiter: "." });
 });
 
 describe("Component Testing", () => {
@@ -262,8 +262,10 @@ describe("Component Testing", () => {
       tree.children[11].children.includes("200");
       tree.children[11].props.onClick();
       tree = component.toJSON();
-      expect(OmniAural.state.nulledPurchase.value()).toBeNull()
-      expect(OmniAural.UnsafeGlobalInstance.value["nulledPurchase"].value).toBeNull()
+      expect(OmniAural.state.nulledPurchase.value()).toBeNull();
+      expect(
+        OmniAural.UnsafeGlobalInstance.value["nulledPurchase"].value
+      ).toBeNull();
 
       tree.children[11].children.includes("null");
     });
@@ -365,7 +367,7 @@ describe("Component Testing", () => {
         expect(consoleOutput).toEqual([
           "Global State Changed",
           "Global State Changed",
-          "Global State Changed"
+          "Global State Changed",
         ]);
 
         component.unmount();
@@ -530,22 +532,16 @@ describe("Component Testing", () => {
 
       let tree = component.toJSON();
       expect(tree).toMatchSnapshot();
-      expect(
-        tree.children[3].children.includes("value")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("value")).toBeTruthy();
 
       act(() => {
         OmniAural.state.nulledOut.set(null);
       });
 
-      expect(
-        OmniAural.state.nulledOut.value()
-      ).toBeNull();
+      expect(OmniAural.state.nulledOut.value()).toBeNull();
 
       tree = component.toJSON();
-      expect(
-        tree.children[3].children.includes("undefined")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("undefined")).toBeTruthy();
     });
 
     test("Hook is updated when null object is set to a value", () => {
@@ -557,22 +553,16 @@ describe("Component Testing", () => {
 
       let tree = component.toJSON();
       expect(tree).toMatchSnapshot();
-      expect(
-        tree.children[3].children.includes("undefined")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("undefined")).toBeTruthy();
 
       act(() => {
-        OmniAural.state.nulledOut.set({key:"value"});
+        OmniAural.state.nulledOut.set({ key: "value" });
       });
 
-      expect(
-        OmniAural.state.nulledOut.key.value()
-      ).toBe("value");
+      expect(OmniAural.state.nulledOut.key.value()).toBe("value");
 
       tree = component.toJSON();
-      expect(
-        tree.children[3].children.includes("value")
-      ).toBeTruthy();
+      expect(tree.children[3].children.includes("value")).toBeTruthy();
     });
 
     test("Verifying property listeners registered and unregistered correctly", () => {
