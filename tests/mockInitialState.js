@@ -3,7 +3,8 @@ export default {
         name: "Mike",
         address: {
             street: "Randolph",
-            city: "Chicago"
+            city: "Chicago",
+            tempAddress: null
         },
         phone_number: 1234567890,
         id: "abcd1234",
@@ -27,5 +28,6 @@ export default {
     nulledOut: {
         key: "value"
     },
-    items: []
+    items: [],
+    thousandItems: null
 }

@@ -376,6 +376,10 @@ describe("Component Testing", () => {
   });
 
   describe("OmniAural Hooks", () => {
+    beforeAll(() => {
+      OmniAural.state.thousandItems.set(require("./bigdata.json"));
+    })
+
     test("Hook is created with the correct value", () => {
       let component;
       act(() => {
@@ -565,13 +569,103 @@ describe("Component Testing", () => {
       expect(tree.children[3].children.includes("value")).toBeTruthy();
     });
 
+    describe("Large object testing", () => {
+
+      test("Hook is updated when a large object is updated", () => {
+        let component;
+
+        act(() => {
+          component = renderer.create(<MyHooksFunctional />);
+        });
+
+        let tree = component.toJSON();
+        expect(tree).toMatchSnapshot();
+        expect(tree.children[4].children[0]).toBe(
+          "foo"
+        );
+
+        act(() => {
+          OmniAural.state.thousandItems.episodes.UtlJT6vWjE.p.set("bar")
+        })
+        
+        tree = component.toJSON();
+        expect(tree.children[4].children[0]).toBe(
+          "bar"
+        );
+      });
+
+      test("Hook is updated when a large object is updated from within the component", () => {
+        let component;
+
+        act(() => {
+          component = renderer.create(<MyHooksFunctional />);
+        });
+
+        let tree = component.toJSON();
+        expect(tree).toMatchSnapshot();
+        expect(tree.children[5].children[0]).toBe(
+          "true"
+        );
+
+        act(() => {
+          tree.children[6].props.onClick()
+        })
+        
+        tree = component.toJSON();
+        expect(tree.children[5].children[0]).toBe(
+          "false"
+        );
+      });
+    })
+
+    test("correctly pass context when setting new properties to object", () => {
+      let component;
+      const globalObject = OmniAural.UnsafeGlobalInstance.value;
+
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      });
+
+      let tree = component.toJSON();
+      expect(tree.children[8].children[0]).toBe(
+        "null"
+      );
+      act(() => {
+        tree.children[7].props.onClick()
+      });
+
+      tree = component.toJSON();
+      expect(tree.children[8].children[0]).not.toBe(
+        null
+      );
+
+      expect(
+        OmniAural.state.account?.address?.tempAddress?.number?.value() === 13
+      ).toBeTruthy();
+      expect(
+        OmniAural.state.account?.address?.tempAddress?.street?.value() === "State"
+      ).toBeTruthy();
+      expect(
+        Object.keys(globalObject.account.value.address.value.tempAddress.context).length > 0
+      ).toBeTruthy();
+      expect(
+        Object.keys(globalObject.account.value.address.value.tempAddress.value.number.context).length > 0
+      ).toBeTruthy();
+      expect(
+        Object.keys(globalObject.account.value.address.value.tempAddress.value.street.context).length > 0
+      ).toBeTruthy();
+    });
+
     test("Verifying property listeners registered and unregistered correctly", () => {
+      let component;
       const originalCount =
         OmniAural.UnsafeGlobalInstance.value.account.value.name.context[
           "account.name"
-        ].length;
+        ]?.length;
 
-      const component = renderer.create(<MyHooksFunctional />);
+      act(() => {
+        component = renderer.create(<MyHooksFunctional />);
+      })
 
       expect(
         OmniAural.UnsafeGlobalInstance.value.account.value.name.context.hasOwnProperty(
@@ -579,7 +673,9 @@ describe("Component Testing", () => {
         )
       ).toBeTruthy();
 
-      component.unmount();
+      act(() => {
+        component.unmount();
+      })
 
       expect(
         originalCount ===
