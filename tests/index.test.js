@@ -413,4 +413,24 @@ describe("Global State Updater", () => {
     );
     expect(OmniAural.state.objectToDelete.value()).toBe(null);
   });
+
+  describe('should handle really large objects', () => {
+    beforeAll(() => {
+      const thousandItems = require("./bigdata.json")
+      OmniAural.addProperty("thousandItems", thousandItems)
+    })
+
+    test("thousand items added to state correctly", () => {
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.c.value()).toBe(true)
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.d.value()).toBe(8497)
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.p.value()).toBe("foo")
+    })
+
+    test("thousand items item to update correctly", () => {
+      OmniAural.state.thousandItems.episodes.UtlJT6vWjE.p.set("bar")
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.c.value()).toBe(true)
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.d.value()).toBe(8497)
+      expect(OmniAural.state.thousandItems.episodes.UtlJT6vWjE.p.value()).toBe("bar")
+    })
+  })
 });

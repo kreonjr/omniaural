@@ -85,7 +85,7 @@ const assign = (obj, keyPath, value) => {
   const lastKeyIndex = keyPath.length - 1;
   for (let i = 0; i < lastKeyIndex; ++i) {
     const key = keyPath[i];
-    if (!(key in obj)) {
+    if (obj[key] === null || !(key in obj)) {
       obj[key] = {};
     }
     obj = obj[key];
