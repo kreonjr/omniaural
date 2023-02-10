@@ -3,7 +3,7 @@ import mockInitialState from "./mockInitialState";
 const fetch = require("node-fetch").default;
 
 beforeAll(() => {
-  initGlobalState(mockInitialState);
+  initGlobalState(mockInitialState, {pathDelimiter: "|"});
 });
 
 describe("Global State Manager", () => {
@@ -32,6 +32,10 @@ describe("Global State Manager", () => {
     expect(OmniAural.state.account.address.street.value()).toBe("Randolph");
     expect(OmniAural.state.account.phone_number.value()).toBe(1234567890);
     expect(OmniAural.state.dev_mode.value()).toBeFalsy();
+
+    expect(OmniAural.getProperty("dev_mode").value()).toBeFalsy();
+    expect(OmniAural.getProperty(`account${PATH_DELIM}name`).value()).toBe("Mike");
+    expect(OmniAural.getProperty(`account${PATH_DELIM}address${PATH_DELIM}city`).value()).toBe("Chicago");
   });
 
   describe("Action Creator", () => {

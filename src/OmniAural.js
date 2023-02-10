@@ -1,6 +1,6 @@
 import React from "react";
 
-export let PATH_DELIM = "|";
+export let PATH_DELIM = ".";
 
 const isObject = (val) => {
   return !Array.isArray(val) && typeof val == "object" && val != null;
@@ -291,6 +291,37 @@ export class OmniAural {
 
     const obj = getOmniAuralPropertyAtPath(path);
     obj.set(path, {});
+  };
+
+  /**
+   * getProperty
+   *
+   * Get an omniaural property of a given global state path
+   *
+   * This function can be used to get a property on the global state object after initialization to a given path.
+   * It will throw an error if the path to the property does not exist.
+   *
+   * @param {string}       path       The path to which to add the new property
+   *
+   * @example
+   *
+   * OmniAural.getProperty("account.id") // returns 1234123412341234
+   *
+   */
+  static getProperty = (path) => {
+    if (typeof path !== "string") {
+      throw new Error(
+        `Path needs to be a string representation of the global state path to the property you want to update.`
+      );
+    }
+
+    const pathArr = path.split(PATH_DELIM)
+    let property = OmniAural.state
+    pathArr.forEach((step) => {
+      property = property[step]
+    })
+
+    return property
   };
 
   /**
