@@ -301,6 +301,7 @@ The main global state manager class. It should be initialized at your top most c
    - [addAction()](#addAction)
    - [addActions()](#addActions)
    - [addProperty()](#addProperty)
+   - [getProperty()](#getProperty)
    - [setProperty()](#setProperty)
    - [clearProperty()](#clearProperty)
    - [useOmniAural()](#useOmniAural)
@@ -482,6 +483,23 @@ OmniAural.addProperty("account.id", 4568585)
 //or
 OmniAural.addProperty("account", {id: 4568585})
 ```
+
+#### getProperty()
+
+This functions accepts a path to a property and returns an object which you can use to get the global value.
+
+| Parameter     | Type          | Description  |
+| ------------- |:------------: | :----------- |
+| path          | String        | The path in the global state to the property to get.
+
+##### Example: 
+```javascript
+import OmniAural from 'omniaural'
+
+const accountId = OmniAural.getProperty("account.id")
+console.log(accountId.value()) // 4568585
+```
+
 
 #### setProperty()
 
