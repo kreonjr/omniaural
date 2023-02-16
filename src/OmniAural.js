@@ -347,7 +347,7 @@ export class OmniAural {
       );
     }
 
-    if (!newValue) {
+    if (typeof newValue === "undefined") {
       throw new Error(
         `Missing or undefined second argument. Please provide an update value for path '${path}'`
       );

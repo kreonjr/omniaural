@@ -391,6 +391,12 @@ describe("Global State Updater", () => {
     expect(OmniAural.state.account.nextOfKin.name.value()).toBe("Luke");
     expect(OmniAural.state.account.nextOfKin.job.value()).toBe("mailman");
 
+    OmniAural.setProperty(`account${PATH_DELIM}nextOfKin${PATH_DELIM}job`, "");
+    expect(OmniAural.state.account.nextOfKin.job.value()).toBe("");
+
+    OmniAural.setProperty(`account${PATH_DELIM}nextOfKin${PATH_DELIM}job`, null);
+    expect(OmniAural.state.account.nextOfKin.job.value()).toBe(null);
+
     expect(() => OmniAural.setProperty("account.nextOfKin.name")).toThrow(
       "Missing or undefined second argument. Please provide an update value for path 'account.nextOfKin.name'"
     );
