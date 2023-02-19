@@ -36,5 +36,8 @@
   },
   "peerDependencies": {
     "react": ">=16.8.0"
+  },
+  "resolutions": {
+    "minimatch": ">=3.0.5"
   }
 }
