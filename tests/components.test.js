@@ -246,13 +246,13 @@ describe("Component Testing", () => {
       tree.children[10].props.onClick();
       tree = component.toJSON();
       expect(() => OmniAural.state.purchase.lastPurchase.value()).toThrow(
-        "Cannot read property 'value' of undefined"
+        "Cannot read properties of undefined (reading 'value')"
       );
       expect(
         () =>
           OmniAural.UnsafeGlobalInstance.value["purchase"].value["lastPurchase"]
             .value
-      ).toThrow("Cannot read property 'value' of undefined");
+      ).toThrow("Cannot read properties of undefined (reading 'value')");
     });
 
     test("Set a previously registered property to null", () => {

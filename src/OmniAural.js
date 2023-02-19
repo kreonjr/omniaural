@@ -156,7 +156,7 @@ const flatten = (obj, prefix = "") => {
  * OmniAural.register(this, ["account.username as user.name", "account.address.street.name as user.street"])
  *
  */
-export class OmniAural {
+class OmniAural {
   static state = {
     value: () => {
       return sanitize(OmniAural.UnsafeGlobalInstance);
@@ -330,17 +330,19 @@ export class OmniAural {
    * Updates a property to the given global state path
    *
    * This function can be used to set a property on the global state object after initialization to a given path.
+   * Setting objects will merge with existing object passed in. It will not overwrite unless explicitly told to.
    * It will throw an error if the path to the property does not exist.
    *
-   * @param {string}       path       The path to which to add the new property
-   * @param {any}          newValue   The value to set the property to
-   *
+   * @param {string}     path                The path to which to add the new property
+   * @param {any}        newValue            The value to set the property to
+   * @param {object}     [options]           An optional set of options for setting values. i.e. (*overwrite* to assign incoming object instead of merging)
+   *  
    * @example
    *
    * OmniAural.setProperty("account.id", 1234123412341234)
    *
    */
-  static setProperty = (path, newValue) => {
+  static setProperty = (path, newValue, options) => {
     if (typeof path !== "string") {
       throw new Error(
         `Path needs to be a string representation of the global state path to the property you want to update.`
@@ -363,10 +365,10 @@ export class OmniAural {
       const flatObj = flatten(newValue);
       for (const key in flatObj) {
         let newPath = path + PATH_DELIM + key;
-        OmniAural.setProperty(newPath, flatObj[key]);
+        OmniAural.setProperty(newPath, flatObj[key], options);
       }
     } else {
-      property.set(newValue);
+      property.set(newValue, options);
     }
   };
 
@@ -663,7 +665,7 @@ export class OmniAural {
   _addSetter = (base, key, value, path) => {
     if (!isObject(value)) {
       base[key] = {
-        set: (newValue) => {
+        set: (newValue, options) => {
           const obj = getOmniAuralPropertyAtPath(path);
           if (!isObject(obj.value) && isObject(newValue)) {
             const inheritedListeners = this._deleteProperty(path);
@@ -673,7 +675,7 @@ export class OmniAural {
               inheritedListeners
             );
           } else {
-            obj.set(path, newValue);
+            obj.set(path, newValue, options);
             if (obj.observers.has(path)) {
               obj.observers.get(path).forEach((callback) => {
                 callback();
@@ -692,7 +694,7 @@ export class OmniAural {
     } else {
       if (!base[key]) {
         base[key] = {
-          set: (params) => {
+          set: (params, options) => {
             if (!isObject(params) && params !== null) {
               throw new Error(
                 `You are trying to set an object. Please pass an object arguement`
@@ -700,7 +702,7 @@ export class OmniAural {
             }
 
             const obj = getOmniAuralPropertyAtPath(path);
-            obj.set(path, params);
+            obj.set(path, params, options);
 
             if (obj.observers.has(path)) {
               obj.observers.get(path).forEach((callback) => {
@@ -771,7 +773,7 @@ export class OmniAural {
         base[key] = {
           value: initialVal,
           listeners: newListeners,
-          set: function (path, newVal) {
+          set: function (path, newVal, options = {}) {
             this.value = newVal;
             this.listeners.forEach((listener) => {
               listener.component.setState(
@@ -826,7 +828,7 @@ export class OmniAural {
         base[key] = {
           value: initialVal,
           listeners: new Map([...initialListeners]),
-          set: function (path, params) {
+          set: function (path, params, options = {}) {
             if (params !== null) {
               const keys = Object.keys(params);
               const obj = getOmniAuralPropertyAtPath(path);
@@ -834,16 +836,20 @@ export class OmniAural {
                 obj.value = {};
               }
 
-              if (keys.length) {
+              if(!keys.length) {
+                this.value = params
+              } else {
                 keys.forEach(function (key) {
+                  if(options.overwrite) {
+                    OmniAural.UnsafeGlobalInstance._deleteProperty(path)
+                  } 
+                  
                   if (!obj.value.hasOwnProperty(key)) {
                     OmniAural.addProperty(path + PATH_DELIM + key, params[key]);
                   } else {
-                    obj.value[key].set(path + PATH_DELIM + key, params[key]);
+                    obj.value[key].set(path + PATH_DELIM + key, params[key], options);
                   }
                 });
-              } else {
-                this.value = params;
               }
             } else {
               this.value = null;

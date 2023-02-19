@@ -210,7 +210,7 @@ describe("Global State Manager", () => {
       };
 
       expect(() => OmniAural.state.jobInfo.value()).toThrow(
-        "Cannot read property 'value' of undefined"
+        "Cannot read properties of undefined (reading 'value')"
       );
       OmniAural.addProperty(`account${PATH_DELIM}jobInfo`, jobInfo);
       expect(JSON.stringify(OmniAural.state.account.jobInfo.value())).toBe(
@@ -218,12 +218,12 @@ describe("Global State Manager", () => {
       );
       OmniAural.state.account.jobInfo.delete();
       expect(() => OmniAural.state.account.jobInfo.value()).toThrow(
-        "Cannot read property 'value' of undefined"
+        "Cannot read properties of undefined (reading 'value')"
       );
       expect(
         () =>
           OmniAural.UnsafeGlobalInstance.value["account"].value["jobInfo"].value
-      ).toThrow("Cannot read property 'value' of undefined");
+      ).toThrow("Cannot read properties of undefined (reading 'value')");
     });
 
     test("Throws an error when invalid data is passed in the _deleteProperty private function", () => {
@@ -341,19 +341,38 @@ describe("Global State Updater", () => {
     );
   });
 
-  test("should update the value of an internal property that didn't exist on initialization", () => {
-    const newInvoice = {
-      number: 1234,
-      amount: 300,
-      type: "$",
+  test("should update the empty string property of an object correctly", () => {
+    const notEmptyPropertyObject = {
+      emptyProperty: "Not Empty Anymore"
+    }
+    expect(OmniAural.state.emptyPropertyObject.emptyProperty.value()).toBe("");
+
+    OmniAural.state.emptyPropertyObject.set(notEmptyPropertyObject)
+    expect(OmniAural.state.emptyPropertyObject.emptyProperty.value()).toBe(notEmptyPropertyObject.emptyProperty);
+    expect(JSON.stringify(OmniAural.state.emptyPropertyObject.value())).toBe(JSON.stringify(notEmptyPropertyObject));
+  })
+
+  test("should merge the state of an existing object property by default", () => {
+    const expectedInvoice = {
+      ...OmniAural.state.invoice.value(),
+      country: "US"
     };
 
-    OmniAural.state.invoice.set(newInvoice);
+    OmniAural.state.invoice.set({country:"US"});
     expect(JSON.stringify(OmniAural.state.invoice.value())).toBe(
-      JSON.stringify(newInvoice)
+      JSON.stringify(expectedInvoice)
     );
-    OmniAural.state.invoice.amount.set(500);
-    expect(OmniAural.state.invoice.amount.value()).toBe(500);
+  });
+
+  test("should overwrite an existing object property if the option is passed in", () => {
+    const expectedInvoice = {
+      status: "Invalid Invoice"
+    };
+
+    OmniAural.state.invoice.set(expectedInvoice, {overwrite: true});
+    expect(JSON.stringify(OmniAural.state.invoice.value())).toBe(
+      JSON.stringify(expectedInvoice)
+    );
   });
 
   test("should update the value of an internal property that was null on initialization", () => {
@@ -373,10 +392,10 @@ describe("Global State Updater", () => {
 
   test("should throw an error when trying to add a property using the set function", () => {
     expect(() => OmniAural.state.anotherInvoice.set({})).toThrow(
-      "Cannot read property 'set' of undefined"
+      "Cannot read properties of undefined (reading 'set')"
     );
     expect(() => OmniAural.state.invoice.someOtherPieceOfInfo.set({})).toThrow(
-      "Cannot read property 'set' of undefined"
+      "Cannot read properties of undefined (reading 'set')"
     );
   });
 
@@ -387,18 +406,23 @@ describe("Global State Updater", () => {
     );
     expect(OmniAural.state.account.nextOfKin.name.value()).toBe("Jake");
 
-    OmniAural.setProperty(`account${PATH_DELIM}nextOfKin`, { name: "Luke" });
-    expect(OmniAural.state.account.nextOfKin.name.value()).toBe("Luke");
-    expect(OmniAural.state.account.nextOfKin.job.value()).toBe("mailman");
-
     OmniAural.setProperty(`account${PATH_DELIM}nextOfKin${PATH_DELIM}job`, "");
     expect(OmniAural.state.account.nextOfKin.job.value()).toBe("");
 
     OmniAural.setProperty(`account${PATH_DELIM}nextOfKin${PATH_DELIM}job`, null);
     expect(OmniAural.state.account.nextOfKin.job.value()).toBe(null);
+  });
 
-    expect(() => OmniAural.setProperty("account.nextOfKin.name")).toThrow(
-      "Missing or undefined second argument. Please provide an update value for path 'account.nextOfKin.name'"
+  test('should merge the global state object properties using the "setProperty" function', () => {
+    OmniAural.setProperty(`account${PATH_DELIM}nextOfKin${PATH_DELIM}job`, "mailman");
+    OmniAural.setProperty(`account${PATH_DELIM}nextOfKin`, { name: "Luke" });
+    expect(OmniAural.state.account.nextOfKin.name.value()).toBe("Luke");
+    expect(OmniAural.state.account.nextOfKin.job.value()).toBe("mailman");
+  });
+
+  test('should throw an error if the "setProperty" function is missing parameters', () => {
+    expect(() => OmniAural.setProperty(`account${PATH_DELIM}nextOfKin${PATH_DELIM}name`)).toThrow(
+      `Missing or undefined second argument. Please provide an update value for path 'account${PATH_DELIM}nextOfKin${PATH_DELIM}name'`
     );
     expect(() => OmniAural.setProperty({}, "")).toThrow(
       "Path needs to be a string representation of the global state path to the property you want to update."
@@ -419,7 +443,7 @@ describe("Global State Updater", () => {
     OmniAural.state.objectToDelete.set(null);
 
     expect(() => OmniAural.state.objectToDelete.innerValue.value()).toThrow(
-      "Cannot read property 'innerValue' of null"
+      "Cannot read properties of null (reading 'innerValue')"
     );
     expect(OmniAural.state.objectToDelete.value()).toBe(null);
   });

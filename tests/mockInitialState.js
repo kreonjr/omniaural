@@ -29,5 +29,8 @@ export default {
         key: "value"
     },
     items: [],
-    thousandItems: null
+    thousandItems: null,
+    emptyPropertyObject: {
+        emptyProperty: ""
+    }
 }
