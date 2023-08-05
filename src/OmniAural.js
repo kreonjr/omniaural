@@ -1106,7 +1106,7 @@ export const useOmniAural = (path) => {
     };
   }, [path, omniObject.context]);
 
-  return [property];
+  return [property, (newVal, options) => omniObject.set(path, newVal, options)];
 };
 
 /**

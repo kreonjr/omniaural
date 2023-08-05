@@ -414,6 +414,15 @@ describe("Component Testing", () => {
       tree = component.toJSON();
 
       expect(tree.children[0].children.includes("Evan")).toBeTruthy();
+
+      act(() => {
+        tree.children[9].props.onClick()
+      });
+
+      expect(OmniAural.state.account.name.value() === "Jake").toBeTruthy();
+      tree = component.toJSON();
+
+      expect(tree.children[0].children.includes("Jake")).toBeTruthy();
     });
 
     test("Hook is updated with the correct nested value through setting an object", () => {

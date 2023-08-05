@@ -30,13 +30,17 @@ exports[`Component Testing OmniAural Hooks Hook is created with the correct valu
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Hook is updated when nested object is deleted 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     undefined in Chicago
@@ -63,13 +67,17 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested object is
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Hook is updated when nested value is deleted 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     Randolph in Chicago
@@ -96,13 +104,17 @@ exports[`Component Testing OmniAural Hooks Hook is updated when nested value is 
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Hook is updated when null object is set to a value 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     undefined in Chicago
@@ -129,13 +141,17 @@ exports[`Component Testing OmniAural Hooks Hook is updated when null object is s
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Hook is updated when property is set to null 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     undefined in Chicago
@@ -162,13 +178,17 @@ exports[`Component Testing OmniAural Hooks Hook is updated when property is set 
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value through setting a property 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     Clark in Chicago
@@ -195,13 +215,17 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Hook is updated with the correct nested value through setting an object 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     State in Chicago
@@ -228,6 +252,10 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct nest
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
@@ -261,13 +289,17 @@ exports[`Component Testing OmniAural Hooks Hook is updated with the correct valu
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Large object testing Hook is updated when a large object is updated 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     undefined in Chicago
@@ -294,13 +326,17 @@ exports[`Component Testing OmniAural Hooks Large object testing Hook is updated 
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 
 exports[`Component Testing OmniAural Hooks Large object testing Hook is updated when a large object is updated from within the component 1`] = `
 <div>
   <div>
-    Evan
+    Jake
   </div>
   <div>
     undefined in Chicago
@@ -327,6 +363,10 @@ exports[`Component Testing OmniAural Hooks Large object testing Hook is updated 
   <div>
     null
   </div>
+  <button
+    id="hook_setter"
+    onClick={[Function]}
+  />
 </div>
 `;
 

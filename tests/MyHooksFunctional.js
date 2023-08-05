@@ -2,7 +2,7 @@ import React from "react"
 import OmniAural, { useOmniAural, useOmniAuralEffect } from "../src/OmniAural"
 
 export default () => {
-    const [name] = useOmniAural("account.name")
+    const [name, setName] = useOmniAural("account.name")
     const [address] = useOmniAural("account.address")
     const [tempAddress] = useOmniAural("account.address.tempAddress")
     const [currentEmployment] = useOmniAural("account.currentEmployment")
@@ -37,6 +37,9 @@ export default () => {
             OmniAural.state.account.address.tempAddress.set({street: "State", number: 13})
         }}/>
         <div>{`${tempAddress}`}</div>
+        <button id="hook_setter" onClick={function(){
+            setName("Jake")
+        }}/>
     </div>
 }
 
