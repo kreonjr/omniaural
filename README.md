@@ -235,7 +235,7 @@ import React from 'react'
 import { useOmniAural } from 'omniaural'
 
 const PersonScreen = () => {
-  const [person] = useOmniAural("account")
+  const [person, setPerson] = useOmniAural("account")
   
   return (
     <div>
@@ -254,7 +254,7 @@ import React from 'react'
 import { useOmniAuralEffect } from 'omniaural'
 
 const PersonScreen = () => {
-  const [person] = useOmniAural("account")
+  const [person, setPerson] = useOmniAural("account")
 
   useOmniAuralEffect(()=> {
     console.log("The account id has changed")
@@ -544,8 +544,7 @@ OmniAural.clearProperty("account.address")
 #### useOmniAural
 
 The `useOmniAural` hook is a custom hook that creates a local variable tied to a global state property value. It can be used in stateless
-functional components to register to variables that live on global state. `useOmniAural` does *not* provide a setter because any updates to 
-the global state should always be done through the property setter or custom omniaural actions.
+functional components to register to variables that live on global state.
 
 | Parameter     | Type          | Description  |
 | ------------- |:------------: | :----------- |
@@ -557,7 +556,7 @@ import React from 'react'
 import { useOmniAural } from 'omniaural'
 
 const PersonScreen = () => {
-  const [accountId] = useOmniAural("account.id")
+  const [accountId, setAccountId] = useOmniAural("account.id")
 
   return (
     <div>
@@ -582,10 +581,10 @@ passed in function when those properties values change.
 ##### Example: 
 ```javascript
 import React from 'react'
-import { useOmniAuralEffect } from 'omniaural'
+import { useOmniAuralEffect, useOmniAural } from 'omniaural'
 
 const PersonScreen = () => {
-  const [accountId] = useOmniAural("account.id")
+  const [accountId, setAccountId] = useOmniAural("account.id")
 
   useOmniAuralEffect(() => {
     console.log("Account Id has changed")
@@ -594,6 +593,10 @@ const PersonScreen = () => {
   return (
     <div>
       <span>User Id: {accountId}</span>
+      <div>
+      <span>Update Account Id</span>
+      <button onClick={() => setAccountId(321321321)}>Update</button>
+      </div>
     </div>
   )
 }
@@ -653,10 +656,10 @@ import { useOmniAural } from 'omniaural'
 
 const PersonScreen = () => {
   //BAD Because you are listening to a property of a potentially null object and this will crash if address is null
-  const [streetAddress] = useOmniAural("account.address.street")   
+  const [streetAddress, setStreetAddress] = useOmniAural("account.address.street")   
 
   //GOOD Because you can code against *address* being null, either on initialization or set to null later
-  const [address] = useOmniAural("account.address")
+  const [address, setAddress] = useOmniAural("account.address")
   const streetAddress = address !== null ? address.street : "Not found"
 
   return (
