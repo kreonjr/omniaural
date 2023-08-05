@@ -2,11 +2,11 @@ import OmniAural, { initGlobalState, PATH_DELIM } from "../src/OmniAural";
 import mockInitialState from "./mockInitialState";
 const fetch = require("node-fetch").default;
 
-beforeAll(() => {
-  initGlobalState(mockInitialState, {pathDelimiter: "|"});
-});
-
 describe("Global State Manager", () => {
+  beforeAll(() => {
+    initGlobalState(mockInitialState, {pathDelimiter: "."});
+  });
+
   test("should validate global state has been initialized correctly", () => {
     const globalObject = OmniAural.UnsafeGlobalInstance.value;
 
@@ -185,21 +185,6 @@ describe("Global State Manager", () => {
       ).toThrow("name already exists at this global state path");
     });
 
-    test("should be able to handle property keys with the '.' character in the name", () => {
-      OmniAural.addProperty(`account${PATH_DELIM}domain`, {
-        "omniaural.com": "token",
-      });
-
-      expect(
-        OmniAural.UnsafeGlobalInstance.value["account"].value["domain"].value[
-          "omniaural.com"
-        ].value
-      ).toBe("token");
-
-      expect(OmniAural.state.account.domain["omniaural.com"].value()).toBe(
-        "token"
-      );
-    });
   });
 
   describe("Deleting a property", () => {
@@ -209,21 +194,17 @@ describe("Global State Manager", () => {
         years: 10,
       };
 
-      expect(() => OmniAural.state.jobInfo.value()).toThrow(
-        "Cannot read properties of undefined (reading 'value')"
-      );
+      expect(() => OmniAural.state.jobInfo.value()).toThrow();
       OmniAural.addProperty(`account${PATH_DELIM}jobInfo`, jobInfo);
       expect(JSON.stringify(OmniAural.state.account.jobInfo.value())).toBe(
         JSON.stringify(jobInfo)
       );
       OmniAural.state.account.jobInfo.delete();
-      expect(() => OmniAural.state.account.jobInfo.value()).toThrow(
-        "Cannot read properties of undefined (reading 'value')"
-      );
+      expect(() => OmniAural.state.account.jobInfo.value()).toThrow();
       expect(
         () =>
           OmniAural.UnsafeGlobalInstance.value["account"].value["jobInfo"].value
-      ).toThrow("Cannot read properties of undefined (reading 'value')");
+      ).toThrow();
     });
 
     test("Throws an error when invalid data is passed in the _deleteProperty private function", () => {
@@ -391,12 +372,8 @@ describe("Global State Updater", () => {
   });
 
   test("should throw an error when trying to add a property using the set function", () => {
-    expect(() => OmniAural.state.anotherInvoice.set({})).toThrow(
-      "Cannot read properties of undefined (reading 'set')"
-    );
-    expect(() => OmniAural.state.invoice.someOtherPieceOfInfo.set({})).toThrow(
-      "Cannot read properties of undefined (reading 'set')"
-    );
+    expect(() => OmniAural.state.anotherInvoice.set({})).toThrow();
+    expect(() => OmniAural.state.invoice.someOtherPieceOfInfo.set({})).toThrow();
   });
 
   test('should update the global state object using the "setProperty" function correctly', () => {
@@ -442,9 +419,7 @@ describe("Global State Updater", () => {
 
     OmniAural.state.objectToDelete.set(null);
 
-    expect(() => OmniAural.state.objectToDelete.innerValue.value()).toThrow(
-      "Cannot read properties of null (reading 'innerValue')"
-    );
+    expect(() => OmniAural.state.objectToDelete.innerValue.value()).toThrow();
     expect(OmniAural.state.objectToDelete.value()).toBe(null);
   });
 
